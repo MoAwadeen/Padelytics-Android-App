@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "509211955945",
+    "project_id": "padelytics-a587d",
+    "storage_bucket": "padelytics-a587d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509211955945:android:90e94ccb2a20ae51b29678",
+        "android_client_info": {
+          "package_name": "grad.project.padelytics"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfn0CVGhyg0myTutJEXNxn1SWWYs9owCE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
