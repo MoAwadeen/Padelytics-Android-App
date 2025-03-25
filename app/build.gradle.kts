@@ -57,6 +57,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("io.coil-kt:coil-compose:2.6.0")
@@ -67,4 +68,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.datastore:datastore-preferences:1.1.3")
 }
