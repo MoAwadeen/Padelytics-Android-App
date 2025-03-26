@@ -118,5 +118,5 @@ fun SignUpScreen(
 @Preview
 @Composable
 fun SignUpScreenPreview() {
-    SignUpScreen(navController = NavHostController(LocalContext.current), authViewModel = AuthViewModel())
+    SignUpScreen(navController = NavHostController(LocalContext.current), authViewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
 }

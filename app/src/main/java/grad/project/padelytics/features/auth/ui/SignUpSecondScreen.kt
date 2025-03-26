@@ -111,5 +111,5 @@ fun SignUpSecondScreen(
 @Preview
 @Composable
 fun SignUpSecondScreenPreview() {
-    SignUpSecondScreen(navController = NavHostController(LocalContext.current), viewModel = AuthViewModel())
+    SignUpSecondScreen(navController = NavHostController(LocalContext.current), viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
 }

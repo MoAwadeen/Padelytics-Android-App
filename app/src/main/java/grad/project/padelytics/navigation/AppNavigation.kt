@@ -2,6 +2,8 @@ package grad.project.padelytics.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,10 +26,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             LoginScreen(modifier,navController)
         }
         composable("signup") {
-            SignUpScreen(modifier,navController,AuthViewModel())
+            SignUpScreen(navController = NavHostController(LocalContext.current), authViewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
         }
         composable("signupSecond") {
-            SignUpSecondScreen(modifier,navController,AuthViewModel())
+            SignUpSecondScreen(navController = NavHostController(LocalContext.current), viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
         }
         composable("home") {
             HomeScreen(modifier,navController)

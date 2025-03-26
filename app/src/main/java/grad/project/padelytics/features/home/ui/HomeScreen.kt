@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.annotations.concurrent.Background
 import grad.project.padelytics.R
@@ -40,16 +41,20 @@ import grad.project.padelytics.features.auth.components.SmallBlueButton
 import grad.project.padelytics.features.auth.components.SmallGreenButton
 import grad.project.padelytics.features.auth.components.WideBlueButton
 import grad.project.padelytics.features.auth.components.WideGreenButton
+import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier.fillMaxSize().background(WhiteGray),navController: NavHostController) {
+fun HomeScreen(modifier: Modifier = Modifier.fillMaxSize().background(WhiteGray),navController: NavHostController,authViewModel: AuthViewModel = viewModel()) {
 
-    Box(modifier = Modifier.fillMaxSize().background(WhiteGray)) {
+    Box(modifier = Modifier.fillMaxSize().background(WhiteGray).padding(50.dp)) {
         Spacer(modifier = Modifier.height(100.dp))
-        WideGreenButton("Log out", {navController.navigate("auth")})
+        WideGreenButton("Log out", {
+            authViewModel.logout {  }
+            navController.navigate("auth")
+        })
     }
 }
 
