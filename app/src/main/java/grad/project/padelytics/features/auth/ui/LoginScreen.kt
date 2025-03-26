@@ -46,6 +46,7 @@ import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
+import grad.project.padelytics.navigation.Routes
 
 @Composable
 fun LoginScreen(
@@ -87,7 +88,7 @@ fun LoginScreen(
         WideGreenButton("Continue", {
             viewModel.login(email, password) { success, errorMsg ->
                 if (success) {
-                    navController.navigate("home")
+                    navController.navigate(Routes.HOME)
                 } else {
                     Toast.makeText(context, "Login failed: $errorMsg", Toast.LENGTH_SHORT).show()
                 }

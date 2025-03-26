@@ -42,6 +42,7 @@ import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
 import grad.project.padelytics.features.auth.components.*
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
+import grad.project.padelytics.navigation.Routes
 
 @Composable
 fun SignUpScreen(
@@ -95,13 +96,13 @@ fun SignUpScreen(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SmallBlueButton("Cancel") { navController.navigate("auth") }
+            SmallBlueButton("Cancel") { navController.navigate(Routes.AUTH) }
             Spacer(modifier = Modifier.width(10.dp))
             SmallGreenButton("Continue") {
                 if (password == confirmPassword) {
                     authViewModel.signup(email, password, firstName, lastName) { success, message ->
                         if (success) {
-                            navController.navigate("signupSecond")
+                            navController.navigate(Routes.SECOND_SIGNUP)
                         } else {
                             AppUtils.showToast(context, message ?: "Something went wrong")
                         }

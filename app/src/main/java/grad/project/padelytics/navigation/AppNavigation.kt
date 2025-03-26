@@ -27,16 +27,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.LOGIN) {
             LoginScreen(modifier,navController)
         }
-        composable("signup") {
-            SignUpScreen(navController = NavHostController(LocalContext.current), authViewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
-        }
-        composable("signupSecond") {
-            SignUpSecondScreen(navController = NavHostController(LocalContext.current), viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
         composable(Routes.SIGNUP) {
-            SignUpScreen(modifier,navController,AuthViewModel())
+            SignUpScreen(modifier,navController, authViewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
         }
         composable(Routes.SECOND_SIGNUP) {
-            SignUpSecondScreen(modifier,navController,AuthViewModel())
+            SignUpSecondScreen(modifier,navController, viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
         }
         composable(Routes.HOME) {
             HomeScreen(modifier,navController)

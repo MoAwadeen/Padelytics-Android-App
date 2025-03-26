@@ -26,6 +26,7 @@ import grad.project.padelytics.R
 import grad.project.padelytics.features.auth.components.GoogleSignInButton
 import grad.project.padelytics.features.auth.components.WideBlueButton
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
+import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
@@ -89,12 +90,12 @@ fun AuthScreen(
         Column(modifier = Modifier.padding(40.dp)) {
             WideBlueButton(
                 label = "I have an account",
-                onClick = { navController.navigate("login") }
+                onClick = { navController.navigate(Routes.LOGIN) }
             )
             Spacer(modifier = Modifier.height(16.dp))
             WideBlueButton(
                 label = "Sign Up",
-                onClick = { navController.navigate("signup") }
+                onClick = { navController.navigate(Routes.SIGNUP) }
             )
             Spacer(modifier = Modifier.height(16.dp))
 

@@ -16,6 +16,7 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.features.auth.components.*
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
+import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.GreenLight
 @Composable
@@ -88,13 +89,13 @@ fun SignUpSecondScreen(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SmallBlueButton("Back") { navController.navigate("signup") }
+            SmallBlueButton("Back") { navController.navigate(Routes.SIGNUP) }
             Spacer(modifier = Modifier.width(10.dp))
             SmallGreenButton("Finish") {
                 if (selectedGender != null && selectedLevel != null) {
                     viewModel.addExtraFeature(selectedGender!!, selectedLevel!!) { success, errorMsg ->
                         if (success) {
-                            navController.navigate("home")
+                            navController.navigate(Routes.HOME)
                         } else {
                             Toast.makeText(context, errorMsg ?: "Something went wrong", Toast.LENGTH_SHORT).show()
                         }
