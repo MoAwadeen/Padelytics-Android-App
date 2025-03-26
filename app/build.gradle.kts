@@ -48,7 +48,10 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3) // Using the BOM, so this is sufficient.
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid) // Using the BOM, so this is sufficient.
     //implementation(libs.volley) // Consider OkHttp or Retrofit
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

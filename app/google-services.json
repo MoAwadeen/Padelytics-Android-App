@@ -12,7 +12,20 @@
           "package_name": "grad.project.padelytics"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "509211955945-rl2cp3m5jd6bo2sp866e0sb5sdgehd60.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "grad.project.padelytics",
+            "certificate_hash": "7295181ac5cbe1b09404280838ad453206097484"
+          }
+        },
+        {
+          "client_id": "509211955945-18j8kuvjngq3st5tghnscvs3qsknapl5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCfn0CVGhyg0myTutJEXNxn1SWWYs9owCE"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "509211955945-18j8kuvjngq3st5tghnscvs3qsknapl5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
