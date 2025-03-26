@@ -10,31 +10,35 @@ import grad.project.padelytics.features.auth.ui.LoginScreen
 import grad.project.padelytics.features.auth.ui.SignUpScreen
 import grad.project.padelytics.features.auth.ui.SignUpSecondScreen
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
+import grad.project.padelytics.features.favorite.ui.FavoriteScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
+import grad.project.padelytics.features.profile.ui.ProfileScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "auth") {
-        composable("auth") {
+        composable(Routes.AUTH) {
             AuthScreen(modifier,navController)
         }
-        composable("login") {
+        composable(Routes.LOGIN) {
             LoginScreen(modifier,navController)
         }
-        composable("signup") {
+        composable(Routes.SIGNUP) {
             SignUpScreen(modifier,navController,AuthViewModel())
         }
-        composable("signupSecond") {
+        composable(Routes.SECOND_SIGNUP) {
             SignUpSecondScreen(modifier,navController,AuthViewModel())
         }
-        composable("home") {
+        composable(Routes.HOME) {
             HomeScreen(modifier,navController)
         }
-
-
-
-
+        composable(Routes.FAVORITE) {
+            FavoriteScreen(modifier,navController)
+        }
+        composable(Routes.PROFILE) {
+            ProfileScreen(modifier,navController)
+        }
     }
 }
