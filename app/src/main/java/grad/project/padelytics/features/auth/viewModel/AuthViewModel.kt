@@ -37,6 +37,7 @@ import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.GreenLight
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.sql.Types.NULL
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -91,8 +92,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun googleSignIn(launcher: ActivityResultLauncher<Intent>, onResult: (Boolean, String?) -> Unit) {
-
-
         try {
             val signInClient = GoogleSignIn.getClient(
                 getApplication(),
@@ -101,14 +100,18 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     .requestEmail()
                     .build()
             )
-            launcher.launch(signInClient.signInIntent)
+            signInClient.signOut().addOnCompleteListener {
+                launcher.launch(signInClient.signInIntent) // Ensure the account selection prompt appears
+            }
         } catch (e: Exception) {
             onResult(false, "Failed to initiate Google Sign-In")
             Log.e("AuthViewModel", "Google Sign-In error", e)
         }
     }
 
-    fun handleGoogleSignInToken(idToken: String, onResult: (Boolean, String?) -> Unit) {
+
+
+    fun handleGoogleSignInToken(idToken: String, onResult: (Boolean, Boolean, String?) -> Unit) {
         viewModelScope.launch {
             try {
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -117,8 +120,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 authResult.user?.let { user ->
                     val userDoc = firestore.collection("users").document(user.uid).get().await()
 
-                    if (!userDoc.exists()) {
-                        // Create new user if doesn't exist
+                    if (userDoc.exists()) {
+                        // User already exists, navigate to Home
+                        onResult(true, true, null)
+                    } else {
+                        // New user, navigate to second signup page
                         val names = user.displayName?.split(" ") ?: listOf("User", "")
                         val userModel = UserModel(
                             firstName = names.first(),
@@ -129,15 +135,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                             photo = user.photoUrl?.toString() ?: ""
                         )
                         firestore.collection("users").document(user.uid).set(userModel).await()
+                        onResult(true, false, null)
                     }
-                    onResult(true, null)
-                } ?: onResult(false, "User not found")
+                } ?: onResult(false, false, "User not found")
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Google Sign-In failed", e)
-                onResult(false, "Authentication failed. Please try again.")
+                onResult(false, false, "Authentication failed. Please try again.")
             }
         }
     }
+
 
     fun addExtraFeature(gender: String, level: String,city: String,date: String ,onResult: (Boolean, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: run {
@@ -184,9 +191,24 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
 
     fun logout(navController: NavController) {
-        FirebaseAuth.getInstance().signOut()
-        navController.navigate(Routes.AUTH) {
-            popUpTo("home") { inclusive = true }
+        val signInClient = GoogleSignIn.getClient(
+            getApplication(),
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build()
+        )
+
+        signInClient.signOut().addOnCompleteListener {
+            FirebaseAuth.getInstance().signOut()
+            navController.navigate(Routes.AUTH) {
+                popUpTo(Routes.HOME) { inclusive = true }
+            }
+        }.addOnFailureListener { e ->
+            Log.e("AuthViewModel", "Google sign-out failed", e)
+            FirebaseAuth.getInstance().signOut()
+            navController.navigate(Routes.AUTH) {
+                popUpTo(Routes.HOME) { inclusive = true }
+            }
         }
     }
 

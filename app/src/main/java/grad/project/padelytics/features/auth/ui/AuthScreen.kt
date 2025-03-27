@@ -58,10 +58,16 @@ fun AuthScreen(
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let { idToken ->
-                viewModel.handleGoogleSignInToken(idToken) { success, errorMsg ->
+                viewModel.handleGoogleSignInToken(idToken) { success, isExistingUser, errorMsg ->
                     if (success) {
-                        navController.navigate(Routes.SECOND_SIGNUP) {
-                            popUpTo("auth") { inclusive = true }
+                        if (isExistingUser) {
+                            navController.navigate(Routes.HOME) {
+                                popUpTo("auth") { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate(Routes.SECOND_SIGNUP) {
+                                popUpTo("auth") { inclusive = true }
+                            }
                         }
                     } else {
                         Toast.makeText(
@@ -71,6 +77,7 @@ fun AuthScreen(
                         ).show()
                     }
                 }
+
             } ?: run {
                 Toast.makeText(context, "Google Sign-In failed: No ID Token", Toast.LENGTH_SHORT).show()
             }
