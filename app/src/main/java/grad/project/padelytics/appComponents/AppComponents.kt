@@ -83,7 +83,7 @@ fun MidWhiteHeadlinePreview(){
 @Composable
 fun AppToolbar(toolbarTitle: String) {
     TopAppBar(
-        modifier = Modifier.fillMaxWidth().height(65.dp),
+        modifier = Modifier.fillMaxWidth().height(80.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Blue,
             titleContentColor = White,
@@ -91,9 +91,9 @@ fun AppToolbar(toolbarTitle: String) {
         title = {
             Text(
                 text = toolbarTitle,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
                 style = TextStyle(
-                    fontSize = 32.sp,
+                    fontSize = 30.sp,
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.Medium,
                     color = White)

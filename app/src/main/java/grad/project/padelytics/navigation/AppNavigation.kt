@@ -15,12 +15,14 @@ import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.favorite.ui.FavoriteScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
+import grad.project.padelytics.features.tournaments.ui.TournamentDetailsScreen
+import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "auth") {
+    NavHost(navController = navController, startDestination = Routes.TOURNAMENTS) {
         composable(Routes.AUTH) {
             AuthScreen(modifier,navController)
         }
@@ -41,6 +43,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
         composable(Routes.PROFILE) {
             ProfileScreen(modifier,navController)
+        }
+        composable(Routes.TOURNAMENTS) {
+            TournamentsScreen(modifier,navController)
+        }
+        composable(Routes.TOURNAMENT_DETAILS) {
+            TournamentDetailsScreen(modifier,navController)
         }
     }
 }
