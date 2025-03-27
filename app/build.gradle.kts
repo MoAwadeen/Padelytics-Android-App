@@ -73,4 +73,5 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.0")
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.datastore:datastore-preferences:1.1.3")
+    implementation("org.jsoup:jsoup:1.16.1")
 }

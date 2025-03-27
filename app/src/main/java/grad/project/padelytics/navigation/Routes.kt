@@ -8,4 +8,6 @@ object Routes {
     const val HOME = "HOME"
     const val FAVORITE = "FAVORITE"
     const val PROFILE = "PROFILE"
+    const val TOURNAMENTS = "TOURNAMENTS"
+    const val TOURNAMENT_DETAILS = "TOURNAMENT_DETAILS"
 }

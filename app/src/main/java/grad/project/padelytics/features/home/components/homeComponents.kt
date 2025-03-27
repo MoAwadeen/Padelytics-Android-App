@@ -32,21 +32,21 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 @Composable
 fun HomeAppToolbar(userName: String) {
     TopAppBar(
-        modifier = Modifier.fillMaxWidth().height(65.dp),
+        modifier = Modifier.fillMaxWidth().height(80.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Blue,
             titleContentColor = White,
         ),
         title = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.padelytics_2),
                     contentDescription = "Logo",
-                    modifier = Modifier.width(170.dp).height(40.dp)
+                    modifier = Modifier.width(160.dp).height(36.dp).padding(start = 3.dp)
                 )
                 Text(
                     text = "Hello, $userName !",
