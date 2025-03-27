@@ -22,7 +22,7 @@ import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.TOURNAMENTS) {
+    NavHost(navController = navController, startDestination = Routes.HOME) {
         composable(Routes.AUTH) {
             AuthScreen(modifier,navController)
         }

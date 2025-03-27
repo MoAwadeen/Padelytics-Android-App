@@ -51,7 +51,7 @@ fun HomeAppToolbar(userName: String) {
                 Text(
                     text = "Hello, $userName !",
                     style = TextStyle(
-                        fontSize = 20.sp,
+                        fontSize = 16.sp,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.Normal,
                         color = White
