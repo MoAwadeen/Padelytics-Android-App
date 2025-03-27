@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import grad.project.padelytics.R
@@ -18,99 +18,121 @@ import grad.project.padelytics.features.auth.components.*
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
-import grad.project.padelytics.ui.theme.GreenLight
-@Composable
 
+@Composable
 fun SignUpSecondScreen(
     modifier: Modifier = Modifier.fillMaxSize(),
     navController: NavHostController,
     viewModel: AuthViewModel
 ) {
     val context = LocalContext.current
-    var (selectedGender, setSelectedGender) = remember { mutableStateOf<String?>(null) }
-    var (selectedLevel, setSelectedLevel) = remember { mutableStateOf<String?>(null) }
-
-    val genderOptions = listOf("Male", "Female")
-    val levelOptions = listOf("Beginner", "Intermediate", "Advanced", "Pro")
+    var selectedGender by remember { mutableStateOf<String?>(null) }
+    var selectedLevel by remember { mutableStateOf<String?>(null) }
+    var selectedCity by remember { mutableStateOf<String?>(null) }
+    var selectedDate by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
-            .fillMaxSize()
             .background(Blue)
-            .padding(25.dp),
+            .padding(25.dp)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
+        MidWhiteHeadline("Sign Up", 30)
         Spacer(modifier = Modifier.height(20.dp))
-        MidWhiteHeadline("Sign Up", 40)
+
+        UserInputSection(
+            title = "What’s your gender?",
+            iconId = R.drawable.gender,
+            options = listOf("Male", "Female"),
+            selectedValue = selectedGender,
+            onSelectionChange = { selectedGender = it }
+        )
+
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Gender Selection
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.gender),
-                contentDescription = "Gender Icon",
-                modifier = Modifier.size(25.dp),
-                tint = GreenLight
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            MidWhiteHeadline("What’s your gender ?", 24)
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        SingleSelectionButtonsGrid(genderOptions) { selectedGender = it }
+        UserInputSection(
+            title = "What’s your level?",
+            iconId = R.drawable.chart,
+            options = listOf("Beginner", "Intermediate", "Advanced", "Pro"),
+            selectedValue = selectedLevel,
+            onSelectionChange = { selectedLevel = it }
+        )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // Level Selection
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.chart),
-                contentDescription = "Chart Icon",
-                modifier = Modifier.size(25.dp),
-                tint = GreenLight
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            MidWhiteHeadline("What’s your level ?", 24)
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        SingleSelectionButtonsGrid(levelOptions) { selectedLevel = it }
+        IconLineRow(iconId = R.drawable.location_bold, title = "Where are you from?")
+        CityDropdownMenu(
+            selectedCity = selectedCity ?: "",
+            onValueChange = { selectedCity = it }
+        )
 
-        Spacer(modifier = Modifier.height(200.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // Buttons Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SmallBlueButton("Back") { navController.navigate(Routes.SIGNUP) }
-            Spacer(modifier = Modifier.width(10.dp))
-            SmallGreenButton("Finish") {
-                if (selectedGender != null && selectedLevel != null) {
-                    viewModel.addExtraFeature(selectedGender!!, selectedLevel!!) { success, errorMsg ->
-                        if (success) {
-                            navController.navigate(Routes.HOME)
-                        } else {
-                            Toast.makeText(context, errorMsg ?: "Something went wrong", Toast.LENGTH_SHORT).show()
-                        }
+        IconLineRow(iconId = R.drawable.calendar, title = "When is your birthday?")
+        DateInputField(
+            selectedDate = selectedDate ?: "",
+            onValueChange = { selectedDate = it }
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+        NavigationButtons(navController, selectedGender, selectedLevel, selectedCity, selectedDate, viewModel, context)
+    }
+}
+
+@Composable
+private fun UserInputSection(
+    title: String,
+    iconId: Int,
+    options: List<String>,
+    selectedValue: String?,
+    onSelectionChange: (String) -> Unit
+) {
+    IconLineRow(iconId = iconId, title = title)
+    SingleSelectionButtonsGrid(options, onSelectionChange)
+}
+
+@Composable
+private fun NavigationButtons(
+    navController: NavHostController,
+    selectedGender: String?,
+    selectedLevel: String?,
+    selectedCity: String?,
+    selectedDate: String?,
+    viewModel: AuthViewModel,
+    context: android.content.Context
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SmallBlueButton("Back") { navController.popBackStack() }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        SmallGreenButton("Finish") {
+            val allFieldsSelected = listOf(selectedGender, selectedLevel, selectedCity, selectedDate).all { it != null }
+            if (allFieldsSelected) {
+                viewModel.addExtraFeature(selectedGender!!, selectedLevel!!, selectedCity!!, selectedDate!!) { success, errorMsg ->
+                    if (success) {
+                        navController.navigate(Routes.HOME)
+                    } else {
+                        Toast.makeText(context, errorMsg ?: "Something went wrong", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(context, "Please select gender and level", Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                Toast.makeText(context, "Please select all fields", Toast.LENGTH_SHORT).show()
             }
         }
     }
 }
 
-
-@Preview
+@Preview()
 @Composable
 fun SignUpSecondScreenPreview() {
-    SignUpSecondScreen(navController = NavHostController(LocalContext.current), viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
+    val dummyNavController = NavHostController(LocalContext.current)
+    val dummyViewModel = AuthViewModel(android.app.Application())
+    SignUpSecondScreen(navController = dummyNavController, viewModel = dummyViewModel)
 }

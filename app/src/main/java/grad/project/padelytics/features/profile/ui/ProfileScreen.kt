@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsEndWidth
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,7 +42,6 @@ import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.features.auth.components.GoogleSignInButton
-import grad.project.padelytics.features.auth.components.OutlinedTextFieldConfirmPassword
 import grad.project.padelytics.features.auth.components.OutlinedTextFieldName
 import grad.project.padelytics.features.auth.components.OutlinedTextFieldPasswordSignUp
 import grad.project.padelytics.features.auth.components.SmallBlueButton
@@ -52,11 +52,15 @@ import grad.project.padelytics.features.home.components.HomeAppToolbar
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
+import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 
 @Composable
 fun ProfileScreen(modifier: Modifier = Modifier,navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application)
+
+
 
     Scaffold(
         bottomBar = {
@@ -77,6 +81,8 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController: NavHostController
                     color = Color.Black
                 )
             )
+
+            WideGreenButton("log out",{viewModel.logout(navController)})
         }
     }
 }

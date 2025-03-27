@@ -35,7 +35,7 @@ import com.google.firebase.annotations.concurrent.Background
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.features.auth.components.GoogleSignInButton
-import grad.project.padelytics.features.auth.components.OutlinedTextFieldConfirmPassword
+import grad.project.padelytics.features.auth.components.OutlinedTextFieldEmail
 import grad.project.padelytics.features.auth.components.OutlinedTextFieldName
 import grad.project.padelytics.features.auth.components.OutlinedTextFieldPasswordSignUp
 import grad.project.padelytics.features.auth.components.SmallBlueButton
@@ -73,17 +73,13 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        OutlinedTextFieldName("Email",email) { email = it }
+        OutlinedTextFieldEmail("Email",email) { email = it }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextFieldPasswordSignUp("Password",password) { password = it }
 
-        Spacer(modifier = Modifier.height(250.dp))
-
-        GoogleSignInButton {  }
-
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(300.dp))
 
         WideGreenButton("Continue", {
             viewModel.login(email, password) { success, errorMsg ->

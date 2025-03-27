@@ -63,11 +63,19 @@ import grad.project.padelytics.ui.theme.WhiteGray
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.VisualTransformation
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 @Composable
@@ -226,7 +234,11 @@ fun OutlinedTextFieldName(
             unfocusedLabelColor = GreenLight,
             errorBorderColor = Color.Red,
             errorCursorColor = Color.Red,
-            errorLabelColor = Color.Red
+            errorLabelColor = Color.Red,
+            disabledTextColor = WhiteGray,
+            focusedTextColor = WhiteGray,
+            unfocusedTextColor = WhiteGray,
+            errorTextColor = Color.Red
         )
     )
 }
@@ -235,99 +247,95 @@ fun OutlinedTextFieldName(
 @Composable
 fun OutlinedTextFieldNamePreview(){
     OutlinedTextFieldName("First Name","",{})}
+
+@Composable
+fun OutlinedTextFieldEmail(
+    label: String,
+    userInput: String,
+    onValueChange: (String) -> Unit
+) {
+    val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+.[A-Za-z0-9.-]+$".toRegex()
+    val isError = userInput.isNotEmpty() && !userInput.matches(emailRegex)
+
+    OutlinedTextField(
+        value = userInput,
+        onValueChange = onValueChange,
+        label = { Text(label, fontFamily = lexendFontFamily) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+        isError = isError,
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = if (isError) Color.Red else GreenLight,
+            unfocusedBorderColor = if (isError) Color.Red else BlueDark,
+            cursorColor = GreenLight,
+            focusedLabelColor = GreenLight,
+            unfocusedLabelColor = GreenLight,
+            errorBorderColor = Color.Red,
+            errorCursorColor = Color.Red,
+            errorLabelColor = Color.Red,
+            disabledTextColor = WhiteGray,
+            focusedTextColor = WhiteGray,
+            unfocusedTextColor = WhiteGray,
+            errorTextColor = Color.Red
+        )
+    )
+}
+
+@Preview
+@Composable
+fun OutlinedTextFieldEmailPreview(){
+    OutlinedTextFieldEmail("Email","",{})}
 @Composable
 fun OutlinedTextFieldPasswordSignUp(
     label: String,
     password: String,
     onValueChange: (String) -> Unit
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    val passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$".toRegex()
+    val isError = password.isNotEmpty() && !password.matches(passwordRegex)
+
     OutlinedTextField(
         value = password,
         onValueChange = onValueChange,
         label = { Text(label, fontFamily = lexendFontFamily) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
+        isError = isError,
+        trailingIcon = {
+            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(imageVector = image, contentDescription = "Toggle Password Visibility", tint = GreenLight)
+            }
+        },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GreenLight,
-            unfocusedBorderColor = BlueDark,
+            focusedBorderColor = if (isError) Color.Red else GreenLight,
+            unfocusedBorderColor = if (isError) Color.Red else BlueDark,
             cursorColor = GreenLight,
             focusedLabelColor = GreenLight,
-            unfocusedLabelColor = GreenLight
+            unfocusedLabelColor = GreenLight,
+            errorBorderColor = Color.Red,
+            errorCursorColor = Color.Red,
+            errorLabelColor = Color.Red,
+            disabledTextColor = WhiteGray,
+            focusedTextColor = WhiteGray,
+            unfocusedTextColor = WhiteGray,
+            errorTextColor = Color.Red
         )
     )
 }
 
-
 @Preview
 @Composable
 fun OutlinedTextFieldPasswordSignUpPreview(){
-    val password by remember { mutableStateOf("") }
-    OutlinedTextFieldPasswordSignUp(label = "Password", password = password, onValueChange = {})}
-
-@Composable
-fun OutlinedTextFieldConfirmPassword(
-    password: String,
-    confirmPassword: String,
-) {
-    var inputvalue by remember { mutableStateOf(confirmPassword) }
-    val localFocusManager = LocalFocusManager.current
-    val isError = confirmPassword.isNotEmpty() && confirmPassword != password
-
-    Column {
-        Box(modifier = Modifier.background(Blue)) {
-            OutlinedTextField(
-                value = inputvalue,
-                onValueChange = {inputvalue = it},
-                label = { Text("Confirm Password", fontFamily = lexendFontFamily) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                isError = isError,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions {
-                    localFocusManager.clearFocus()
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = if (isError) Color.Red else GreenLight,
-                    unfocusedBorderColor = if (isError) Color.Red else BlueDark,
-                    cursorColor = GreenLight,
-                    focusedLabelColor = GreenLight,
-                    unfocusedLabelColor = GreenLight,
-                    errorBorderColor = Color.Red,
-                    errorCursorColor = Color.Red,
-                    errorLabelColor = Color.Red
-                )
-            )
-        }
-
-        if (isError) {
-            Text(
-                text = "Passwords do not match",
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun OutlinedTextFieldConfirmPasswordPreview() {
-    val password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    OutlinedTextFieldConfirmPassword(
-        password = password,
-        confirmPassword = confirmPassword)
-}
+    OutlinedTextFieldPasswordSignUp("Password","",{})}
 
 @Composable
 fun SingleSelectionButtonsGrid(options: List<String>, onSelectionChange: (String) -> Unit) {
@@ -382,56 +390,168 @@ fun PreviewSingleSelectionButtonsGrid() {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgeDatePicker() {
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
+fun CityDropdownMenu(
+    selectedCity: String,
+    onValueChange: (String) -> Unit,
+    isError: Boolean = false
+) {
+    val cities = listOf("Cairo", "Giza", "Alexandria", "Dakahlia","Beheira", "Matrouh", "Kafr El Sheikh", "Gharbia", "Menofia",
+        "Damietta", "Port Said", "Ismailia", "Suez", "Sharqia", "Qalyubia", "Fayoum", "Beni Suef", "Minya", "Assiut", "Sohag",
+        "Qena", "Luxor", "Aswan", "Red Sea", "New Valley", "North Sinai", "South Sinai")
 
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
+    var expanded by remember { mutableStateOf(false) }
 
-    var selectedDate by remember { mutableStateOf("") }
-    var age by remember { mutableStateOf("") }
-
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _, selectedYear, selectedMonth, selectedDay ->
-            val birthCalendar = Calendar.getInstance().apply {
-                set(selectedYear, selectedMonth, selectedDay)
-            }
-            selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-
-            // Calculate Age
-            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-            val calculatedAge = currentYear - selectedYear
-            age = "$calculatedAge years old"
-        },
-        year, month, day
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
     ) {
-        Text(text = "Selected Date: $selectedDate", fontSize = 18.sp)
-        Text(text = "Age: $age", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Blue)
+        OutlinedTextField(
+            value = selectedCity,
+            onValueChange = {}, // Empty because we're using readOnly=true
+            readOnly = true,
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+            label = { Text("Select a City", fontFamily = lexendFontFamily) },
+            singleLine = true,
+            isError = isError,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = if (isError) Color.Red else GreenLight,
+                unfocusedBorderColor = if (isError) Color.Red else BlueDark,
+                cursorColor = GreenLight,
+                focusedLabelColor = GreenLight,
+                unfocusedLabelColor = GreenLight,
+                errorBorderColor = Color.Red,
+                errorCursorColor = Color.Red,
+                errorLabelColor = Color.Red,
+                disabledTextColor = WhiteGray,
+                focusedTextColor = WhiteGray,
+                unfocusedTextColor = WhiteGray,
+            ),
+            trailingIcon = {
+                Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon", tint = GreenLight)
+            }
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = { datePickerDialog.show() }) {
-            Text(text = "Select Birth Date")
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            cities.forEach { city ->
+                DropdownMenuItem(
+                    text = { Text(city, fontFamily = lexendFontFamily) },
+                    onClick = {
+                        onValueChange(city) // Notify parent of the change
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun PreviewAgeDatePicker() {
-    AgeDatePicker()
+fun CityDropdownMenuPreview() {
+    var selectedCity by remember { mutableStateOf("Cairo") }
+    CityDropdownMenu( selectedCity = selectedCity,
+        onValueChange = { newCity ->
+            selectedCity = newCity // Update the state when selection changes
+        })
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateInputField(
+    selectedDate: String,          
+    onValueChange: (String) -> Unit,
+    isError: Boolean = false
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+    val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val newDate = Calendar.getInstance()
+            newDate.set(year, month, dayOfMonth)
+            onValueChange(dateFormatter.format(newDate.time)) // Notify parent of the change
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    OutlinedTextField(
+        value = selectedDate,
+        onValueChange = {},
+        readOnly = true,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Select Date", fontFamily = lexendFontFamily, color = GreenLight) },
+        singleLine = true,
+        isError = isError,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = if (isError) Color.Red else GreenLight,
+            unfocusedBorderColor = if (isError) Color.Red else BlueDark,
+            cursorColor = GreenLight,
+            focusedLabelColor = GreenLight,
+            unfocusedLabelColor = GreenLight,
+            errorBorderColor = Color.Red,
+            errorCursorColor = Color.Red,
+            errorLabelColor = Color.Red,
+            disabledTextColor = GreenLight,
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            disabledLabelColor = GreenLight,
+            disabledPlaceholderColor = GreenLight,
+            errorTrailingIconColor = Color.Red
+        ),
+        trailingIcon = {
+            IconButton(onClick = { datePickerDialog.show() }) {
+                Icon(Icons.Default.CalendarToday, contentDescription = "Calendar Icon", tint = GreenLight)
+            }
+        }
+    )
+}
+
+@Preview
+@Composable
+fun DateInputFieldPreview() {
+    var selectedDate by remember { mutableStateOf("Select Date") }
+    DateInputField(selectedDate = selectedDate,
+        onValueChange = { newDate ->
+            selectedDate = newDate
+        })
+}
+
+
+
+@Composable
+internal fun IconLineRow(iconId: Int, title: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = iconId),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = GreenLight
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        MidWhiteHeadline(title, 20)
+    }
+    Spacer(modifier = Modifier.height(5.dp))
+}
+
+@Preview
+@Composable
+fun IconLineRowPreview() {
+    IconLineRow(iconId = R.drawable.gender, title = "What’s your gender?")
+}
+
 
 
