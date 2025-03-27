@@ -55,6 +55,7 @@ fun SignUpScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var photo by remember {  mutableStateOf("")  }
     val context = LocalContext.current
 
     Column(
@@ -79,7 +80,7 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        OutlinedTextFieldName("Email", email) { email = it }
+        OutlinedTextFieldEmail("Email", email) { email = it }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -100,7 +101,7 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.width(10.dp))
             SmallGreenButton("Continue") {
                 if (password == confirmPassword) {
-                    authViewModel.signup(email, password, firstName, lastName) { success, message ->
+                    authViewModel.signup(email, password, firstName, lastName, photo) { success, message ->
                         if (success) {
                             navController.navigate(Routes.SECOND_SIGNUP)
                         } else {

@@ -4,18 +4,37 @@ import android.app.Application
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import grad.project.padelytics.R
+import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.data.UserModel
+import grad.project.padelytics.navigation.Routes
+import grad.project.padelytics.ui.theme.GreenLight
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -29,6 +48,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         password: String,
         firstName: String,
         lastName: String,
+        photo: String,
         onResult: (Boolean, String?) -> Unit
     ) {
         viewModelScope.launch {
@@ -41,7 +61,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     lastName = lastName,
                     uid = userId,
                     email = email,
-                    password = password
+                    password = password,
+                    photo = photo
                 )
 
                 firestore.collection("users")
@@ -70,6 +91,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun googleSignIn(launcher: ActivityResultLauncher<Intent>, onResult: (Boolean, String?) -> Unit) {
+
+
         try {
             val signInClient = GoogleSignIn.getClient(
                 getApplication(),
@@ -92,7 +115,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 val authResult = auth.signInWithCredential(credential).await()
 
                 authResult.user?.let { user ->
-                    // Check if user exists in Firestore
                     val userDoc = firestore.collection("users").document(user.uid).get().await()
 
                     if (!userDoc.exists()) {
@@ -103,7 +125,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                             lastName = names.getOrElse(1) { "" },
                             uid = user.uid,
                             email = user.email ?: "",
-                            password = ""
+                            password = "",
+                            photo = user.photoUrl?.toString() ?: ""
                         )
                         firestore.collection("users").document(user.uid).set(userModel).await()
                     }
@@ -116,7 +139,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addExtraFeature(gender: String, level: String, onResult: (Boolean, String?) -> Unit) {
+    fun addExtraFeature(gender: String, level: String,city: String,date: String ,onResult: (Boolean, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: run {
             onResult(false, "User not found")
             return
@@ -126,7 +149,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val userUpdates = mapOf(
                     "gender" to gender,
-                    "level" to level
+                    "level" to level,
+                    "city" to city,
+                    "date" to date
                 )
 
                 firestore.collection("users")
@@ -142,8 +167,28 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun logout(onResult: () -> Unit) {
-        auth.signOut()
-        onResult()
+    fun saveUserToFirestore(user: FirebaseUser) {
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("users").document(user.uid)
+
+        val userData = hashMapOf(
+            "uid" to user.uid,
+            "email" to user.email,
+            "name" to (user.displayName ?: "Guest")
+        )
+
+        userRef.set(userData, SetOptions.merge())
+            .addOnSuccessListener { Log.d("Firestore", "User saved successfully") }
+            .addOnFailureListener { Log.e("Firestore", "Error saving user", it) }
     }
+
+
+    fun logout(navController: NavController) {
+        FirebaseAuth.getInstance().signOut()
+        navController.navigate(Routes.AUTH) {
+            popUpTo("home") { inclusive = true }
+        }
+    }
+
 }
+

@@ -6,6 +6,7 @@ data class UserModel(
     val uid: String = "",
     val email: String,
     val password: String,
+    val photo: String
    // val gender: String,
     //val level: String,
     //val age: Int,
@@ -17,6 +18,6 @@ data class UserModelExtra(
     val uid: String = "",
     val gender: String,
     val level: String,
-    //val age: Int,
-    //val city: String,
+    val date: String,
+    val city: String,
 )

@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +23,8 @@ import androidx.navigation.NavHostController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import grad.project.padelytics.R
 import grad.project.padelytics.features.auth.components.GoogleSignInButton
 import grad.project.padelytics.features.auth.components.WideBlueButton
@@ -37,6 +40,15 @@ fun AuthScreen(
     navController: NavHostController,
     viewModel: AuthViewModel = viewModel()
 ) {
+    val user = FirebaseAuth.getInstance().currentUser
+    LaunchedEffect(user) {
+        if (user != null) {
+            navController.navigate(Routes.HOME) {
+                viewModel.saveUserToFirestore(user)
+                popUpTo("auth") { inclusive = true }
+            }
+        }
+    }
     val context = LocalContext.current
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -48,7 +60,7 @@ fun AuthScreen(
             account?.idToken?.let { idToken ->
                 viewModel.handleGoogleSignInToken(idToken) { success, errorMsg ->
                     if (success) {
-                        navController.navigate("home") {
+                        navController.navigate(Routes.SECOND_SIGNUP) {
                             popUpTo("auth") { inclusive = true }
                         }
                     } else {
@@ -134,6 +146,5 @@ fun AuthScreen(
 @Preview
 @Composable
 fun AuthScreenPreview() {
-    // Note: In a real preview, you might want to use a fake NavController
     AuthScreen(navController = NavHostController(LocalContext.current))
 }

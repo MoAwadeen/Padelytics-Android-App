@@ -41,7 +41,6 @@ import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.features.auth.components.GoogleSignInButton
-import grad.project.padelytics.features.auth.components.OutlinedTextFieldConfirmPassword
 import grad.project.padelytics.features.auth.components.OutlinedTextFieldName
 import grad.project.padelytics.features.auth.components.OutlinedTextFieldPasswordSignUp
 import grad.project.padelytics.features.auth.components.SmallBlueButton
