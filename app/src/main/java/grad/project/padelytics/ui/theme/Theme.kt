@@ -12,12 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = BlueDark,
-    secondary = Blue,
-    tertiary = GreenLight
-)
-
 private val LightColorScheme = lightColorScheme(
     primary = BlueDark,
     secondary = Blue,
@@ -46,8 +40,6 @@ fun PadelyticsTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
-        darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
