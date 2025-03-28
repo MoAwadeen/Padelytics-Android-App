@@ -3,7 +3,6 @@ package grad.project.padelytics.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -48,7 +47,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             TournamentsScreen(modifier,navController)
         }
         composable(Routes.TOURNAMENT_DETAILS) {
-            TournamentDetailsScreen(modifier,navController)
+            TournamentDetailsScreen(modifier, navController)
         }
     }
 }
