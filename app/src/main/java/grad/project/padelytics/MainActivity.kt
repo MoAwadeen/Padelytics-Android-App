@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.light(Blue.toArgb(),Blue.toArgb()),
             navigationBarStyle = SystemBarStyle.light(Blue.toArgb(),Blue.toArgb())
         )
+
         setContent {
             PadelyticsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

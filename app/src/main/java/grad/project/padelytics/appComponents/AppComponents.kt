@@ -73,11 +73,38 @@ fun MidWhiteHeadline(text: String,size: Int,){
         fontWeight = FontWeight.Medium)
 }
 
+
 @Preview
 @Composable
 fun MidWhiteHeadlinePreview(){
     MidWhiteHeadline("Hello", 30)
 }
+
+@Composable
+fun MidDarkHeadline(text: String,size: Int,){
+    Text(text=text,
+        fontSize = size.sp,
+        color = BlueDark,
+        fontFamily = lexendFontFamily,
+        fontWeight = FontWeight.Bold)
+}
+
+@Composable
+fun SimiMidDarkHeadline(text: String,size: Int,){
+    Text(text=text,
+        fontSize = size.sp,
+        color = BlueDark,
+        fontFamily = lexendFontFamily,
+        fontWeight = FontWeight.SemiBold)
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun MidDarkHeadlinePreview(){
+    MidDarkHeadline(" Mohamed ", 30)
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
