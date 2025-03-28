@@ -1,5 +1,8 @@
 package grad.project.padelytics.features.profile.ui
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -28,6 +31,7 @@ import grad.project.padelytics.features.auth.components.WideGreenButton
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import grad.project.padelytics.appComponents.MidDarkHeadline
 import grad.project.padelytics.features.profile.components.*
@@ -40,10 +44,11 @@ fun ProfileScreen(
     modifier: Modifier = Modifier.background(WhiteGray),
     navController: NavHostController,
     authViewModel: AuthViewModel = viewModel(),
-    profileViewModel: ProfileViewModel = viewModel()
+    profileViewModel: ProfileViewModel = viewModel(),
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val context = LocalContext.current
 
     val userProfile by profileViewModel.userProfile.collectAsState()
 
@@ -56,6 +61,19 @@ fun ProfileScreen(
     val city = userProfile?.city.orEmpty()
     val rewardPoints = userProfile?.rewardPoints ?: 0
 
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            profileViewModel.uploadImage(it, context)
+        }
+    }
+
+    fun selectImage() {
+        pickImageLauncher.launch("image/*")
+    }
+
     LaunchedEffect(Unit) {
         profileViewModel.fetchUserProfile()
     }
@@ -64,7 +82,7 @@ fun ProfileScreen(
         modifier = Modifier.background(WhiteGray),
         topBar = {
             val profileImage: Painter = rememberAsyncImagePainter(photo)
-            ProfileHeader(avatarImage = profileImage)
+            ProfileHeader(avatarImage = profileImage, iconOnClick = {selectImage()})
         },
         bottomBar = {
             BottomAppBar(navController, currentRoute)
@@ -79,7 +97,6 @@ fun ProfileScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-
                 MidDarkHeadline(text = fullname, size = 20)
 
                 Row(

@@ -74,4 +74,8 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.datastore:datastore-preferences:1.1.3")
     implementation("org.jsoup:jsoup:1.16.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+    implementation("androidx.activity:activity-ktx:1.10.1")
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
 }
