@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -43,8 +43,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
 import grad.project.padelytics.appComponents.MidDarkHeadline
 import grad.project.padelytics.appComponents.SimiMidDarkHeadline
@@ -58,7 +60,8 @@ import grad.project.padelytics.ui.theme.WhiteGray
 fun ProfileHeader(
     backgroundImage: Int = R.drawable.profilebg,
     avatarImage: Painter = painterResource(id = R.drawable.shop),
-    avatarSize: Dp = 80.dp
+    avatarSize: Dp = 80.dp,
+    iconOnClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -66,7 +69,7 @@ fun ProfileHeader(
             .height(120.dp)
             .background(Transparent)
     ) {
-        // Background Image with overlay
+
         Box(modifier = Modifier.background(Transparent)) {
             Image(
                 painter = painterResource(id = backgroundImage),
@@ -96,13 +99,30 @@ fun ProfileHeader(
                     .background(Transparent)
             )
         }
+
+        Box(modifier = Modifier
+            .size(avatarSize)
+            .align(Alignment.BottomEnd)
+            .offset(y = avatarSize /2)
+            .background(Transparent)){
+            Image(
+                painter = painterResource(id = R.drawable.edit),
+                contentDescription = "Edit Icon",
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { iconOnClick() },
+                colorFilter = ColorFilter.tint(GreenLight),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.BottomEnd,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true, device = "id:pixel_8")
 @Composable
 fun PreviewProfileHeader(modifier: Modifier = Modifier){
-    ProfileHeader()
+    ProfileHeader(iconOnClick = {})
 }
 
 @Composable
