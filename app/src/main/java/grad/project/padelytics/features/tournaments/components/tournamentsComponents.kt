@@ -245,7 +245,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
                             .width(200.dp)
                             .height(260.dp)
                             .clip(RoundedCornerShape(20.dp)),
-                        model = tournament.image ?: R.drawable.tournament,
+                        model = tournament.image,
                         contentDescription = "Tournament Image",
                         contentScale = ContentScale.Crop,
                         alignment = Alignment.Center
@@ -302,7 +302,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
         }
 
         Text(
-            text = tournament.tournamentName ?: "Tournament Name",
+            text = tournament.tournamentName,
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
                 fontSize = 18.sp,
@@ -313,7 +313,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
         )
 
         Text(
-            text = "Prizes: EGP ${tournament.prize ?: "N/A"}",
+            text = "Prizes: EGP ${tournament.prize}",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 15.dp, bottom = 15.dp),
@@ -326,7 +326,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
         )
 
         Text(
-            text = "Registration Fees: EGP ${tournament.registrationFees ?: "N/A"}",
+            text = "Registration Fees: EGP ${tournament.registrationFees}",
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
                 fontSize = 20.sp,
@@ -353,7 +353,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
             )
 
             Text(
-                text = tournament.location ?: "Location Unavailable",
+                text = tournament.location,
                 modifier = Modifier.fillMaxWidth(),
                 style = TextStyle(
                     fontSize = 20.sp,
@@ -375,7 +375,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
                         Log.e("TournamentDetails", "Error opening URL: $url", e)
                         Toast.makeText(context, "Failed to open link", Toast.LENGTH_SHORT).show()
                     }
-                } ?: Toast.makeText(context, "URL is not available", Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }
