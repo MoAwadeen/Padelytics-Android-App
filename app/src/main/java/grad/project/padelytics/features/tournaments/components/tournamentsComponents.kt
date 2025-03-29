@@ -1,5 +1,8 @@
 package grad.project.padelytics.features.tournaments.components
 
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +24,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,9 +43,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -45,6 +56,8 @@ import coil.request.ImageRequest
 import coil.size.Scale
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.WideGreenButton
+import grad.project.padelytics.features.tournaments.data.Tournament
+import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
 import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
@@ -93,18 +106,20 @@ fun GridItem(tournament: String, prize: String, date: String, imageUrl: String, 
             text = tournament,
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
-                fontSize = 24.sp,
+                fontSize = 18.sp,
                 fontFamily = lexendFontFamily,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = Blue
-            )
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
 
         Text(
             text = prize,
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 color = BlueDark
@@ -115,7 +130,7 @@ fun GridItem(tournament: String, prize: String, date: String, imageUrl: String, 
             text = date,
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Normal,
                 color = BlueDark
@@ -168,7 +183,9 @@ fun TournamentAppToolbar(navController: NavController, tournamentName: String) {
                         fontWeight = FontWeight.Medium,
                         color = White
                     ),
-                    modifier = Modifier.padding(start = 18.dp)
+                    modifier = Modifier.padding(start = 18.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -182,9 +199,21 @@ fun TournamentAppToolbarPreview(){
 }
 
 @Composable
-fun TournamentDetails(navController: NavController){
+fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = viewModel()) {
+    val context = LocalContext.current
+    var isFavorite by remember { mutableStateOf(false) }
+
+    LaunchedEffect(tournament.id) {
+        viewModel.checkIfFavorite(tournament.id) { result ->
+            isFavorite = result
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 15.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -216,12 +245,8 @@ fun TournamentDetails(navController: NavController){
                             .width(200.dp)
                             .height(260.dp)
                             .clip(RoundedCornerShape(20.dp)),
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(R.drawable.tournament)
-                            .crossfade(true)
-                            .scale(Scale.FILL)
-                            .build(),
-                        contentDescription = "Image",
+                        model = tournament.image,
+                        contentDescription = "Tournament Image",
                         contentScale = ContentScale.Crop,
                         alignment = Alignment.Center
                     )
@@ -242,22 +267,42 @@ fun TournamentDetails(navController: NavController){
                 ) {
                     IconButton(
                         onClick = {
+                            if (isFavorite) {
+                                viewModel.removeFavoriteTournament(tournament.id) { success ->
+                                    if (success) {
+                                        isFavorite = false
+                                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Failed to remove", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            } else {
+                                viewModel.saveFavoriteTournament(tournament.id) { success ->
+                                    if (success) {
+                                        isFavorite = true
+                                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Failed to add", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
                         },
                         modifier = Modifier.size(30.dp)
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.fav_selected),
-                            contentDescription = "Back",
+                            painter = painterResource(
+                                if (isFavorite) R.drawable.fav_selected else R.drawable.fav_unselected
+                            ),
+                            contentDescription = "Favorite",
                             modifier = Modifier.size(24.dp)
                         )
                     }
                 }
-
             }
         }
 
         Text(
-            text = "Tournament",
+            text = tournament.tournamentName,
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
                 fontSize = 18.sp,
@@ -268,29 +313,35 @@ fun TournamentDetails(navController: NavController){
         )
 
         Text(
-            text = "prizes : EGP",
-            modifier = Modifier.fillMaxWidth().padding(top = 15.dp, bottom = 15.dp),
+            text = "Prizes: EGP ${tournament.prize}",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 15.dp, bottom = 15.dp),
             style = TextStyle(
                 fontSize = 22.sp,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Normal,
-                color = Blue)
+                color = Blue
+            )
         )
 
         Text(
-            text = "Registration Fees : EGP",
+            text = "Registration Fees: EGP ${tournament.registrationFees}",
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
                 fontSize = 20.sp,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Normal,
-                color = GreenDark)
+                color = GreenDark
+            )
         )
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 15.dp, bottom = 40.dp),
-            verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 15.dp, bottom = 40.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 modifier = Modifier
                     .width(30.dp)
@@ -302,16 +353,31 @@ fun TournamentDetails(navController: NavController){
             )
 
             Text(
-                text = "Location",
+                text = tournament.location,
                 modifier = Modifier.fillMaxWidth(),
                 style = TextStyle(
                     fontSize = 20.sp,
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.Medium,
-                    color = Blue)
+                    color = Blue
+                )
             )
         }
-        WideGreenButton(label = "Contact Now", onClick = {navController.navigate(Routes.TOURNAMENTS)})
+
+        WideGreenButton(
+            label = "Contact Now",
+            onClick = {
+                tournament.url.let { url ->
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e("TournamentDetails", "Error opening URL: $url", e)
+                        Toast.makeText(context, "Failed to open link", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -321,6 +387,6 @@ fun TournamentDetailsPreview(){
     Surface (
         modifier = Modifier.fillMaxSize().background(White),
     ){
-        TournamentDetails(navController = rememberNavController())
+        TournamentDetails(tournament = Tournament())
     }
 }

@@ -9,5 +9,5 @@ object Routes {
     const val FAVORITE = "FAVORITE"
     const val PROFILE = "PROFILE"
     const val TOURNAMENTS = "TOURNAMENTS"
-    const val TOURNAMENT_DETAILS = "TOURNAMENT_DETAILS"
+    const val TOURNAMENT_DETAILS = "TOURNAMENT_DETAILS/{tournamentId}"
 }

@@ -167,7 +167,7 @@ fun BottomAppBar(navController: NavController, currentRoute: String?) {
                         modifier = Modifier.size(24.dp),
                         onClick = { navController.navigate(Routes.FAVORITE) }) {
                         val icon = if (currentRoute == Routes.FAVORITE) {
-                            painterResource(id = R.drawable.fav_selected)
+                            painterResource(id = R.drawable.fav_unselected)
                         } else {
                             painterResource(id = R.drawable.fav)
                         }
