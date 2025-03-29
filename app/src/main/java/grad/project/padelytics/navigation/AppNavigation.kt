@@ -2,6 +2,7 @@ package grad.project.padelytics.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,40 +20,40 @@ import grad.project.padelytics.features.tournaments.ui.TournamentDetailsScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Routes.AUTH) {
         composable(Routes.AUTH) {
-            AuthScreen(navController = navController)
+            AuthScreen(modifier,navController)
         }
         composable(Routes.LOGIN) {
-            LoginScreen(navController = navController)
+            LoginScreen(modifier,navController)
         }
         composable(Routes.SIGNUP) {
-            SignUpScreen(navController = navController, authViewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
+            SignUpScreen(modifier,navController, authViewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
         }
         composable(Routes.SECOND_SIGNUP) {
-            SignUpSecondScreen(navController = navController, viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
+            SignUpSecondScreen(modifier,navController, viewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
         }
         composable(Routes.HOME) {
-            HomeScreen(navController = navController)
+            HomeScreen(modifier,navController)
         }
         composable(Routes.FAVORITE) {
-            FavoriteScreen(navController = navController)
+            FavoriteScreen(modifier,navController)
         }
         composable(Routes.PROFILE) {
-            ProfileScreen(navController = navController)
+            ProfileScreen(modifier,navController)
         }
         composable(Routes.TOURNAMENTS) {
-            TournamentsScreen(navController = navController)
+            TournamentsScreen(modifier,navController)
         }
         composable(
             route = Routes.TOURNAMENT_DETAILS,
             arguments = listOf(navArgument("tournamentId") { type = NavType.StringType })
         ) { backStackEntry ->
             val tournamentId = backStackEntry.arguments?.getString("tournamentId")
-            TournamentDetailsScreen(navController = navController, tournamentId =  tournamentId)
+            TournamentDetailsScreen(modifier, navController, tournamentId)
         }
     }
 }

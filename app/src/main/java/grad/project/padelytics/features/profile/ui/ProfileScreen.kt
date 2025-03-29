@@ -41,7 +41,7 @@ import grad.project.padelytics.ui.theme.WhiteGray
 
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier.background(WhiteGray),
+    modifier: Modifier = Modifier.background(WhiteGray).fillMaxSize(),
     navController: NavHostController,
     authViewModel: AuthViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
