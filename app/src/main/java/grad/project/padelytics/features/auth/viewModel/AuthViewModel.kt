@@ -213,4 +213,3 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 }
-

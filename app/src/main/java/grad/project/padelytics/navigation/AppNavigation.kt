@@ -1,8 +1,8 @@
 package grad.project.padelytics.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,7 +23,7 @@ import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.HOME) {
+    NavHost(navController = navController, startDestination = Routes.AUTH) {
         composable(Routes.AUTH) {
             AuthScreen(modifier,navController)
         }
