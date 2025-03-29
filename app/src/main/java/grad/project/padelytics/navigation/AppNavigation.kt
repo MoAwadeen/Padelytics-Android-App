@@ -3,9 +3,11 @@ package grad.project.padelytics.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import grad.project.padelytics.features.auth.ui.AuthScreen
 import grad.project.padelytics.features.auth.ui.LoginScreen
 import grad.project.padelytics.features.auth.ui.SignUpScreen
@@ -21,7 +23,7 @@ import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.AUTH) {
+    NavHost(navController = navController, startDestination = Routes.HOME) {
         composable(Routes.AUTH) {
             AuthScreen(modifier,navController)
         }
@@ -46,8 +48,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.TOURNAMENTS) {
             TournamentsScreen(modifier,navController)
         }
-        composable(Routes.TOURNAMENT_DETAILS) {
-            TournamentDetailsScreen(modifier, navController)
+        composable(
+            route = Routes.TOURNAMENT_DETAILS,
+            arguments = listOf(navArgument("tournamentId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val tournamentId = backStackEntry.arguments?.getString("tournamentId")
+            TournamentDetailsScreen(modifier, navController, tournamentId)
         }
     }
 }
