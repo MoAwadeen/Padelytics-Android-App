@@ -53,7 +53,6 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.androidx.media3.common.ktx) // Using the BOM, so this is sufficient.
-    //implementation(libs.volley) // Consider OkHttp or Retrofit
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
