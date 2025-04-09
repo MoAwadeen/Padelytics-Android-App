@@ -33,6 +33,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         password: String,
         firstName: String,
         lastName: String,
+        userName: String,
         photo: String,
         onResult: (Boolean, String?) -> Unit
     ) {
@@ -44,6 +45,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 val userModel = UserModel(
                     firstName = firstName,
                     lastName = lastName,
+                    username = userName,
                     uid = userId,
                     email = email,
                     password = password,

@@ -18,6 +18,7 @@ import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentDetailsScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
+import grad.project.padelytics.features.videoUpload.ui.VideoUploadScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -55,5 +56,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             val tournamentId = backStackEntry.arguments?.getString("tournamentId")
             TournamentDetailsScreen(modifier, navController, tournamentId)
         }
+        composable(Routes.VIDEO_UPLOAD) {
+            VideoUploadScreen(modifier,navController)
+        }
+
     }
 }

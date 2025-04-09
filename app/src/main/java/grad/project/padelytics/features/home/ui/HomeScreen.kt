@@ -89,7 +89,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                 .fillMaxSize()
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
                 FeatureList(navController)
