@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "509211955945-1hk9fetn2q64hsj6m95ievc0ktfmq5du.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "grad.project.padelytics",
+            "certificate_hash": "9c6d274599579fc94b80d7fc8ed27887499a569d"
+          }
+        },
+        {
           "client_id": "509211955945-rl2cp3m5jd6bo2sp866e0sb5sdgehd60.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
