@@ -52,6 +52,7 @@ fun SignUpScreen(
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -77,6 +78,10 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextFieldName("Last Name", lastName) { lastName = it }
+        
+        Spacer(modifier = Modifier.height(20.dp))
+
+        OutlinedTextFieldName("Username", username) { username = it }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -101,7 +106,7 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.width(10.dp))
             SmallGreenButton("Continue") {
                 if (password == confirmPassword) {
-                    authViewModel.signup(email, password, firstName, lastName, photo) { success, message ->
+                    authViewModel.signup(email, password, firstName, lastName, username, photo) { success, message ->
                         if (success) {
                             navController.navigate(Routes.SECOND_SIGNUP)
                         } else {
@@ -117,7 +122,7 @@ fun SignUpScreen(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun SignUpScreenPreview() {
     SignUpScreen(navController = NavHostController(LocalContext.current), authViewModel = AuthViewModel(LocalContext.current.applicationContext as android.app.Application))
