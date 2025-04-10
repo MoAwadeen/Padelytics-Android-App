@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.videoUpload.ui
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -20,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,23 +33,56 @@ import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
+import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
 import grad.project.padelytics.features.videoUpload.components.PlayersGrid
+import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
 import grad.project.padelytics.features.videoUpload.components.VideoUploadCard
-import grad.project.padelytics.features.videoUpload.data.FriendPlayer
+import grad.project.padelytics.features.videoUpload.data.FriendData
+import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
 
 @Composable
 fun VideoUploadScreen(modifier: Modifier = Modifier,
                       navController: NavHostController,
-                      profileViewModel: ProfileViewModel = viewModel())
+                      profileViewModel: ProfileViewModel = viewModel(),
+                      viewModel: VideoUploadViewModel = viewModel())
 {
-    var userName by remember { mutableStateOf("You") }
+    val selectedVideo by viewModel.selectedVideoUri.collectAsState()
+    var myName by remember { mutableStateOf("You") }
     var friendName1 by remember { mutableStateOf("") }
     var friendName2 by remember { mutableStateOf("") }
     var friendName3 by remember { mutableStateOf("") }
 
+    val userProfile by profileViewModel.userProfile.collectAsState()
+    val photo = userProfile?.photo ?: R.drawable.user
+    val profileImage = rememberAsyncImagePainter(model = photo)
+
 
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var selectedCourt by remember { mutableStateOf<String?>(null) }
+
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showFriendsDialog by remember { mutableStateOf(false) }
+    var selectedFriend by remember { mutableStateOf<FriendData?>(null) }
+
+    if (showAddDialog) {
+        SearchFriendDialog(
+            onDismiss = { showAddDialog = false },
+            onUserFound = { username ->
+                Log.d("FriendSearch", "Found user: $username")
+            }
+        )
+    }
+
+    if (showFriendsDialog) {
+        FriendsListDialog(
+            onDismiss = { showFriendsDialog = false },
+            onAdd = { showAddDialog = true },
+            onFriendClick = { friend ->
+                selectedFriend = friend
+                Log.d("FriendSelected", "Selected: ${friend.userName}")
+            }
+        )
+    }
 
     Scaffold(
         modifier = Modifier,
@@ -83,14 +116,35 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                 horizontalAlignment = Alignment.Start
             ) {
                 item {
-                    VideoUploadCard(uploadOnClick = {})
+                    VideoUploadCard(
+                        onVideoSelected = { uri ->
+                            viewModel.setSelectedVideo(uri)
+                        }
+                    )
                     Spacer(modifier = Modifier.height(22.dp))
-                    PlayersGrid(players =
+                    PlayersGrid(playerOnClick = { showFriendsDialog = true },players =
                         listOf(
-                            FriendPlayer(userName, R.drawable.user),
-                            FriendPlayer(friendName1, R.drawable.add_user),
-                            FriendPlayer(friendName2, R.drawable.add_user),
-                            FriendPlayer(friendName3, R.drawable.add_user)),
+                            FriendData(
+                                userName = "exampleUser",
+                                firstName = myName,
+                                lastName = "Doe",
+                                photo = profileImage.toString()
+                            )
+                            ,FriendData(
+                                userName = "exampleUser",
+                                firstName = friendName1,
+                                lastName = "Doe",
+                                photo = profileImage.toString())
+                            ,FriendData(
+                                userName = "",
+                                firstName = friendName2,
+                                photo = profileImage.toString())
+                            ,FriendData(
+                                userName = "",
+                                firstName = friendName3,
+                                lastName = "Doe",
+                                photo = profileImage.toString())
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(22.dp))
