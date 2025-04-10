@@ -91,7 +91,9 @@ fun FeatureList(navController: NavController) {
     )
 
     LazyRow(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.Center,
     ) {
         items(features) { feature ->

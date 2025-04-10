@@ -96,7 +96,7 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(46.dp))
                 MidDarkHeadline(text = fullname, size = 20)
 
                 Row(
