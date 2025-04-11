@@ -1,8 +1,11 @@
 package grad.project.padelytics.features.videoUpload.components
 
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,28 +20,56 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,11 +89,9 @@ import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
 
 @Composable
 fun VideoUploadCard(
@@ -261,98 +290,117 @@ fun CourtDropdownMenu(
     }
 }
 
-
 @Composable
-fun PlayersGrid(players: List<FriendData>, playerOnClick: () -> Unit = {}) {
-    MidDarkHeadline(text = "Players", size = 24)
-    Spacer(modifier = Modifier.height(4.dp))
+fun MyPlayerPlaceHolder(
+    avatarImage: Painter = painterResource(id = R.drawable.user),
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = GreenLight,
+            contentColor = BlueDark
+        ),
+        shape = RoundedCornerShape(60.dp),
+        border = BorderStroke(3.dp, GreenLight),
+        elevation = ButtonDefaults.buttonElevation(0.dp),
+        modifier = modifier
+            .height(50.dp)
     ) {
-        players.chunked(2).forEach { rowPlayers ->  // chunked to display 2 players per row
-            Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                rowPlayers.forEachIndexed { index, player ->
-                    // Determine button color based on whether the player's name is not empty
-                    val isButtonFilled = player.firstName.isNotEmpty()
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Image(
+                painter = avatarImage,
+                contentDescription = "Avatar",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(35.dp)
+                    .border(3.dp, BlueDark, CircleShape)
+                    .clip(CircleShape)
+            )
 
-                    Button(
-                        onClick = playerOnClick,  // No onClick functionality
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isButtonFilled) GreenLight else WhiteGray
-                        ),
-                        border = BorderStroke(5.dp, if (isButtonFilled) GreenLight else GreenLight),
-                        shape = RoundedCornerShape(100.dp),
-                        elevation = ButtonDefaults.buttonElevation(0.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .width(100.dp)
-                            .height(70.dp)
-                            .padding(2.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            // Use painterResource to convert the photoResId (resource ID) to a Painter
-                            AsyncImage(
-                                model = player.photo,
-                                contentDescription = "Avatar",
-                                contentScale = ContentScale.Inside,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .border(2.dp, BlueDark, CircleShape)
-                                    .clip(CircleShape)
-                                    .background(Transparent)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                           
-                            Text(
-                                text = player.firstName,
-                                fontSize = 16.sp,
-                                color = BlueDark,  // Use BlueDark for text color
-                                fontFamily = lexendFontFamily,
-                                fontWeight = if (isButtonFilled) FontWeight.Bold else FontWeight.SemiBold,
-                                maxLines = 1,
-                            )
-                        }
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Text(
+                text = "You",
+                fontSize = 16.sp,
+                color = BlueDark,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
 
 
-
-@Preview
 @Composable
-fun PlayerGridPreview(){
-    PlayersGrid(players = listOf(
-        FriendData(
-            userName = "exampleUser",
-            firstName = "John",
-            lastName = "Doe",
-            photo = "https://example.com/photo.jpg")
-        ,FriendData(
-            userName = "exampleUser",
-            firstName = "",
-            lastName = "Doe",
-            photo = "https://example.com/photo.jpg")
-        ,FriendData(
-            userName = "",
-            firstName = "John",
-            lastName = "Doe",
-            photo = "https://example.com/photo.jpg")
-        ,FriendData(
-            userName = "",
-            firstName = "John",
-            lastName = "Doe",
-            photo = "https://example.com/photo.jpg")
-    ))
+fun FriendPlaceHolder(
+    avatarImage: Painter = painterResource(id = R.drawable.plus),
+    friendName: String = "",
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (friendName.isNotEmpty()) GreenDark else WhiteGray,
+            contentColor = GreenLight
+        ),
+        shape = RoundedCornerShape(60.dp),
+        border = BorderStroke(3.dp, GreenDark),
+        elevation = ButtonDefaults.buttonElevation(0.dp),
+        modifier = modifier
+            .height(50.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.fillMaxWidth().wrapContentSize()
+        ) {
+            Text(
+                text = friendName,
+                fontSize = 14.sp,
+                color = GreenLight,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Image(
+                painter = avatarImage,
+                contentDescription = "Avatar",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(35.dp)
+                    .border(3.dp, GreenLight, CircleShape)
+                    .clip(CircleShape)
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun MyPlayerPlaceHolderPreview(){
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ){
+    MyPlayerPlaceHolder(modifier = Modifier.weight(1f))
+    FriendPlaceHolder(friendName = "",modifier = Modifier.weight(1f))}
 }
 
 
@@ -476,94 +524,137 @@ fun SearchFriendDialogPreview() {
 @Composable
 fun FriendsListDialog(
     onDismiss: () -> Unit,
-    onAdd: () -> Unit,
-    onFriendClick: (FriendData) -> Unit, // New callback for friend clicks
+    onAddFriendClick: () -> Unit,
     viewModel: VideoUploadViewModel = viewModel()
 ) {
     val friendsList by viewModel.friendsList.collectAsState()
     val isLoading by viewModel.isLoadingFriends.collectAsState()
+    val selectedFriend by viewModel.selectedFriend.collectAsState()
+    val context = LocalContext.current
+
 
     LaunchedEffect(Unit) {
         viewModel.fetchFriendsList()
     }
 
     AlertDialog(
+        modifier = Modifier.padding(vertical = 16.dp),
         containerColor = Blue,
-        titleContentColor = BlueDark,
+        titleContentColor = WhiteGray,
         textContentColor = WhiteGray,
         onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Select a Friend",
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                selectedFriend?.let { friend ->
+                    SelectedFriendPreview(friend = friend)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Divider(color = GreenLight.copy(alpha = 0.3f))
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                when {
+                    isLoading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = GreenLight)
+                        }
+                    }
+
+                    friendsList.isEmpty() -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No friends found",
+                                color = GreenLight,
+                                fontFamily = lexendFontFamily
+                            )
+                        }
+                    }
+
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.heightIn(max = 400.dp)
+                        ) {
+                            items(friendsList) { friend ->
+                                FriendListItem(
+                                    friend = friend,
+                                    isSelected = selectedFriend?.userName == friend.userName,
+                                    onClick = {
+                                        viewModel.selectFriend(friend)
+                                        // Optional: auto-dismiss on selection
+                                        // onDismiss()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
         confirmButton = {
-            Button(onClick = onAdd,
+            Button(
+                onClick = {
+                    selectedFriend?.let { onDismiss() }
+                        ?: Toast.makeText(context, "Please select a friend", Toast.LENGTH_SHORT).show()
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GreenLight,
                     contentColor = BlueDark
-                )) {
-                Text(text = "Add",
+                )
+            ) {
+                Text(
+                    text = "DONE",
                     fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.SemiBold)
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         },
         dismissButton = {
             Button(
-                onClick = onDismiss ,
-                enabled = friendsList.all { it.photo.isNotBlank() },
+                onClick = onAddFriendClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GreenDark,
                     contentColor = GreenLight)
             ) {
-                Text(text = "Close",
+                Text(
+                    text = "ADD PLAYER",
                     fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.SemiBold)
-            }
-        },
-        title = { Text(text = "Your Friends"
-            ,fontFamily = lexendFontFamily,
-            fontWeight = FontWeight.Bold,
-            color = WhiteGray)  },
-        text = {
-            when {
-                isLoading -> {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                friendsList.isEmpty() -> {
-                    Text("You don't have any friends yet.",
-                        color = GreenLight,
-                        modifier = Modifier.padding(top = 16.dp,end = 16.dp),
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.SemiBold,)
-                }
-                else -> {
-                    LazyColumn {
-                        items(friendsList) { friend ->
-                            FriendListItem(
-                                friend = friend,
-                                onClick = { onFriendClick(friend) } // Pass click to parent
-                            )
-                        }
-                    }
-                }
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     )
 }
 
 @Composable
-fun FriendListItem(
-    friend: FriendData,
-    onClick: () -> Unit
-) {
+private fun SelectedFriendPreview(friend: FriendData) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { onClick() }, // Make whole row clickable
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
             model = friend.photo,
-            contentDescription = "${friend.userName}'s profile picture",
+            contentDescription = "Selected friend",
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape),
@@ -574,18 +665,79 @@ fun FriendListItem(
 
         Column {
             Text(
-                text = "${friend.firstName} ${friend.lastName}",
+                text = friend.userName,
                 color = WhiteGray,
                 fontFamily = lexendFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "@${friend.userName}",
+                text = "${friend.firstName} ${friend.lastName}",
                 color = GreenLight,
                 fontFamily = lexendFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp)
+                fontSize = 12.sp
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun FriendListItem(
+    friend: FriendData,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) GreenLight.copy(alpha = 0.15f) else Color.Transparent
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp), // Keep padding inside the Row
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = friend.photo,
+                contentDescription = "Friend avatar",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = friend.userName,
+                    color = WhiteGray,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "${friend.firstName} ${friend.lastName}",
+                    color = GreenLight.copy(alpha = 0.85f),
+                    fontFamily = lexendFontFamily,
+                    fontSize = 12.sp
+                )
+            }
+
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Selected",
+                    tint = GreenLight,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -593,7 +745,7 @@ fun FriendListItem(
 @Preview
 @Composable
 fun FriendsListDialogPreview() {
-    FriendsListDialog(onDismiss = {}, onFriendClick = {}, onAdd = {})
+    FriendsListDialog(onDismiss = {}, onAddFriendClick = {})
 }
 
 @Preview(showBackground = true)
@@ -606,6 +758,7 @@ fun FriendListItemPreview() {
             lastName = "Doe",
             photo = "https://example.com/photo.jpg"
         ),
-        onClick = {}
+        onClick = {},
+        isSelected = false
     )
 }

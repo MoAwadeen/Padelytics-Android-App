@@ -7,13 +7,17 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,11 +34,13 @@ import coil.compose.rememberAsyncImagePainter
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.MidDarkHeadline
 import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
+import grad.project.padelytics.features.videoUpload.components.FriendPlaceHolder
 import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
-import grad.project.padelytics.features.videoUpload.components.PlayersGrid
+import grad.project.padelytics.features.videoUpload.components.MyPlayerPlaceHolder
 import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
 import grad.project.padelytics.features.videoUpload.components.VideoUploadCard
 import grad.project.padelytics.features.videoUpload.data.FriendData
@@ -47,14 +53,15 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                       viewModel: VideoUploadViewModel = viewModel())
 {
     val selectedVideo by viewModel.selectedVideoUri.collectAsState()
-    var myName by remember { mutableStateOf("You") }
-    var friendName1 by remember { mutableStateOf("") }
-    var friendName2 by remember { mutableStateOf("") }
-    var friendName3 by remember { mutableStateOf("") }
+    val selectedFriend by viewModel.selectedFriend.collectAsState()
+    val friendName = selectedFriend?.firstName ?: ""
+    val friendUserName = selectedFriend?.userName ?: ""
+    val friendPhoto = selectedFriend?.photo ?: R.drawable.plus
+    val friendProfileImage = rememberAsyncImagePainter(model = friendPhoto)
 
     val userProfile by profileViewModel.userProfile.collectAsState()
-    val photo = userProfile?.photo ?: R.drawable.user
-    val profileImage = rememberAsyncImagePainter(model = photo)
+    val userPhoto = userProfile?.photo ?: R.drawable.user
+    val profileImage = rememberAsyncImagePainter(model = userPhoto)
 
 
     var isBottomBarVisible by remember { mutableStateOf(true) }
@@ -62,7 +69,10 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showFriendsDialog by remember { mutableStateOf(false) }
-    var selectedFriend by remember { mutableStateOf<FriendData?>(null) }
+
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchUserProfile()
+    }
 
     if (showAddDialog) {
         SearchFriendDialog(
@@ -76,13 +86,10 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
     if (showFriendsDialog) {
         FriendsListDialog(
             onDismiss = { showFriendsDialog = false },
-            onAdd = { showAddDialog = true },
-            onFriendClick = { friend ->
-                selectedFriend = friend
-                Log.d("FriendSelected", "Selected: ${friend.userName}")
-            }
+            onAddFriendClick = { showAddDialog = true }
         )
     }
+
 
     Scaffold(
         modifier = Modifier,
@@ -112,7 +119,7 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                 modifier = modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                verticalArrangement = Arrangement.Top,
+                verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.Start
             ) {
                 item {
@@ -122,36 +129,30 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                         }
                     )
                     Spacer(modifier = Modifier.height(22.dp))
-                    PlayersGrid(playerOnClick = { showFriendsDialog = true },players =
-                        listOf(
-                            FriendData(
-                                userName = "exampleUser",
-                                firstName = myName,
-                                lastName = "Doe",
-                                photo = profileImage.toString()
-                            )
-                            ,FriendData(
-                                userName = "exampleUser",
-                                firstName = friendName1,
-                                lastName = "Doe",
-                                photo = profileImage.toString())
-                            ,FriendData(
-                                userName = "",
-                                firstName = friendName2,
-                                photo = profileImage.toString())
-                            ,FriendData(
-                                userName = "",
-                                firstName = friendName3,
-                                lastName = "Doe",
-                                photo = profileImage.toString())
-                        )
-                    )
+                    MidDarkHeadline("Players", size = 24)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        MyPlayerPlaceHolder(
+                            avatarImage = profileImage,
+                            modifier = Modifier.weight(0.5f,fill = true))
+
+                        FriendPlaceHolder(
+                            friendName = friendName,
+                            onClick = { showFriendsDialog = true }
+                            ,avatarImage = friendProfileImage
+                            ,modifier = Modifier.weight(0.5f,fill = true))
+                    }
 
                     Spacer(modifier = Modifier.height(22.dp))
                     CourtDropdownMenu(selectedCourt = selectedCourt ?: "",
                         onValueChange = { selectedCourt = it })
 
-                    Spacer(modifier = Modifier.height(44.dp))
+                }
+                item {
                     WideGreenButton("Analyze", onClick = {})
                 }
             }

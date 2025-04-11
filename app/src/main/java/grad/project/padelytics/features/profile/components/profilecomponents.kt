@@ -169,13 +169,15 @@ fun PreviewNumberChipsRow() {
 fun InfoRow(
     icon: Painter,
     label: String,
-    value: String? = null // Optional value
+    value: String? = null,
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 12.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
             painter = icon,

@@ -2,6 +2,9 @@ package grad.project.padelytics.features.videoUpload.viewModel
 
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -11,37 +14,34 @@ import kotlinx.coroutines.flow.StateFlow
 
 class VideoUploadViewModel : ViewModel() {
 
-    // Video selection state
     private val _selectedVideoUri = MutableStateFlow<Uri?>(null)
     val selectedVideoUri: StateFlow<Uri?> = _selectedVideoUri
 
-    // Existing friend search state
     private val _searchResult = MutableStateFlow<Pair<String, String>?>(null)
     val searchResult: StateFlow<Pair<String, String>?> = _searchResult
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    // Friends list state
     private val _friendsList = MutableStateFlow<List<FriendData>>(emptyList())
     val friendsList: StateFlow<List<FriendData>> = _friendsList
 
     private val _isLoadingFriends = MutableStateFlow(false)
     val isLoadingFriends: StateFlow<Boolean> = _isLoadingFriends
 
+    private val _selectedFriend = MutableStateFlow<FriendData?>(null)
+    val selectedFriend: StateFlow<FriendData?> = _selectedFriend
+
     private val firestore = FirebaseFirestore.getInstance()
 
-    // Video selection handler
     fun setSelectedVideo(uri: Uri) {
         _selectedVideoUri.value = uri
     }
 
-    // Clear selected video
     fun clearSelectedVideo() {
         _selectedVideoUri.value = null
     }
 
-    // Existing friend search function
     fun searchUsername(username: String) {
         _isLoading.value = true
         firestore.collection("users")
@@ -64,7 +64,6 @@ class VideoUploadViewModel : ViewModel() {
             }
     }
 
-    // Existing friend management functions
     fun clearResult() {
         _searchResult.value = null
     }
@@ -129,5 +128,14 @@ class VideoUploadViewModel : ViewModel() {
                 _isLoadingFriends.value = false
                 Log.e("FriendsFetch", "Error fetching friends", it)
             }
+    }
+
+    fun selectFriend(friend: FriendData) {
+        _selectedFriend.value = friend
+        Log.d("VideoUploadVM", "Friend selected: ${friend.userName}")
+    }
+
+    fun clearSelectedFriend() {
+        _selectedFriend.value = null
     }
 }

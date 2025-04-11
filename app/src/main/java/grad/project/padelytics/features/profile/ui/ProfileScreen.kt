@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.profile.ui
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import grad.project.padelytics.appComponents.MidDarkHeadline
 import grad.project.padelytics.features.profile.components.*
+import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
@@ -61,6 +63,8 @@ fun ProfileScreen(
     val city = userProfile?.city.orEmpty()
     val rewardPoints = userProfile?.rewardPoints ?: 0
 
+    var showAddDialog by remember { mutableStateOf(false) }
+
 
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -72,6 +76,15 @@ fun ProfileScreen(
 
     fun selectImage() {
         pickImageLauncher.launch("image/*")
+    }
+
+    if (showAddDialog) {
+        SearchFriendDialog(
+            onDismiss = { showAddDialog = false },
+            onUserFound = { username ->
+                Log.d("FriendSearch", "Found user: $username")
+            }
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -134,7 +147,7 @@ fun ProfileScreen(
             item {
                 Column(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     InfoRow(
                         icon = painterResource(id = R.drawable.reward),
@@ -166,7 +179,8 @@ fun ProfileScreen(
 
                     InfoRow(
                         icon = painterResource(id = R.drawable.add_user),
-                        label = "Invite Friends"
+                        label = "Add Friends",
+                        onClick = { showAddDialog = true }
                     )
 
                     InfoRow(
@@ -174,12 +188,13 @@ fun ProfileScreen(
                         label = "About Us"
                     )
 
-                    LogoutButton{
-                        authViewModel.logout(navController)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
+            }
+            item {
+                Box(modifier = Modifier.padding(horizontal = 24.dp)){
+                LogoutButton{
+                    authViewModel.logout(navController)
+                }}
             }
         }
     }
