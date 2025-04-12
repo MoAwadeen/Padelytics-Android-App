@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -43,7 +42,6 @@ import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
 import grad.project.padelytics.features.videoUpload.components.MyPlayerPlaceHolder
 import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
 import grad.project.padelytics.features.videoUpload.components.VideoUploadCard
-import grad.project.padelytics.features.videoUpload.data.FriendData
 import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
 
 @Composable
