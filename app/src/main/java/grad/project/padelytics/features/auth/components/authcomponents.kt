@@ -209,16 +209,17 @@ fun GoogleSignInButtonPreview() {
 fun OutlinedTextFieldName(
     label: String,
     userinput: String,
-    onValueChange: (String) -> Unit
+    modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit,
 ) {
     val isError = userinput.isNotEmpty() && userinput.trim().length < 2
 
     OutlinedTextField(
+        modifier = modifier,
         value = userinput,
         onValueChange = onValueChange,
         label = { Text(label, fontFamily = lexendFontFamily) },
         singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
         isError = isError,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = if (isError) Color.Red else GreenLight,
@@ -240,7 +241,7 @@ fun OutlinedTextFieldName(
 @Preview
 @Composable
 fun OutlinedTextFieldNamePreview(){
-    OutlinedTextFieldName("First Name","",{})}
+    OutlinedTextFieldName("First Name", "", modifier = Modifier.fillMaxWidth(),{})}
 
 @Composable
 fun OutlinedTextFieldEmail(
