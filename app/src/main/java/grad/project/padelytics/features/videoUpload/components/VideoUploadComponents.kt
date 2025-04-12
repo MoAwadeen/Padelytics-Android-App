@@ -447,7 +447,7 @@ fun SearchFriendDialog(
                     contentColor = BlueDark
                 )
             ) {
-                Text(text = "Search",
+                Text(text = "ADD",
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.SemiBold)
             }
@@ -459,7 +459,7 @@ fun SearchFriendDialog(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GreenDark,
                     contentColor = GreenLight)) {
-                Text(text = "Cancel",
+                Text(text = "CANCEL",
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.SemiBold)
             }
@@ -665,7 +665,7 @@ private fun SelectedFriendPreview(friend: FriendData) {
 
         Column {
             Text(
-                text = friend.userName,
+                text = "@${friend.userName}",
                 color = WhiteGray,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.SemiBold
@@ -717,7 +717,7 @@ private fun FriendListItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = friend.userName,
+                    text = "@${friend.userName}",
                     color = WhiteGray,
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.SemiBold

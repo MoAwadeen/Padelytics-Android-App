@@ -39,6 +39,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         viewModelScope.launch {
             try {
+
                 val authResult = auth.createUserWithEmailAndPassword(email, password).await()
                 val userId = authResult.user?.uid ?: throw Exception("User creation failed")
 
@@ -197,4 +198,63 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun updateUsername(newUsername: String, onResult: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: run {
+            onResult(false, "User not logged in")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+
+                val existingUsers = firestore.collection("users")
+                    .whereEqualTo("userName", newUsername)
+                    .get()
+                    .await()
+
+                val usernameTaken = existingUsers.any { it.id != userId }
+
+                if (usernameTaken) {
+                    onResult(false, "Username is already taken")
+                    return@launch
+                }
+
+                firestore.collection("users")
+                    .document(userId)
+                    .update("userName", newUsername)
+                    .await()
+                onResult(true, null)
+
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Failed to update username", e)
+                onResult(false, e.message ?: "Failed to update username")
+            }
+        }
+    }
+
+    fun checkUsernameAvailable(
+        username: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val existingUsers = firestore.collection("users")
+                    .whereEqualTo("userName", username) // Make sure this matches your Firestore field
+                    .get()
+                    .await()
+
+                if (existingUsers.isEmpty) {
+                    onResult(true, null)
+                } else {
+                    onResult(false, "Username is already taken")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "checkUsernameAvailable failed", e)
+                onResult(false, "Failed to check username availability")
+            }
+        }
+    }
+
+
 }

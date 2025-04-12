@@ -11,4 +11,5 @@ object Routes {
     const val TOURNAMENTS = "TOURNAMENTS"
     const val TOURNAMENT_DETAILS = "TOURNAMENT_DETAILS/{tournamentId}"
     const val VIDEO_UPLOAD = "VIDEO_UPLOAD"
+    const val USERNAME_UPDATE = "USERNAME_UPDATE"
 }

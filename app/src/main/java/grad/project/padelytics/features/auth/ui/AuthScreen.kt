@@ -70,7 +70,7 @@ fun AuthScreen(
                                 popUpTo("auth") { inclusive = true }
                             }
                         } else {
-                            navController.navigate(Routes.SECOND_SIGNUP) {
+                            navController.navigate(Routes.USERNAME_UPDATE) {
                                 popUpTo("auth") { inclusive = true }
                             }
                         }

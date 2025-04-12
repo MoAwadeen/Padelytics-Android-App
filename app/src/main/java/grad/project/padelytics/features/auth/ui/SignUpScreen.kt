@@ -1,6 +1,5 @@
 package grad.project.padelytics.features.auth.ui
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -91,28 +90,41 @@ fun SignUpScreen(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     SmallGreenButton("Continue") {
-                        if (password == confirmPassword) {
-                            authViewModel.signup(
-                                email,
-                                password,
-                                firstName,
-                                lastName,
-                                username,
-                                photo
-                            ) { success, message ->
-                                if (success) {
-                                    navController.navigate(Routes.SECOND_SIGNUP)
-                                } else {
-                                    AppUtils.showToast(
-                                        context,
-                                        message ?: "Something went wrong"
-                                    )
-                                }
-                            }
-                        } else {
+                        if (password != confirmPassword) {
                             AppUtils.showToast(context, "Passwords do not match")
+                            return@SmallGreenButton
+                        }
+
+                        if (username.isBlank()) {
+                            AppUtils.showToast(context, "Username cannot be empty")
+                            return@SmallGreenButton
+                        }
+
+                        authViewModel.checkUsernameAvailable(username) { isAvailable, errorMsg ->
+                            if (isAvailable) {
+                                authViewModel.signup(
+                                    email,
+                                    password,
+                                    firstName,
+                                    lastName,
+                                    username,
+                                    photo
+                                ) { success, message ->
+                                    if (success) {
+                                        navController.navigate(Routes.SECOND_SIGNUP)
+                                    } else {
+                                        AppUtils.showToast(
+                                            context,
+                                            message ?: "Something went wrong"
+                                        )
+                                    }
+                                }
+                            } else {
+                                AppUtils.showToast(context, errorMsg ?: "Username is already taken")
+                            }
                         }
                     }
+
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
