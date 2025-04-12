@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import grad.project.padelytics.features.auth.components.UpdateUsernameDialog
+import grad.project.padelytics.features.auth.components.UsernameUpdateScreen
 import grad.project.padelytics.features.auth.ui.AuthScreen
 import grad.project.padelytics.features.auth.ui.LoginScreen
 import grad.project.padelytics.features.auth.ui.SignUpScreen
@@ -58,6 +60,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
         composable(Routes.VIDEO_UPLOAD) {
             VideoUploadScreen(modifier,navController)
+        }
+        composable(Routes.USERNAME_UPDATE) {
+            UsernameUpdateScreen(navController = navController)
         }
 
     }

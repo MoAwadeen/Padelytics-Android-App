@@ -4,11 +4,14 @@ import android.app.DatePickerDialog
 import android.icu.util.Calendar
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -28,10 +32,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +56,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidWhiteHeadline
+import grad.project.padelytics.features.auth.viewModel.AuthViewModel
+import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
+import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
@@ -392,7 +403,7 @@ fun CityDropdownMenu(
     ) {
         OutlinedTextField(
             value = selectedCity,
-            onValueChange = {}, // Empty because we're using readOnly=true
+            onValueChange = {},
             readOnly = true,
             modifier = Modifier
                 .menuAnchor()
@@ -536,5 +547,156 @@ fun IconLineRowPreview() {
     IconLineRow(iconId = R.drawable.gender, title = "What’s your gender?")
 }
 
+@Composable
+fun UpdateUsernameDialog(
+    onDismiss: () -> Unit? = {},
+    viewModel: AuthViewModel = viewModel(),
+    navController: NavHostController
+) {
+    val context = LocalContext.current
+    var username by remember { mutableStateOf("") }
+    var isUpdating by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    AlertDialog(
+        containerColor = Blue,
+        titleContentColor = BlueDark,
+        textContentColor = GreenLight,
+        onDismissRequest = {
+            if (!isUpdating) {
+                errorMessage = null
+                onDismiss()
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    isUpdating = true
+                    viewModel.updateUsername(username) { success, error ->
+                        isUpdating = false
+                        if (success) {
+                            navController.navigate(Routes.SECOND_SIGNUP) {
+                                popUpTo("auth") { inclusive = true }
+                            }
+                        } else {
+                            errorMessage = error ?: "Update failed"
+                        }
+                    }
+                },
+                enabled = username.isNotBlank() && !isUpdating,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GreenLight,
+                    contentColor = BlueDark
+                )
+            ) {
+                Text(
+                    text = if (isUpdating) "UPDATING..." else "CONFIRM",
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = {
+                    if (!isUpdating) {
+                        errorMessage = null
+                        onDismiss()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GreenDark,
+                    contentColor = GreenLight
+                )
+            ) {
+                Text(
+                    text = "CANCEL",
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        },
+        title = {
+            Text(
+                text = "Choose Username",
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = WhiteGray
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = GreenLight,
+                        unfocusedBorderColor = BlueDark,
+                        cursorColor = GreenLight,
+                        focusedLabelColor = GreenLight,
+                        unfocusedLabelColor = GreenLight,
+                        errorBorderColor = Color.Red,
+                        errorCursorColor = Color.Red,
+                        errorLabelColor = Color.Red,
+                        disabledTextColor = WhiteGray,
+                        focusedTextColor = WhiteGray,
+                        unfocusedTextColor = WhiteGray,
+                        errorTextColor = GreenDark
+                    )
+                )
+
+                if (isUpdating) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.padding(16.dp),
+                        color = GreenLight,
+                        trackColor = BlueDark
+                    )
+                }
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = GreenDark,
+                        modifier = Modifier.padding(top = 16.dp),
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun UsernameUpdateScreen(
+    navController: NavHostController,
+    viewModel: AuthViewModel = viewModel()
+) {
+    var showDialog by remember { mutableStateOf(true) }
+
+    if (showDialog) {
+        UpdateUsernameDialog(
+            onDismiss = { showDialog = false },
+            viewModel = viewModel,
+            navController = navController
+        )
+    } else {
+        LaunchedEffect(Unit) {
+            navController.navigate(Routes.AUTH) {
+                popUpTo(Routes.AUTH) { inclusive = true }
+            }
+        }
+    }
+    Box(modifier = Modifier.fillMaxSize().background(Blue))
+}
+
+
+@Preview
+@Composable
+fun UpdateUsernameDialogPreview() {
+    UpdateUsernameDialog( onDismiss = {}, navController = NavHostController(LocalContext.current))
+}
 
