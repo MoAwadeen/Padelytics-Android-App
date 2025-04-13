@@ -16,6 +16,8 @@ import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.favorite.ui.FavoriteScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
+import grad.project.padelytics.features.shop.ui.ShopItemDetailsScreen
+import grad.project.padelytics.features.shop.ui.ShopScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentDetailsScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
 import grad.project.padelytics.features.videoUpload.ui.VideoUploadScreen
@@ -59,6 +61,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.VIDEO_UPLOAD) {
             VideoUploadScreen(modifier,navController)
         }
-
+        composable(Routes.SHOP) {
+            ShopScreen(modifier,navController)
+        }
+        composable(Routes.SHOP_ITEM_DETAILS) {
+            ShopItemDetailsScreen(modifier,navController)
+        }
     }
 }

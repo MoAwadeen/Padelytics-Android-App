@@ -1,45 +1,47 @@
-package grad.project.padelytics.features.tournaments.ui
+package grad.project.padelytics.features.shop.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
-import grad.project.padelytics.features.tournaments.components.TournamentAppToolbar
-import grad.project.padelytics.features.tournaments.components.TournamentDetails
-import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
+import grad.project.padelytics.features.shop.components.ShopHeaders
+import grad.project.padelytics.features.shop.components.ShopProduct
+import grad.project.padelytics.features.shop.viewModel.ShopViewModel
 
 @Composable
-fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHostController, tournamentId: String?) {
-    val viewModel: TournamentsViewModel = viewModel()
-    val tournament by viewModel.getTournamentById(tournamentId).collectAsState(initial = null)
+fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, viewModel: ShopViewModel = viewModel()) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
@@ -60,17 +62,9 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchTournament()
-    }
-
-    Scaffold(
-        modifier = Modifier.nestedScroll(nestedScrollConnection),
+    Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection),
         topBar = {
-            TournamentAppToolbar(
-                navController,
-                tournamentName = tournament?.tournamentName ?: "Tournament Name"
-            )
+            AppToolbar(toolbarTitle = "Shop")
         },
         bottomBar = {
             AnimatedVisibility(
@@ -84,36 +78,49 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
                     animationSpec = tween(durationMillis = 300)
                 )
             ) {
-                BottomAppBar(navController, navController.currentBackStackEntry?.destination?.route)
+                BottomAppBar(navController, currentRoute)
             }
         }
     ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .background(color = Color.White)
                 .padding(innerPadding)
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures { _, dragAmount ->
-                        if (dragAmount > 0) {
-                            isBottomBarVisible = true
-                        } else if (dragAmount < 0) {
-                            isBottomBarVisible = false
-                        }
-                    }
-                }
+                .padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
-                if (tournament != null) {
-                    TournamentDetails(tournament = tournament!!)
-                } else {
-                    Text(
-                        text = "Loading...",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    )
+                Spacer(modifier = Modifier.height(14.dp))
+
+                ShopHeaders(
+                    viewModel = viewModel,
+                    selectedCategory = viewModel.selectedCategory.value,
+                    selectedBrand = viewModel.selectedBrand.value,
+                    selectedSorting = viewModel.selectedSorting.value
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+
+            items(viewModel.products.value) { product ->
+                product.delivery?.let {
+                    product.product_star_rating?.let { it1 ->
+                        ShopProduct(
+                            viewModel = viewModel,
+                            productId = product.asin,
+                            productImage = product.product_photo,
+                            productName = product.product_title,
+                            productRating = it1,
+                            productNumRating = product.product_num_ratings.toString(),
+                            productDelivery = it,
+                            productPrice = product.product_price,
+                            productUrl = product.product_url
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }
@@ -121,6 +128,6 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
 
 @Preview(showBackground = true)
 @Composable
-fun TournamentDetailsScreenPreview() {
-    TournamentDetailsScreen(navController = rememberNavController(), tournamentId = "tournament1")
+fun ShopScreenPreview() {
+    ShopScreen(navController = rememberNavController())
 }
