@@ -17,7 +17,7 @@ data class Product(
     val product_num_ratings: Int?,
     val product_url: String,
     val product_photo: String,
-    val product_num_offers: Int,
+    val product_num_offers: Int?,
     val product_minimum_offer_price: String,
     val is_best_seller: Boolean,
     val is_amazon_choice: Boolean,

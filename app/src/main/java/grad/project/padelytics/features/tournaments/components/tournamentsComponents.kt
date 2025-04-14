@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -62,6 +64,7 @@ import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
+import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
@@ -202,6 +205,67 @@ fun TournamentAppToolbarPreview(){
 fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = viewModel()) {
     val context = LocalContext.current
     var isFavorite by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(text = "Remove from favorites",
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    ) )
+            },
+            text = {
+                Text(text = "Are you sure you want to remove this tournament from your favorites?",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Blue
+                    ))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        viewModel.removeFavoriteTournament(tournament.id) { success ->
+                            if (success) {
+                                isFavorite = false
+                                Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Failed to remove", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                ) {
+                    Text(text = "Yes",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            color = GreenDark
+                        ))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDialog = false }
+                ) {
+                    Text(text = "No",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            color = GreenLight
+                        ))
+                }
+            }
+        )
+    }
 
     LaunchedEffect(tournament.id) {
         viewModel.checkIfFavorite(tournament.id) { result ->
@@ -268,16 +332,9 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
                     IconButton(
                         onClick = {
                             if (isFavorite) {
-                                viewModel.removeFavoriteTournament(tournament.id) { success ->
-                                    if (success) {
-                                        isFavorite = false
-                                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        Toast.makeText(context, "Failed to remove", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                                showDialog = true
                             } else {
-                                viewModel.saveFavoriteTournament(tournament.id) { success ->
+                                viewModel.saveFavoriteTournament(tournament) { success ->
                                     if (success) {
                                         isFavorite = true
                                         Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()

@@ -1,8 +1,8 @@
 package grad.project.padelytics.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +16,7 @@ import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.favorite.ui.FavoriteScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
-import grad.project.padelytics.features.shop.ui.ShopItemDetailsScreen
+import grad.project.padelytics.features.shop.ui.ProductDetailsScreen
 import grad.project.padelytics.features.shop.ui.ShopScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentDetailsScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
@@ -64,8 +64,8 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.SHOP) {
             ShopScreen(modifier,navController)
         }
-        composable(Routes.SHOP_ITEM_DETAILS) {
-            ShopItemDetailsScreen(modifier,navController)
+        composable(Routes.PRODUCT_DETAILS) {
+            ProductDetailsScreen(modifier,navController)
         }
     }
 }

@@ -61,7 +61,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
     }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchTournament()
+        viewModel.getTournamentById(tournamentId)
     }
 
     Scaffold(

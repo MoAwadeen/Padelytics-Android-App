@@ -1,5 +1,8 @@
 package grad.project.padelytics.features.shop.components
 
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,22 +12,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +50,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -49,11 +58,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import grad.project.padelytics.R
+import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.features.shop.viewModel.ShopViewModel
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
+import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.lexendFontFamily
 import kotlinx.coroutines.launch
@@ -151,7 +163,7 @@ fun ShopHeaders(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(70.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
@@ -199,7 +211,6 @@ fun ShopHeaders(
 
         Column(
             modifier = Modifier
-                .align(Alignment.CenterVertically)
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -386,9 +397,78 @@ fun ShopProduct(
     productNumRating: String,
     productPrice: String,
     productDelivery: String,
-    productUrl: String
+    productUrl: String,
+    onClick: () -> Unit
 ) {
     var isFavorite by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var showRemoveDialog by remember { mutableStateOf(false) }
+
+    if (showRemoveDialog) {
+        AlertDialog(
+            onDismissRequest = { showRemoveDialog = false },
+            title = {
+                Text(
+                    text = "Remove from favorites",
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    )
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to remove this product from your favorites?",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Blue
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRemoveDialog = false
+                        viewModel.removeFavoriteProduct(productId) { success ->
+                            if (success) {
+                                isFavorite = false
+                                Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Failed to remove", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                ) {
+                    Text(
+                        text = "Yes",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            color = GreenDark
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRemoveDialog = false }) {
+                    Text(
+                        text = "No",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            color = GreenLight
+                        )
+                    )
+                }
+            }
+        )
+    }
 
     LaunchedEffect(productId) {
         viewModel.checkIfFavorite(productId) { result ->
@@ -409,7 +489,10 @@ fun ShopProduct(
     }
 
     Box(modifier = Modifier.fillMaxWidth().height(110.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth()
+            .clickable { onClick() },
+            verticalAlignment = Alignment.CenterVertically,
+            ) {
             Box(
                 modifier = Modifier
                     .width(110.dp)
@@ -444,7 +527,7 @@ fun ShopProduct(
             Spacer(modifier = Modifier.width(4.dp))
 
             Column(
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier.weight(1f).fillMaxHeight().padding(start = 2.dp, top = 4.dp, bottom = 4.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -500,20 +583,6 @@ fun ShopProduct(
                 Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
-                    text = productDelivery,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        color = BlueDark
-                    ),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
                     text = productPrice,
                     style = TextStyle(
                         fontSize = 14.sp,
@@ -539,11 +608,7 @@ fun ShopProduct(
                     IconButton(
                         onClick = {
                             if (isFavorite) {
-                                viewModel.removeFavoriteProduct(productId) { success ->
-                                    if (success) {
-                                        isFavorite = false
-                                    }
-                                }
+                                showRemoveDialog = true
                             } else {
                                 viewModel.saveFavoriteProduct(
                                     productId,
@@ -552,10 +617,13 @@ fun ShopProduct(
                                     productImage,
                                     productUrl,
                                     productRating,
-                                    productNumRating,
+                                    productNumRating
                                 ) { success ->
                                     if (success) {
                                         isFavorite = true
+                                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Failed to add", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
@@ -587,6 +655,337 @@ fun ShopProductPreview(){
         productNumRating = "200",
         productDelivery = "Free Delivery",
         productPrice = "1000 EGP",
-        productUrl = ""
+        productUrl = "",
+        onClick = {}
     )
+}
+
+@Composable
+fun ProductDetails(
+    viewModel: ShopViewModel,
+    productId: String,
+    productImage: String,
+    productName: String,
+    productRating: String,
+    productNumRating: String,
+    productPrice: String,
+    productDelivery: String,
+    productUrl: String,
+    productOffers: String,
+    userCity : String
+){
+    val context = LocalContext.current
+    var isFavorite by remember { mutableStateOf(false) }
+    var showRemoveDialog by remember { mutableStateOf(false) }
+
+    if (showRemoveDialog) {
+        AlertDialog(
+            onDismissRequest = { showRemoveDialog = false },
+            title = {
+                Text(
+                    text = "Remove from favorites",
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    )
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to remove this product from your favorites?",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Blue
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRemoveDialog = false
+                        viewModel.removeFavoriteProduct(productId) { success ->
+                            if (success) {
+                                isFavorite = false
+                                Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Failed to remove", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                ) {
+                    Text(
+                        text = "Yes",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            color = GreenDark
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRemoveDialog = false }) {
+                    Text(
+                        text = "No",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            color = GreenLight
+                        )
+                    )
+                }
+            }
+        )
+    }
+
+    LaunchedEffect(productId) {
+        viewModel.checkIfFavorite(productId) { result ->
+            isFavorite = result
+        }
+    }
+
+    val ratingValue = productRating.toFloatOrNull() ?: 0f
+    val starImages = List(5) { index ->
+        val fullStars = ratingValue.toInt()
+        val hasHalfStar = ratingValue - fullStars >= 0.5f
+
+        when {
+            index < fullStars -> R.drawable.rating
+            index == fullStars && hasHalfStar -> R.drawable.rating
+            else -> R.drawable.no_rating
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(262.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(202.dp)
+                        .height(262.dp)
+                        .background(color = Color.White)
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .width(200.dp)
+                            .height(240.dp)
+                            .clip(RoundedCornerShape(20.dp)),
+                        model = productImage,
+                        contentDescription = "Product Image",
+                        contentScale = ContentScale.Fit,
+                        alignment = Alignment.Center
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .width(32.dp)
+                        .height(32.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .shadow(
+                            elevation = 0.5.dp,
+                            shape = RoundedCornerShape(10.dp),
+                            spotColor = Color.Gray.copy(alpha = 0.001f)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = {
+                            if (isFavorite) {
+                                showRemoveDialog = true
+                            } else {
+                                viewModel.saveFavoriteProduct(
+                                    productId,
+                                    productName,
+                                    productPrice,
+                                    productImage,
+                                    productUrl,
+                                    productRating,
+                                    productNumRating
+                                ) { success ->
+                                    if (success) {
+                                        isFavorite = true
+                                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Failed to add", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        },
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(
+                                if (isFavorite) R.drawable.fav_selected else R.drawable.fav_unselected
+                            ),
+                            contentDescription = "Favorite",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        Text(
+            text = productName,
+            modifier = Modifier.fillMaxWidth(),
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                color = BlueDark
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Text(
+            text = "Price : $productPrice",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 15.dp, bottom = 15.dp),
+            style = TextStyle(
+                fontSize = 22.sp,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.Normal,
+                color = Blue
+            )
+        )
+
+        Text(
+            text = "Delivery : $productDelivery",
+            modifier = Modifier.fillMaxWidth(),
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.Normal,
+                color = Blue
+            )
+        )
+
+        Row(
+            modifier = Modifier.padding(top = 15.dp, bottom = 15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Rating : $productRating",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    color = Blue
+                ),
+                modifier = Modifier.padding(end = 2.dp)
+            )
+
+            starImages.forEach { starImage ->
+                Image(
+                    painter = painterResource(starImage),
+                    contentDescription = "Star Rating",
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            val ratingNum = if (productNumRating == "") "" else "($productNumRating)"
+
+            Text(
+                text = ratingNum,
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    color = Blue
+                )
+            )
+        }
+
+        Text(
+            text = "Number of offers : $productOffers",
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.Normal,
+                color = Blue
+            )
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 15.dp, bottom = 40.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier
+                    .width(30.dp)
+                    .height(30.dp)
+                    .padding(end = 5.dp),
+                painter = painterResource(R.drawable.location),
+                contentDescription = "Location",
+                tint = Blue
+            )
+
+            Text(
+                text = "$userCity - Egypt",
+                modifier = Modifier.fillMaxWidth(),
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = BlueDark
+                )
+            )
+        }
+
+        WideGreenButton(
+            label = "Order Now",
+            onClick = {
+                productUrl.let { url ->
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e("ProductDetails", "Error opening URL: $url", e)
+                        Toast.makeText(context, "Failed to open link", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ProductDetailsPreview(){
+    ProductDetails(
+        ShopViewModel(),
+        productId = "1",
+        productImage = "",
+        productName = "productName",
+        productRating = "4.5",
+        productNumRating = "200",
+        productPrice = "1000 EGP",
+        productDelivery = "Free Delivery",
+        productUrl = "",
+        productOffers = "1",
+        userCity = "City"
+        )
 }

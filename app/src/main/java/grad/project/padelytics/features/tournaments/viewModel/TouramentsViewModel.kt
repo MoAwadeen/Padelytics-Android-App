@@ -50,11 +50,10 @@ class TournamentsViewModel : ViewModel() {
 
     fun getTournamentById(tournamentId: String?): Flow<Tournament?> = flow {
         if (tournamentId != null) {
-            val documentId = "tournament$tournamentId"
             try {
-                Log.d("TournamentsViewModel", "Fetching document: $documentId")
+                Log.d("TournamentsViewModel", "Fetching document: $tournamentId")
                 val snapshot = db.collection("tournaments")
-                    .document(documentId)
+                    .document(tournamentId)
                     .get()
                     .await()
 
@@ -72,34 +71,22 @@ class TournamentsViewModel : ViewModel() {
         }
     }.flowOn(Dispatchers.IO)
 
-    fun fetchTournament() {
-        viewModelScope.launch {
-            firestore.collection("tournaments")
-                .get()
-                .addOnSuccessListener { result ->
-                    val tournamentList = result.map { document ->
-                        Log.d("TournamentsViewModel", "Found document: ${document.id}")
-                        document.toObject(Tournament::class.java).copy(id = document.id)
-                    }
-                    _tournaments.value = tournamentList
-                }
-                .addOnFailureListener { e ->
-                    Log.e("TournamentsViewModel", "Error fetching tournaments", e)
-                }
-        }
-    }
-
-    fun saveFavoriteTournament(tournamentId: String, onComplete: (Boolean) -> Unit) {
+    fun saveFavoriteTournament(tournament: Tournament, onComplete: (Boolean) -> Unit) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
             val db = FirebaseFirestore.getInstance()
             val favoriteTournamentRef = db.collection("users")
                 .document(userId)
                 .collection("favoriteTournaments")
-                .document(tournamentId)
+                .document(tournament.id)
 
             val favoriteData = hashMapOf(
-                "tournamentId" to tournamentId
+                "id" to tournament.id,
+                "tournamentName" to tournament.tournamentName,
+                "image" to tournament.image,
+                "prize" to tournament.prize,
+                "location" to tournament.location,
+                "url" to tournament.url
             )
 
             favoriteTournamentRef.set(favoriteData)
