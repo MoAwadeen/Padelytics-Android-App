@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.features.home.components.FeatureList
 import grad.project.padelytics.features.home.components.HomeAppToolbar
+import grad.project.padelytics.features.home.components.Spotlight
 import grad.project.padelytics.features.home.viewModel.HomeViewModel
 
 @Composable
@@ -93,6 +94,10 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
         ) {
             item {
                 FeatureList(navController)
+            }
+
+            item{
+                Spotlight()
             }
         }
 
