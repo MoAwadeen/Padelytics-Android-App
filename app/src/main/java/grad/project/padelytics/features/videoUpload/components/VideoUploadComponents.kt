@@ -128,7 +128,6 @@ fun VideoUploadCard(
                 }
             }
             else -> {
-                // Show upload button
                 Image(
                     painter = painterResource(id = R.drawable.upload_video),
                     contentDescription = "Upload video",
@@ -139,6 +138,7 @@ fun VideoUploadCard(
         }
     }
 }
+
 
 @Composable
 fun VideoThumbnail(
