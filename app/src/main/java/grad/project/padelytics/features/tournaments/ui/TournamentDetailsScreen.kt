@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.tournaments.components.TournamentAppToolbar
 import grad.project.padelytics.features.tournaments.components.TournamentDetails
 import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
@@ -65,7 +66,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(nestedScrollConnection),
+        modifier = Modifier.nestedScroll(nestedScrollConnection).fillMaxSize(),
         topBar = {
             TournamentAppToolbar(
                 navController,
@@ -107,12 +108,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
                 if (tournament != null) {
                     TournamentDetails(tournament = tournament!!)
                 } else {
-                    Text(
-                        text = "Loading...",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    )
+                    FetchingIndicator(isFetching = true)
                 }
             }
         }

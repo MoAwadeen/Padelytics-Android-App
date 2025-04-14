@@ -457,7 +457,7 @@ fun CityDropdownMenuPreview() {
         })
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun DateInputField(
     selectedDate: String,          
@@ -473,7 +473,7 @@ fun DateInputField(
         { _, year, month, dayOfMonth ->
             val newDate = Calendar.getInstance()
             newDate.set(year, month, dayOfMonth)
-            onValueChange(dateFormatter.format(newDate.time)) // Notify parent of the change
+            onValueChange(dateFormatter.format(newDate.time))
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
@@ -511,6 +511,7 @@ fun DateInputField(
         }
     )
 }
+
 
 @Preview
 @Composable

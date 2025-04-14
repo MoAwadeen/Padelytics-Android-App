@@ -1,6 +1,7 @@
 package grad.project.padelytics.appComponents
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,6 +44,8 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.ui.draw.clip
+import com.airbnb.lottie.compose.*
 
 @Composable
 fun MidWhiteHeadline(text: String,size: Int,){
@@ -303,4 +306,53 @@ fun DetailsAppToolbar(onClick: () -> Unit, itemName: String) {
 @Composable
 fun DetailsAppToolbarPreview(){
     DetailsAppToolbar(onClick = {}, itemName = "item Name")
+}
+
+
+@Composable
+fun FetchingIndicator(
+    modifier: Modifier = Modifier,
+    isFetching: Boolean
+) {
+    if (isFetching) {
+        val composition by rememberLottieComposition(
+            LottieCompositionSpec.Asset("loading.json")
+        )
+
+        val progress by animateLottieCompositionAsState(
+            composition,
+            iterations = LottieConstants.IterateForever
+        )
+
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.loading_bg), // <- your vector file
+                    contentDescription = null,
+                    modifier = Modifier
+                        .matchParentSize()
+                )
+
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier
+                        .matchParentSize()
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun FetchingPreview(){
+    FetchingIndicator(isFetching = true)
 }

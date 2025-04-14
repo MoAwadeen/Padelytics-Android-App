@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.home.components
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import grad.project.padelytics.R
 import grad.project.padelytics.features.videoUpload.components.VideoThumbnail
@@ -102,8 +104,8 @@ fun FeatureList(navController: NavController) {
         Feature(R.drawable.video, "Upload\nVideo", Routes.VIDEO_UPLOAD),
         Feature(R.drawable.previousresults, "Previous\nResults", Routes.HOME),
         Feature(R.drawable.court, "Court\nBooking", Routes.HOME),
-        Feature(R.drawable.shop, "Shop", Routes.SHOP),
-        Feature(R.drawable.tournament, "Tournaments", Routes.TOURNAMENTS)
+        Feature(R.drawable.tournament, "Tournaments", Routes.TOURNAMENTS),
+        Feature(R.drawable.shop, "Shop", Routes.SHOP)
     )
 
     LazyRow(
@@ -122,16 +124,16 @@ fun FeatureList(navController: NavController) {
 fun FeatureItem(feature: Feature,navController: NavController) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(96.dp),
+        modifier = Modifier.width(100.dp),
     ) {
         Card(modifier = Modifier
-            .width(80.dp),
+            .width(90.dp),
             shape = RoundedCornerShape(12.dp),) {
         Image(
             painter = painterResource(id = feature.imageRes),
             contentDescription = feature.title,
             modifier = Modifier
-                .size(80.dp)
+                .size(90.dp)
                 .clickable {navController.navigate(feature.route)},
             contentScale = ContentScale.FillHeight,
 
@@ -143,7 +145,7 @@ fun FeatureItem(feature: Feature,navController: NavController) {
             text = feature.title,
             fontSize = 14.sp,
             fontFamily = lexendFontFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
             color = BlueDark
@@ -162,6 +164,9 @@ data class Feature(
 fun Spotlight(
     modifier: Modifier = Modifier.fillMaxWidth(),
 ) {
+    val url = "https://www.instagram.com/p/DFBSQymNMXH/?hl=en"
+    val context = LocalContext.current
+
     Box(
         modifier = modifier
             .fillMaxWidth(),
@@ -171,7 +176,14 @@ fun Spotlight(
             painter = painterResource(id = R.drawable.spotlightwithad),
             contentDescription = "Upload video",
             contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize(1f)
+            modifier = Modifier
+                .fillMaxSize(1f)
+                .clickable(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        context.startActivity(intent)
+                    }
+                )
         )
     }
 }

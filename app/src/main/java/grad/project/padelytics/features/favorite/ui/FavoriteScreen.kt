@@ -19,6 +19,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
@@ -38,15 +39,7 @@ fun FavoriteScreen(modifier: Modifier = Modifier,navController: NavHostControlle
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Welcome to Padelytics",
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
-                )
-            )
+            FetchingIndicator(isFetching = true)
         }
     }
 }
