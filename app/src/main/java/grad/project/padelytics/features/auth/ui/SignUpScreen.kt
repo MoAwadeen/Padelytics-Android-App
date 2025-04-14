@@ -52,15 +52,20 @@ fun SignUpScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                OutlinedTextFieldName("First Name", firstName) { firstName = it }
+                Row( modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically)
+                {
+                    OutlinedTextFieldName("First Name", firstName, modifier = Modifier.weight(1f)) { firstName = it }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    OutlinedTextFieldName("Last Name", lastName, modifier = Modifier.weight(1f)) { lastName = it }
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                OutlinedTextFieldName("Last Name", lastName) { lastName = it }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                OutlinedTextFieldName("Username", username) { username = it }
+                OutlinedTextFieldName("Username", username, modifier = Modifier.fillMaxWidth()) { username = it }
 
                 Spacer(modifier = Modifier.height(20.dp))
 

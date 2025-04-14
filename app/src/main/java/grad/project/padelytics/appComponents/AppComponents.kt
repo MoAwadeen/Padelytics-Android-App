@@ -39,6 +39,10 @@ import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
 
+import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+
 @Composable
 fun MidWhiteHeadline(text: String,size: Int,){
     Text(text=text,
@@ -255,3 +259,5 @@ fun WideGreenButton(label: String, onClick: () -> Unit ){
             fontWeight = FontWeight.SemiBold)
     }
 }
+
+
