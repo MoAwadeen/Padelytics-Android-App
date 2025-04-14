@@ -483,7 +483,7 @@ fun ShopProduct(
 
         when {
             index < fullStars -> R.drawable.rating
-            index == fullStars && hasHalfStar -> R.drawable.rating
+            index == fullStars && hasHalfStar -> R.drawable.half_star
             else -> R.drawable.no_rating
         }
     }
