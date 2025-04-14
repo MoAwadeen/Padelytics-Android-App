@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -59,7 +61,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
     }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchTournament()
+        viewModel.getTournamentById(tournamentId)
     }
 
     Scaffold(
@@ -89,6 +91,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .background(color = Color.White)
                 .padding(innerPadding)
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, dragAmount ->

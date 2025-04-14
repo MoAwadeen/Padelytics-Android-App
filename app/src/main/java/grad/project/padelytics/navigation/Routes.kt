@@ -12,4 +12,6 @@ object Routes {
     const val TOURNAMENT_DETAILS = "TOURNAMENT_DETAILS/{tournamentId}"
     const val VIDEO_UPLOAD = "VIDEO_UPLOAD"
     const val USERNAME_UPDATE = "USERNAME_UPDATE"
+    const val SHOP = "SHOP"
+    const val PRODUCT_DETAILS = "PRODUCT_DETAILS"
 }

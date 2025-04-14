@@ -79,14 +79,13 @@ fun HomeAppToolbarPreview(){
     HomeAppToolbar(userName = "Merna")
 }
 
-
 @Composable
 fun FeatureList(navController: NavController) {
     val features = listOf(
         Feature(R.drawable.video, "Upload\nVideo", Routes.VIDEO_UPLOAD),
         Feature(R.drawable.previousresults, "Previous\nResults", Routes.HOME),
         Feature(R.drawable.court, "Court\nBooking", Routes.HOME),
-        Feature(R.drawable.shop, "Shop", Routes.HOME),
+        Feature(R.drawable.shop, "Shop", Routes.SHOP),
         Feature(R.drawable.tournament, "Tournaments", Routes.TOURNAMENTS)
     )
 

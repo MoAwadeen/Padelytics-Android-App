@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,7 +53,6 @@ fun MidWhiteHeadline(text: String,size: Int,){
         fontWeight = FontWeight.Medium)
 }
 
-
 @Preview
 @Composable
 fun MidWhiteHeadlinePreview(){
@@ -77,13 +77,11 @@ fun SimiMidDarkHeadline(text: String,size: Int,){
         fontWeight = FontWeight.SemiBold)
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun MidDarkHeadlinePreview(){
     MidDarkHeadline(" Mohamed ", 30)
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -260,4 +258,49 @@ fun WideGreenButton(label: String, onClick: () -> Unit ){
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DetailsAppToolbar(onClick: () -> Unit, itemName: String) {
+    TopAppBar(
+        modifier = Modifier.fillMaxWidth().height(80.dp),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Blue,
+            titleContentColor = White,
+        ),
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { onClick() },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.back) ,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                Text(
+                    text = itemName,
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = White
+                    ),
+                    modifier = Modifier.padding(start = 18.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    )
+}
 
+@Preview
+@Composable
+fun DetailsAppToolbarPreview(){
+    DetailsAppToolbar(onClick = {}, itemName = "item Name")
+}
