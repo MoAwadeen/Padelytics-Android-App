@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.favorite.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,10 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 fun FavoriteScreen(modifier: Modifier = Modifier,navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    BackHandler {
+        navController.popBackStack()
+    }
 
     Scaffold(
         topBar = {

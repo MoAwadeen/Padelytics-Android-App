@@ -73,5 +73,6 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.PRODUCT_DETAILS) {
             ProductDetailsScreen(modifier,navController)
         }
+
     }
 }

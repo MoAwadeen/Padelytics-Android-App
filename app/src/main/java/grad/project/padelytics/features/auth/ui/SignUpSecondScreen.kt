@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.auth.ui
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -47,6 +48,10 @@ fun SignUpSecondScreen(
     var selectedLevel by remember { mutableStateOf<String?>(null) }
     var selectedCity by remember { mutableStateOf<String?>(null) }
     var selectedDate by remember { mutableStateOf<String?>(null) }
+
+    BackHandler(enabled = true) {
+        // Block from back
+    }
 
     Scaffold(
         modifier = Modifier.background(Blue).padding(25.dp)

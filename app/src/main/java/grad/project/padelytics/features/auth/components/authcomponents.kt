@@ -2,6 +2,7 @@ package grad.project.padelytics.features.auth.components
 
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -678,6 +679,10 @@ fun UsernameUpdateScreen(
     viewModel: AuthViewModel = viewModel()
 ) {
     var showDialog by remember { mutableStateOf(true) }
+
+    BackHandler {
+        //Block the back button
+    }
 
     if (showDialog) {
         UpdateUsernameDialog(

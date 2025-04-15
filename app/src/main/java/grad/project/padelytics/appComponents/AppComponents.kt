@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.painterResource
@@ -44,8 +43,10 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import com.airbnb.lottie.compose.*
+import grad.project.padelytics.ui.theme.GreenDark
 
 @Composable
 fun MidWhiteHeadline(text: String,size: Int,){
@@ -70,6 +71,17 @@ fun MidDarkHeadline(text: String,size: Int,){
         fontFamily = lexendFontFamily,
         fontWeight = FontWeight.Bold)
 }
+
+
+@Composable
+fun MidBlueHeadline(text: String,size: Int,){
+    Text(text=text,
+        fontSize = size.sp,
+        color = Blue,
+        fontFamily = lexendFontFamily,
+        fontWeight = FontWeight.Bold)
+}
+
 
 @Composable
 fun SimiMidDarkHeadline(text: String,size: Int,){
@@ -326,15 +338,16 @@ fun FetchingIndicator(
 
         Box(
             modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(120.dp)
                     .clip(RoundedCornerShape(16.dp))
+                    .align(Alignment.Center)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.loading_bg), // <- your vector file
+                    painter = painterResource(id = R.drawable.loading_bg),
                     contentDescription = null,
                     modifier = Modifier
                         .matchParentSize()
@@ -344,8 +357,19 @@ fun FetchingIndicator(
                     composition = composition,
                     progress = { progress },
                     modifier = Modifier
-                        .matchParentSize()
+                        .size(100.dp)
+                        .align(Alignment.Center)
                 )
+
+                Text(text = "Loading...",
+                    modifier
+                        .matchParentSize()
+                        .padding(top = 90.dp)
+                    ,
+                    textAlign = TextAlign.Center,
+                    color = WhiteGray,
+                    fontFamily = lexendFontFamily,
+                    fontSize = 14.sp)
             }
         }
     }

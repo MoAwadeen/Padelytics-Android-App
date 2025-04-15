@@ -17,12 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -65,6 +66,7 @@ import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
+import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
@@ -209,6 +211,9 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
 
     if (showDialog) {
         AlertDialog(
+            containerColor = Blue,
+            titleContentColor = BlueDark,
+            textContentColor = GreenLight,
             onDismissRequest = { showDialog = false },
             title = {
                 Text(text = "Remove from favorites",
@@ -216,7 +221,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
                         fontSize = 22.sp,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.SemiBold,
-                        color = BlueDark
+                        color = WhiteGray
                     ) )
             },
             text = {
@@ -224,12 +229,16 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        color = Blue
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
                     ))
             },
             confirmButton = {
-                TextButton(
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenLight,
+                        contentColor = BlueDark
+                    ),
                     onClick = {
                         showDialog = false
                         viewModel.removeFavoriteTournament(tournament.id) { success ->
@@ -242,24 +251,27 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
                         }
                     }
                 ) {
-                    Text(text = "Yes",
+                    Text(text = "YES",
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Medium,
-                            color = GreenDark
+                            fontWeight = FontWeight.SemiBold,
+                            color = BlueDark
                         ))
                 }
             },
             dismissButton = {
-                TextButton(
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenDark,
+                        contentColor = GreenLight),
                     onClick = { showDialog = false }
                 ) {
-                    Text(text = "No",
+                    Text(text = "NO",
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                             color = GreenLight
                         ))
                 }

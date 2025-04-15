@@ -49,6 +49,12 @@ import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.lexendFontFamily
+import grad.project.padelytics.ui.theme.WhiteGray
+import android.widget.Toast
+import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import grad.project.padelytics.ui.theme.Blue
 
 
 @Composable
@@ -170,7 +176,7 @@ fun InfoRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .padding(vertical = 10.dp)
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -275,3 +281,84 @@ fun LogoutButtonPreview() {
     LogoutButton(onClick = {})
 }
 
+@Composable
+fun LogoutConfirmationDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onConfirmLogout: () -> Unit
+) {
+    if (!showDialog) return
+
+    val context = LocalContext.current
+
+    AlertDialog(
+        containerColor = Blue,
+        titleContentColor = BlueDark,
+        textContentColor = GreenLight,
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Log out",
+                style = TextStyle(
+                    fontSize = 22.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    color = WhiteGray
+                )
+            )
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to log out from your account?",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    color = BlueDark
+                )
+            )
+        },
+        confirmButton = {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GreenLight,
+                    contentColor = BlueDark
+                ),
+                onClick = {
+                    onDismiss()
+                    onConfirmLogout()
+                    Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                }
+            ) {
+                Text(
+                    text = "YES",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    )
+                )
+            }
+        },
+        dismissButton = {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GreenDark,
+                    contentColor = GreenLight
+                ),
+                onClick = onDismiss
+            ) {
+                Text(
+                    text = "NO",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = GreenLight
+                    )
+                )
+            }
+        }
+    )
+}

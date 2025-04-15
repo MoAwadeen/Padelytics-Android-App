@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.auth.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +36,10 @@ fun SignUpScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var photo by remember { mutableStateOf("") }
+
+    BackHandler {
+        navController.popBackStack()
+    }
 
     Scaffold(
         modifier = Modifier.background(Blue).padding(25.dp)

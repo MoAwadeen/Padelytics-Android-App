@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,6 +66,7 @@ import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
+import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
 import kotlinx.coroutines.launch
 
@@ -406,34 +406,37 @@ fun ShopProduct(
 
     if (showRemoveDialog) {
         AlertDialog(
+            containerColor = Blue,
+            titleContentColor = BlueDark,
+            textContentColor = GreenLight,
             onDismissRequest = { showRemoveDialog = false },
             title = {
-                Text(
-                    text = "Remove from favorites",
+                Text(text = "Remove from favorites",
                     style = TextStyle(
                         fontSize = 22.sp,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.SemiBold,
-                        color = BlueDark
-                    )
-                )
+                        color = WhiteGray
+                    ) )
             },
             text = {
-                Text(
-                    text = "Are you sure you want to remove this product from your favorites?",
+                Text(text = "Are you sure you want to remove this product from your favorites?",
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        color = Blue
-                    )
-                )
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    ))
             },
             confirmButton = {
-                TextButton(
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenLight,
+                        contentColor = BlueDark
+                    ),
                     onClick = {
                         showRemoveDialog = false
-                        viewModel.removeFavoriteProduct(productId) { success ->
+                        viewModel.removeFavoriteProduct(productId){ success ->
                             if (success) {
                                 isFavorite = false
                                 Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
@@ -443,32 +446,34 @@ fun ShopProduct(
                         }
                     }
                 ) {
-                    Text(
-                        text = "Yes",
+                    Text(text = "YES",
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Medium,
-                            color = GreenDark
-                        )
-                    )
+                            fontWeight = FontWeight.SemiBold,
+                            color = BlueDark
+                        ))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showRemoveDialog = false }) {
-                    Text(
-                        text = "No",
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenDark,
+                        contentColor = GreenLight),
+                    onClick = { showRemoveDialog = false }
+                ) {
+                    Text(text = "NO",
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                             color = GreenLight
-                        )
-                    )
+                        ))
                 }
             }
         )
     }
+
 
     LaunchedEffect(productId) {
         viewModel.checkIfFavorite(productId) { result ->
