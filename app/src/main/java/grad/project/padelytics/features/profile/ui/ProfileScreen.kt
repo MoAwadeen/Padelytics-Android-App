@@ -2,6 +2,7 @@ package grad.project.padelytics.features.profile.ui
 
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -37,10 +38,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberAsyncImagePainter
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.BottomAppBar
-import grad.project.padelytics.appComponents.MidDarkHeadline
+import grad.project.padelytics.appComponents.*
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.profile.components.InfoRow
 import grad.project.padelytics.features.profile.components.LogoutButton
+import grad.project.padelytics.features.profile.components.LogoutConfirmationDialog
 import grad.project.padelytics.features.profile.components.NumberLabelChip
 import grad.project.padelytics.features.profile.components.ProfileHeader
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
@@ -70,8 +72,10 @@ fun ProfileScreen(
     val photo = userProfile?.photo ?: R.drawable.user
     val city = userProfile?.city.orEmpty()
     val rewardPoints = userProfile?.rewardPoints ?: 0
+    val userName = userProfile?.userName.orEmpty()
 
     var showAddDialog by remember { mutableStateOf(false) }
+    var showConfirmationDialog by remember { mutableStateOf(false) }
 
 
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -80,6 +84,10 @@ fun ProfileScreen(
         uri?.let {
             profileViewModel.uploadImage(it, context)
         }
+    }
+
+    BackHandler {
+        navController.popBackStack()
     }
 
     fun selectImage() {
@@ -92,6 +100,14 @@ fun ProfileScreen(
             onUserFound = { username ->
                 Log.d("FriendSearch", "Found user: $username")
             }
+        )
+    }
+
+    if (showConfirmationDialog) {
+        LogoutConfirmationDialog(
+            showDialog = showConfirmationDialog,
+            onDismiss = { showConfirmationDialog = false },
+            onConfirmLogout = { authViewModel.logout(navController) }
         )
     }
 
@@ -117,8 +133,9 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(modifier = Modifier.height(46.dp))
+                Spacer(modifier = Modifier.height(50.dp))
                 MidDarkHeadline(text = fullname, size = 20)
+                MidBlueHeadline(text = "@$userName", size = 12)
 
                 Row(
                     modifier = Modifier.wrapContentSize(),
@@ -201,7 +218,7 @@ fun ProfileScreen(
             item {
                 Box(modifier = Modifier.padding(horizontal = 24.dp)){
                 LogoutButton{
-                    authViewModel.logout(navController)
+                    showConfirmationDialog = true
                 }}
             }
         }

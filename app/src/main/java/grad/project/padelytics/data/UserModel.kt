@@ -14,7 +14,7 @@ data class UserProfileModel(
     val uid: String = "",
     val firstName: String = "",
     val lastName: String = "",
-    val username: String = "",
+    val userName: String = "",
     val email: String = "",
     val photo: String = "",
     val wins: Int = 0,

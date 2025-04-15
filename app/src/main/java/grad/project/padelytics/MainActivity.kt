@@ -14,6 +14,11 @@ import grad.project.padelytics.ui.theme.PadelyticsTheme
 import grad.project.padelytics.ui.theme.*
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -23,6 +28,14 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.light(Blue.toArgb(),Blue.toArgb()),
             navigationBarStyle = SystemBarStyle.light(Blue.toArgb(),Blue.toArgb())
         )
+
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition {true}
+
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(2000)
+            splashScreen.setKeepOnScreenCondition {false}
+        }
 
         setContent {
             PadelyticsTheme {

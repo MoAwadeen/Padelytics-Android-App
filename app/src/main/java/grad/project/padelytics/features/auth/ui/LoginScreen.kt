@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.auth.ui
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
@@ -39,6 +40,10 @@ fun LoginScreen(
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    BackHandler {
+        navController.popBackStack()
+    }
 
     Scaffold(Modifier.background(Blue).padding(25.dp)){
         innerPadding ->

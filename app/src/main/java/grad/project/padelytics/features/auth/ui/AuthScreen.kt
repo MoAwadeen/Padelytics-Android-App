@@ -38,6 +38,7 @@ import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
+import androidx.activity.compose.BackHandler
 
 @Composable
 fun AuthScreen(
@@ -45,6 +46,7 @@ fun AuthScreen(
     navController: NavHostController,
     viewModel: AuthViewModel = viewModel()
 ) {
+
     val user = FirebaseAuth.getInstance().currentUser
     LaunchedEffect(user) {
         if (user != null) {

@@ -14,4 +14,5 @@ object Routes {
     const val USERNAME_UPDATE = "USERNAME_UPDATE"
     const val SHOP = "SHOP"
     const val PRODUCT_DETAILS = "PRODUCT_DETAILS"
+    const val SPLASH = "SPLASH"
 }

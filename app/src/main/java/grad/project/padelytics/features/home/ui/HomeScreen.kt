@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.home.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -42,6 +43,10 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+
+    BackHandler(enabled = true) {
+        // This empty to block
+    }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {

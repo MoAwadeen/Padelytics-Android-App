@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.shop.ui
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -79,6 +80,10 @@ fun ProductDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCo
                 return Offset.Zero
             }
         }
+    }
+
+    BackHandler {
+        navController.popBackStack()
     }
 
     LaunchedEffect(Unit) {

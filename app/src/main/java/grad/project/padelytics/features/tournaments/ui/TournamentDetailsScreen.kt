@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.tournaments.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -59,6 +60,10 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
                 return Offset.Zero
             }
         }
+    }
+
+    BackHandler {
+        navController.popBackStack()
     }
 
     LaunchedEffect(Unit) {

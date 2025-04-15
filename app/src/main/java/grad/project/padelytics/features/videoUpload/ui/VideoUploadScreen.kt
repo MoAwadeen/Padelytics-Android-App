@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.videoUpload.ui
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -70,6 +71,10 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
 
     LaunchedEffect(Unit) {
         profileViewModel.fetchUserProfile()
+    }
+
+    BackHandler {
+        navController.popBackStack()
     }
 
     if (showAddDialog) {
