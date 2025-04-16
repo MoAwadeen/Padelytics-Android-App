@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ShopRetrofitModule {
     private const val BASE_URL = "https://real-time-amazon-data.p.rapidapi.com/"
-    private const val API_KEY = "c6948ac65fmsh6265da08a3d340dp114c64jsna77e78c8551e"
+    private const val API_KEY = "f7f71cf292msha1eb101ed45cee4p176c8fjsndc395517831a"
 
     val apiService: AmazonApiService by lazy {
         Retrofit.Builder()

@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,7 +70,7 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
     }
 
     BackHandler {
-        navController.popBackStack()
+        navController.popBackStack(Routes.HOME, inclusive = false)
     }
 
     Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection),
@@ -133,6 +132,8 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                                 put("productUrl", product.product_url)
                                 put("productOffers", product.product_num_offers)
                             }.toString()
+
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             ShopProduct(
                                 viewModel = viewModel,

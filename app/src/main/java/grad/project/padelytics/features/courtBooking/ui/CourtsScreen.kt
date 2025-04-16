@@ -1,4 +1,4 @@
-package grad.project.padelytics.features.tournaments.ui
+package grad.project.padelytics.features.courtBooking.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -7,9 +7,14 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +24,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -27,20 +33,19 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
-import grad.project.padelytics.appComponents.DetailsAppToolbar
-import grad.project.padelytics.appComponents.FetchingIndicator
-import grad.project.padelytics.features.tournaments.components.TournamentDetails
-import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
+import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
+import grad.project.padelytics.features.tournaments.components.GridItem
 import grad.project.padelytics.navigation.Routes
 
 @Composable
-fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHostController, tournamentId: String?) {
-    val viewModel: TournamentsViewModel = viewModel()
-    val tournament by viewModel.getTournamentById(tournamentId).collectAsState(initial = null)
+fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController, viewModel: CourtBookingViewModel = viewModel()) {
+    val tournaments by viewModel.tournaments.collectAsState()
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
@@ -62,20 +67,17 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
     }
 
     BackHandler {
-        navController.popBackStack()
+        navController.popBackStack(Routes.HOME, inclusive = false)
     }
 
     LaunchedEffect(Unit) {
-        viewModel.getTournamentById(tournamentId)
+        viewModel.fetchTournaments()
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(nestedScrollConnection).fillMaxSize(),
+        modifier = Modifier.nestedScroll(nestedScrollConnection),
         topBar = {
-            DetailsAppToolbar(
-                onClick = {navController.navigate(Routes.TOURNAMENTS)},
-                itemName = tournament?.tournamentName ?: "Tournament Name"
-            )
+            AppToolbar(toolbarTitle = "Tournaments")
         },
         bottomBar = {
             AnimatedVisibility(
@@ -93,7 +95,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
             }
         }
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = Color.White)
@@ -106,13 +108,28 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
                             isBottomBarVisible = false
                         }
                     }
-                }
+                },
+            contentAlignment = Alignment.Center
         ) {
-            item {
-                if (tournament != null) {
-                    TournamentDetails(tournament = tournament!!)
-                } else {
-                    FetchingIndicator(isFetching = true)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(30.dp)
+            ) {
+                items(tournaments) { tournament ->
+                    GridItem(
+                        tournament = tournament.tournamentName,
+                        prize = tournament.prize,
+                        date = tournament.date,
+                        imageUrl = tournament.image,
+                        onClick = {
+                            navController.navigate("TOURNAMENT_DETAILS/${tournament.id}")
+                        }
+                    )
                 }
             }
         }
@@ -121,6 +138,6 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
 
 @Preview(showBackground = true)
 @Composable
-fun TournamentDetailsScreenPreview() {
-    TournamentDetailsScreen(navController = rememberNavController(), tournamentId = "tournament1")
+fun CourtsScreenPreview() {
+    CourtsScreen(navController = rememberNavController())
 }

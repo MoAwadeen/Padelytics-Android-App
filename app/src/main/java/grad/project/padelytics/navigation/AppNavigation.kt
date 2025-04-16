@@ -8,13 +8,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import grad.project.padelytics.features.auth.components.UpdateUsernameDialog
 import grad.project.padelytics.features.auth.components.UsernameUpdateScreen
 import grad.project.padelytics.features.auth.ui.AuthScreen
 import grad.project.padelytics.features.auth.ui.LoginScreen
 import grad.project.padelytics.features.auth.ui.SignUpScreen
 import grad.project.padelytics.features.auth.ui.SignUpSecondScreen
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
+import grad.project.padelytics.features.courtBooking.ui.CourtDetailsScreen
+import grad.project.padelytics.features.courtBooking.ui.CourtsScreen
 import grad.project.padelytics.features.favorite.ui.FavoriteScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
@@ -66,13 +67,17 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.USERNAME_UPDATE) {
             UsernameUpdateScreen(navController = navController)
         }
-
         composable(Routes.SHOP) {
             ShopScreen(modifier,navController)
         }
         composable(Routes.PRODUCT_DETAILS) {
             ProductDetailsScreen(modifier,navController)
         }
-
+        composable(Routes.COURTS) {
+            CourtsScreen(modifier,navController)
+        }
+        composable(Routes.COURT_DETAILS) {
+            CourtDetailsScreen(modifier,navController)
+        }
     }
 }
