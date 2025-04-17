@@ -31,7 +31,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -482,13 +481,19 @@ fun ShopProduct(
     }
 
     val ratingValue = productRating.toFloatOrNull() ?: 0f
-    val starImages = List(5) { index ->
-        val fullStars = ratingValue.toInt()
-        val hasHalfStar = ratingValue - fullStars >= 0.5f
+    val fullStars = ratingValue.toInt()
+    val decimalPart = ratingValue - fullStars
 
+    val extraStar: Int? = when {
+        decimalPart < 0.3f -> null
+        decimalPart < 0.8f -> R.drawable.half_rating
+        else -> R.drawable.rating
+    }
+
+    val starImages = List(5) { index ->
         when {
             index < fullStars -> R.drawable.rating
-            index == fullStars && hasHalfStar -> R.drawable.half_star
+            index == fullStars && extraStar != null -> extraStar
             else -> R.drawable.no_rating
         }
     }
@@ -506,11 +511,11 @@ fun ShopProduct(
                     .shadow(
                         elevation = 1.dp,
                         shape = RoundedCornerShape(12.dp),
-                        spotColor = Color.White.copy(alpha = 0.005f)
+                        spotColor = Color.Gray.copy(alpha = 0.005f)
                     )
                     .drawBehind {
                         drawRect(
-                            color = Color.White.copy(alpha = 0.05f),
+                            color = Color.Gray.copy(alpha = 0.05f),
                             topLeft = Offset(2.dp.toPx(), size.height - 8.dp.toPx()),
                             size = Size(size.width - 6.dp.toPx(), 8.dp.toPx())
                         )
@@ -519,9 +524,10 @@ fun ShopProduct(
             ) {
                 AsyncImage(
                     modifier = Modifier
-                        .width(74.dp)
-                        .height(74.dp)
-                        .clip(RoundedCornerShape(12.dp)),
+                        .width(108.dp)
+                        .height(108.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(color = Color.White),
                     model = productImage,
                     contentDescription = "Product Image",
                     contentScale = ContentScale.Fit,
@@ -685,34 +691,37 @@ fun ProductDetails(
 
     if (showRemoveDialog) {
         AlertDialog(
+            containerColor = Blue,
+            titleContentColor = BlueDark,
+            textContentColor = GreenLight,
             onDismissRequest = { showRemoveDialog = false },
             title = {
-                Text(
-                    text = "Remove from favorites",
+                Text(text = "Remove from favorites",
                     style = TextStyle(
                         fontSize = 22.sp,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.SemiBold,
-                        color = BlueDark
-                    )
-                )
+                        color = WhiteGray
+                    ) )
             },
             text = {
-                Text(
-                    text = "Are you sure you want to remove this product from your favorites?",
+                Text(text = "Are you sure you want to remove this product from your favorites?",
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        color = Blue
-                    )
-                )
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    ))
             },
             confirmButton = {
-                TextButton(
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenLight,
+                        contentColor = BlueDark
+                    ),
                     onClick = {
                         showRemoveDialog = false
-                        viewModel.removeFavoriteProduct(productId) { success ->
+                        viewModel.removeFavoriteProduct(productId){ success ->
                             if (success) {
                                 isFavorite = false
                                 Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
@@ -722,28 +731,29 @@ fun ProductDetails(
                         }
                     }
                 ) {
-                    Text(
-                        text = "Yes",
+                    Text(text = "YES",
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Medium,
-                            color = GreenDark
-                        )
-                    )
+                            fontWeight = FontWeight.SemiBold,
+                            color = BlueDark
+                        ))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showRemoveDialog = false }) {
-                    Text(
-                        text = "No",
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenDark,
+                        contentColor = GreenLight),
+                    onClick = { showRemoveDialog = false }
+                ) {
+                    Text(text = "NO",
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                             color = GreenLight
-                        )
-                    )
+                        ))
                 }
             }
         )
@@ -756,13 +766,19 @@ fun ProductDetails(
     }
 
     val ratingValue = productRating.toFloatOrNull() ?: 0f
-    val starImages = List(5) { index ->
-        val fullStars = ratingValue.toInt()
-        val hasHalfStar = ratingValue - fullStars >= 0.5f
+    val fullStars = ratingValue.toInt()
+    val decimalPart = ratingValue - fullStars
 
+    val extraStar: Int? = when {
+        decimalPart < 0.3f -> null
+        decimalPart < 0.8f -> R.drawable.half_star
+        else -> R.drawable.rating
+    }
+
+    val starImages = List(5) { index ->
         when {
             index < fullStars -> R.drawable.rating
-            index == fullStars && hasHalfStar -> R.drawable.rating
+            index == fullStars && extraStar != null -> extraStar
             else -> R.drawable.no_rating
         }
     }

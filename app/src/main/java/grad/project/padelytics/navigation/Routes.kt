@@ -15,4 +15,6 @@ object Routes {
     const val SHOP = "SHOP"
     const val PRODUCT_DETAILS = "PRODUCT_DETAILS"
     const val SPLASH = "SPLASH"
+    const val COURTS = "COURTS"
+    const val COURT_DETAILS = "COURT_DETAILS/{courtId}"
 }

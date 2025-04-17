@@ -19,13 +19,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,8 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
@@ -61,7 +56,6 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.features.tournaments.data.Tournament
 import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
-import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
@@ -71,7 +65,7 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
 fun GridItem(tournament: String, prize: String, date: String, imageUrl: String, onClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().clickable { onClick() }) {
 
         Box(
             modifier = Modifier
@@ -152,55 +146,6 @@ fun GridItemPreview(){
     ){
         GridItem(tournament="Tournament", prize="Prize", date="Date", imageUrl = "imageUrl", onClick = {})
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TournamentAppToolbar(navController: NavController, tournamentName: String) {
-    TopAppBar(
-        modifier = Modifier.fillMaxWidth().height(80.dp),
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Blue,
-            titleContentColor = White,
-        ),
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        navController.navigate(Routes.TOURNAMENTS)
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.back) ,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-                Text(
-                    text = tournamentName,
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        color = White
-                    ),
-                    modifier = Modifier.padding(start = 18.dp),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    )
-}
-
-@Preview
-@Composable
-fun TournamentAppToolbarPreview(){
-    TournamentAppToolbar(navController = rememberNavController(), tournamentName = "Tournament Name")
 }
 
 @Composable

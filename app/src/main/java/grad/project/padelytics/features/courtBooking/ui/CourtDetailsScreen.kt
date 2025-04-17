@@ -1,4 +1,4 @@
-package grad.project.padelytics.features.tournaments.ui
+package grad.project.padelytics.features.courtBooking.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -33,14 +33,13 @@ import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.DetailsAppToolbar
 import grad.project.padelytics.appComponents.FetchingIndicator
-import grad.project.padelytics.features.tournaments.components.TournamentDetails
-import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
+import grad.project.padelytics.features.courtBooking.components.CourtDetails
+import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
 import grad.project.padelytics.navigation.Routes
 
 @Composable
-fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHostController, tournamentId: String?) {
-    val viewModel: TournamentsViewModel = viewModel()
-    val tournament by viewModel.getTournamentById(tournamentId).collectAsState(initial = null)
+fun CourtDetailsScreen(modifier: Modifier = Modifier, navController: NavHostController, viewModel: CourtBookingViewModel = viewModel(), courtId: String?) {
+    val court by viewModel.getCourtById(courtId).collectAsState(initial = null)
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
@@ -66,15 +65,15 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
     }
 
     LaunchedEffect(Unit) {
-        viewModel.getTournamentById(tournamentId)
+        viewModel.getCourtById(courtId)
     }
 
     Scaffold(
         modifier = Modifier.nestedScroll(nestedScrollConnection).fillMaxSize(),
         topBar = {
             DetailsAppToolbar(
-                onClick = {navController.navigate(Routes.TOURNAMENTS)},
-                itemName = tournament?.tournamentName ?: "Tournament Name"
+                onClick = {navController.navigate(Routes.COURTS)},
+                itemName = court?.courtName ?: "Court Name"
             )
         },
         bottomBar = {
@@ -109,8 +108,8 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
                 }
         ) {
             item {
-                if (tournament != null) {
-                    TournamentDetails(tournament = tournament!!)
+                if (court != null) {
+                    CourtDetails(court = court!!)
                 } else {
                     FetchingIndicator(isFetching = true)
                 }
@@ -121,6 +120,6 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
 
 @Preview(showBackground = true)
 @Composable
-fun TournamentDetailsScreenPreview() {
-    TournamentDetailsScreen(navController = rememberNavController(), tournamentId = "tournament1")
+fun CourtDetailsScreenPreview() {
+    CourtDetailsScreen(navController = rememberNavController(), courtId = "court1")
 }
