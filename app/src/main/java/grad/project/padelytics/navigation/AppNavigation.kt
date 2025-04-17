@@ -16,6 +16,7 @@ import grad.project.padelytics.features.auth.ui.SignUpSecondScreen
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.courtBooking.ui.CourtDetailsScreen
 import grad.project.padelytics.features.courtBooking.ui.CourtsScreen
+import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
 import grad.project.padelytics.features.favorite.ui.FavoriteScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
@@ -76,8 +77,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.COURTS) {
             CourtsScreen(modifier,navController)
         }
-        composable(Routes.COURT_DETAILS) {
-            CourtDetailsScreen(modifier,navController)
+        composable(
+            route = Routes.COURT_DETAILS,
+            arguments = listOf(navArgument("courtId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val courtId = backStackEntry.arguments?.getString("courtId")
+            CourtDetailsScreen(modifier, navController, viewModel = CourtBookingViewModel(), courtId)
         }
     }
 }

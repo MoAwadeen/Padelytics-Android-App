@@ -98,7 +98,7 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                 .fillMaxSize()
                 .background(color = Color.White)
                 .padding(innerPadding)
-                .padding(start = 20.dp, end = 20.dp, bottom = 12.dp),
+                .padding(start = 20.dp, end = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.height(12.dp))
@@ -152,7 +152,7 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
                 }
             }
         }

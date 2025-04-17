@@ -14,5 +14,8 @@ data class Court(
     val numPlayers: String = "",
     val bookingPrice: String = "",
     val firstPhoto: String = "",
-    val secondPhoto: String = ""
+    val secondPhoto: String = "",
+    val twoPlayers: Boolean = false,
+    val fourPlayers: Boolean = true
+
 )

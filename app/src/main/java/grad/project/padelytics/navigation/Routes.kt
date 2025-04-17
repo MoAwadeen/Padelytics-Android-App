@@ -16,5 +16,5 @@ object Routes {
     const val PRODUCT_DETAILS = "PRODUCT_DETAILS"
     const val SPLASH = "SPLASH"
     const val COURTS = "COURTS"
-    const val COURT_DETAILS = "COURT_DETAILS"
+    const val COURT_DETAILS = "COURT_DETAILS/{courtId}"
 }

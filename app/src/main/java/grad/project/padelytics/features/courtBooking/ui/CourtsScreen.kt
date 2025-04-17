@@ -7,20 +7,21 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,13 +40,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.features.courtBooking.components.CourtHeaders
+import grad.project.padelytics.features.courtBooking.components.CourtItem
 import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
-import grad.project.padelytics.features.tournaments.components.GridItem
 import grad.project.padelytics.navigation.Routes
 
 @Composable
 fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController, viewModel: CourtBookingViewModel = viewModel()) {
-    val tournaments by viewModel.tournaments.collectAsState()
+    val courts by viewModel.courts.collectAsState()
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
@@ -71,13 +73,13 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
     }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchTournaments()
+        viewModel.fetchCourts()
     }
 
     Scaffold(
         modifier = Modifier.nestedScroll(nestedScrollConnection),
         topBar = {
-            AppToolbar(toolbarTitle = "Tournaments")
+            AppToolbar(toolbarTitle = "Court Booking")
         },
         bottomBar = {
             AnimatedVisibility(
@@ -95,11 +97,12 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
             }
         }
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = Color.White)
                 .padding(innerPadding)
+                .padding(start = 20.dp, end = 20.dp)
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, dragAmount ->
                         if (dragAmount > 0) {
@@ -109,27 +112,38 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
                         }
                     }
                 },
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
-                verticalArrangement = Arrangement.spacedBy(30.dp)
-            ) {
-                items(tournaments) { tournament ->
-                    GridItem(
-                        tournament = tournament.tournamentName,
-                        prize = tournament.prize,
-                        date = tournament.date,
-                        imageUrl = tournament.image,
+            Spacer(modifier = Modifier.height(12.dp))
+
+            var selectedValue by remember { mutableIntStateOf(2) }
+
+            CourtHeaders(selectedValue = selectedValue, onValueChange = { selectedValue = it }, userCity = "City")
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+                .background(color = Color.White)
+            ){
+                items(courts){ court ->
+                    CourtItem(
+                        viewModel = CourtBookingViewModel(),
+                        court = court,
+                        courtId = court.courtId,
+                        courtImage = court.courtImage,
+                        courtName = court.courtName,
+                        courtRating = court.courtRating,
+                        courtNumRating = court.numRating,
+                        courtPrice = court.bookingPrice,
                         onClick = {
-                            navController.navigate("TOURNAMENT_DETAILS/${tournament.id}")
+                            navController.navigate(route = "COURT_DETAILS/${court.courtId}")
                         }
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                item{
+                    Spacer(modifier = Modifier.height(14.dp))
                 }
             }
         }

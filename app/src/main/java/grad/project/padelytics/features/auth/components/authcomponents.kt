@@ -552,7 +552,7 @@ fun IconLineRowPreview() {
 
 @Composable
 fun UpdateUsernameDialog(
-    onDismiss: () -> Unit? = {},
+    onDismiss: () -> Unit = {},
     viewModel: AuthViewModel = viewModel(),
     navController: NavHostController
 ) {
