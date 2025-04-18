@@ -3,12 +3,16 @@ package grad.project.padelytics.features.courtBooking.components
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,6 +33,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -35,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,13 +57,16 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -71,67 +82,116 @@ import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
+import kotlin.math.roundToInt
 
 @Composable
-fun CourtHeaders(selectedValue: Int,
-                 onValueChange: (Int) -> Unit,
-                 userCity: String){
-    Row(modifier = Modifier.fillMaxWidth()
-        .height(80.dp)
-        .background(color = White),
-        horizontalArrangement = Arrangement.SpaceBetween){
+fun CourtHeaders(
+    selectedPlayers: Int,
+    onPlayersChange: (Int) -> Unit,
+    selectedCity: String,
+    onCityChange: (String) -> Unit,
+    cities: List<String>
+) {
+    var expanded by remember { mutableStateOf(false) }
 
-        Column(modifier = Modifier.align(Alignment.CenterVertically)
-            .fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally){
-            Text(text = "Players",
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .background(color = White),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Players",
                 style = TextStyle(
                     fontSize = 24.sp,
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.Medium,
                     color = BlueDark
                 ),
-                modifier = Modifier.padding(bottom = 8.dp))
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-            CustomToggleSwitch(selectedValue = selectedValue, onValueChange = onValueChange)
+            CustomSwipeToggleSwitch(selectedValue = selectedPlayers, onValueChange = onPlayersChange)
         }
 
-        Column(modifier = Modifier.align(Alignment.CenterVertically)
-            .fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally){
-            Text(text = "Location",
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Location",
                 style = TextStyle(
                     fontSize = 24.sp,
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.Medium,
                     color = BlueDark
                 ),
-                modifier = Modifier.padding(bottom = 8.dp))
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-            Row(modifier = Modifier.width(110.dp)
-                .height(40.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center){
-                Icon(
+            Box {
+                Row(
                     modifier = Modifier
-                        .width(30.dp)
-                        .height(30.dp)
-                        .padding(end = 5.dp),
-                    painter = painterResource(R.drawable.location),
-                    contentDescription = "Location",
-                    tint = BlueDark
-                )
-
-                Text(
-                    text = userCity,
-                    modifier = Modifier.fillMaxWidth(),
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Light,
-                        color = BlueDark
+                        .width(110.dp)
+                        .height(40.dp)
+                        .clickable { expanded = true },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(end = 4.dp),
+                        painter = painterResource(R.drawable.location),
+                        contentDescription = "Location",
+                        tint = BlueDark
                     )
-                )
+
+                    Text(
+                        text = selectedCity,
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Light,
+                            color = BlueDark
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                DropdownMenu(
+                    modifier = Modifier.background(color = White),
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    cities.forEach { city ->
+                        DropdownMenuItem(
+                            modifier = Modifier.background(White),
+                            text = { Text(text = city,
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontFamily = lexendFontFamily,
+                                    fontWeight = FontWeight.Light,
+                                    color = BlueDark
+                                ))
+                                   },
+                            onClick = {
+                                onCityChange(city)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -141,62 +201,98 @@ fun CourtHeaders(selectedValue: Int,
 @Composable
 fun CourtHeadersPreview(){
     var selectedValue by remember { mutableIntStateOf(2) }
-    CourtHeaders(selectedValue = selectedValue, onValueChange = { selectedValue = it }, userCity = "City")
+    CourtHeaders(selectedPlayers = selectedValue,
+        onPlayersChange = { selectedValue = it },
+        selectedCity = "City",
+        onCityChange = {},
+        cities = listOf()
+    )
 }
 
 @Composable
-fun CustomToggleSwitch(
-    modifier: Modifier = Modifier,
+fun CustomSwipeToggleSwitch(
     selectedValue: Int,
     onValueChange: (Int) -> Unit
 ) {
-    val options = listOf(2, 4)
+    val toggleWidth = 90.dp
+    val toggleHeight = 40.dp
+    val thumbWidth = toggleWidth / 2
 
-    Row(
-        modifier = modifier
-            .width(90.dp)
-            .height(40.dp)
+    val density = LocalDensity.current
+    val maxOffsetPx = with(density) { thumbWidth.toPx() }
+
+    var offsetX by remember { mutableFloatStateOf(if (selectedValue == 2) 0f else maxOffsetPx) }
+
+    val animatedOffset by animateFloatAsState(
+        targetValue = offsetX,
+        animationSpec = tween(250),
+        label = "SwipeToggleOffset"
+    )
+
+    Box(
+        modifier = Modifier
+            .width(toggleWidth)
+            .height(toggleHeight)
             .clip(RoundedCornerShape(30.dp))
             .background(White)
             .border(3.dp, GreenLight, RoundedCornerShape(30.dp))
-    ) {
-        options.forEach { value ->
-            val isSelected = value == selectedValue
-            val backgroundColor by animateColorAsState(
-                targetValue = if (isSelected) GreenLight else Color.Transparent,
-                animationSpec = tween(durationMillis = 250),
-                label = "ToggleSwitchColor"
-            )
-            val textColor = if (isSelected) BlueDark else GreenDark
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(30.dp))
-                    .weight(1f)
-                    .clickable { onValueChange(value) }
-                    .background(backgroundColor)
-                    .padding(vertical = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = value.toString(),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.SemiBold,
-                        color = textColor
-                    )
-                )
+            .pointerInput(Unit) {
+                detectTapGestures { tapOffset ->
+                    val newValue = if (tapOffset.x < size.width / 2f) 2 else 4
+                    offsetX = if (newValue == 2) 0f else maxOffsetPx
+                    onValueChange(newValue)
+                }
             }
+    ) {
+        Box(
+            modifier = Modifier
+                .offset { IntOffset(animatedOffset.roundToInt(), 0) }
+                .width(thumbWidth)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(30.dp))
+                .background(GreenLight)
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        offsetX = (offsetX + delta).coerceIn(0f, maxOffsetPx)
+                    },
+                    onDragStopped = {
+                        val newValue = if (offsetX < maxOffsetPx / 2) 2 else 4
+                        offsetX = if (newValue == 2) 0f else maxOffsetPx
+                        onValueChange(newValue)
+                    }
+                )
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "2",
+                color = if (selectedValue == 2) BlueDark else GreenDark,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                fontFamily = lexendFontFamily
+            )
+            Text(
+                text = "4",
+                color = if (selectedValue == 4) BlueDark else GreenDark,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                fontFamily = lexendFontFamily
+            )
         }
     }
 }
 
 @Preview
 @Composable
-fun CustomToggleSwitchPreview(){
-    var selectedValue by remember { mutableIntStateOf(2) }
-    CustomToggleSwitch(selectedValue = selectedValue, onValueChange = { selectedValue = it })
+fun CustomSwipeToggleSwitchPreview() {
+    CustomSwipeToggleSwitch(selectedValue = 2, onValueChange = {})
 }
 
 @Composable
@@ -864,5 +960,34 @@ fun CourtDetailsPreview(){
         modifier = Modifier.fillMaxSize().background(White),
     ){
         CourtDetails(court = Court())
+    }
+}
+
+@Composable
+fun NoCourtsAlert(){
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = White),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.no_near_courts),
+                contentDescription = "No Results",
+                modifier = Modifier
+                    .size(200.dp)
+            )
+            Text(
+                text = "No near courts",
+                fontSize = 28.sp,
+                fontFamily = lexendFontFamily,
+                color = BlueDark,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }

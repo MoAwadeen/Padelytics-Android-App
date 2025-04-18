@@ -1,6 +1,9 @@
 package grad.project.padelytics.features.courtBooking.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -21,39 +24,10 @@ class CourtBookingViewModel : ViewModel() {
     val courts: StateFlow<List<Court>> = _courts
     private val db = FirebaseFirestore.getInstance()
     private val userId = FirebaseAuth.getInstance().currentUser?.uid
-
-    fun fetchCourts() {
-        viewModelScope.launch {
-            firestore.collection("courts")
-                .get()
-                .addOnSuccessListener { result ->
-                    val courtList = result.map { document ->
-                        Court(
-                            courtName = document.getString("courtName") ?: "",
-                            courtImage = document.getString("courtImage") ?: "",
-                            courtLocation = document.getString("courtLocation") ?: "",
-                            courtOnMap = document.getString("courtOnMap") ?: "",
-                            courtCity = document.getString("courtCity") ?: "",
-                            courtId = document.getString("courtId") ?: "",
-                            bookingUrl = document.getString("bookingUrl") ?: "",
-                            courtRating = document.getString("courtRating") ?: "",
-                            numRating = document.getString("numRating") ?: "",
-                            instagramPage = document.getString("instagramPage") ?: "",
-                            numPlayers = document.getString("numPlayers") ?: "",
-                            bookingPrice = document.getString("bookingPrice") ?: "",
-                            firstPhoto = document.getString("firstPhoto") ?: "",
-                            secondPhoto = document.getString("secondPhoto") ?: "",
-                            twoPlayers = document.getBoolean("twoPlayers") ?: false,
-                            fourPlayers = document.getBoolean("fourPlayers") ?: true
-                            )
-                    }
-                    _courts.value = courtList
-                }
-                .addOnFailureListener { e ->
-                    e.printStackTrace()
-                }
-        }
-    }
+    private val _selectedPlayers = mutableIntStateOf(2)
+    val selectedPlayers: State<Int> = _selectedPlayers
+    private val _selectedCity = mutableStateOf("All Cities")
+    val selectedCity: State<String> = _selectedCity
 
     fun getCourtById(courtId: String?): Flow<Court?> = flow {
         if (courtId != null) {
@@ -94,8 +68,11 @@ class CourtBookingViewModel : ViewModel() {
                 "courtCity" to court.courtCity,
                 "courtRating" to court.courtRating,
                 "numRating" to court.numRating,
-                "bookingPrice" to court.bookingPrice
-                )
+                "bookingPrice" to court.bookingPrice,
+                "numPlayers" to court.numPlayers,
+                "firstPhoto" to court.firstPhoto,
+                "secondPhoto" to court.secondPhoto
+            )
 
             favoriteCourtRef.set(favoriteData)
                 .addOnSuccessListener {
@@ -144,6 +121,66 @@ class CourtBookingViewModel : ViewModel() {
                 }
         } else {
             onResult(false)
+        }
+    }
+
+    fun setSelectedPlayers(count: Int) {
+        _selectedPlayers.intValue = count
+    }
+
+    fun setSelectedCity(city: String) {
+        _selectedCity.value = city
+    }
+
+    fun getAllCities(onResult: (List<String>) -> Unit) {
+        firestore.collection("courts")
+            .get()
+            .addOnSuccessListener { result ->
+                val cities = result.mapNotNull { it.getString("courtCity") }
+                    .distinct()
+                    .sorted()
+                onResult(cities)
+            }
+    }
+
+    fun fetchFilteredCourts(playerCount: Int) {
+        viewModelScope.launch {
+            val filterField = if (playerCount == 2) "twoPlayers" else "fourPlayers"
+
+            var query = firestore.collection("courts")
+                .whereEqualTo(filterField, true)
+
+            if (_selectedCity.value != "All Cities") {
+                query = query.whereEqualTo("courtCity", _selectedCity.value)
+            }
+
+            query.get()
+                .addOnSuccessListener { result ->
+                    val courtList = result.map { document ->
+                        Court(
+                            courtName = document.getString("courtName") ?: "",
+                            courtImage = document.getString("courtImage") ?: "",
+                            courtLocation = document.getString("courtLocation") ?: "",
+                            courtOnMap = document.getString("courtOnMap") ?: "",
+                            courtCity = document.getString("courtCity") ?: "",
+                            courtId = document.getString("courtId") ?: "",
+                            bookingUrl = document.getString("bookingUrl") ?: "",
+                            courtRating = document.getString("courtRating") ?: "",
+                            numRating = document.getString("numRating") ?: "",
+                            instagramPage = document.getString("instagramPage") ?: "",
+                            numPlayers = document.getString("numPlayers") ?: "",
+                            bookingPrice = document.getString("bookingPrice") ?: "",
+                            firstPhoto = document.getString("firstPhoto") ?: "",
+                            secondPhoto = document.getString("secondPhoto") ?: "",
+                            twoPlayers = document.getBoolean("twoPlayers") ?: false,
+                            fourPlayers = document.getBoolean("fourPlayers") ?: true
+                        )
+                    }
+                    _courts.value = courtList
+                }
+                .addOnFailureListener { e ->
+                    e.printStackTrace()
+                }
         }
     }
 }

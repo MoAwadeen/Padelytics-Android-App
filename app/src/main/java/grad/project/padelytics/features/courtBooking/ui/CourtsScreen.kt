@@ -21,7 +21,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +41,7 @@ import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.features.courtBooking.components.CourtHeaders
 import grad.project.padelytics.features.courtBooking.components.CourtItem
+import grad.project.padelytics.features.courtBooking.components.NoCourtsAlert
 import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
 import grad.project.padelytics.navigation.Routes
 
@@ -51,6 +51,9 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+    val selectedPlayers by viewModel.selectedPlayers
+    val selectedCity by viewModel.selectedCity
+    var cities by remember { mutableStateOf(listOf<String>()) }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -73,7 +76,13 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
     }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchCourts()
+        viewModel.getAllCities { result ->
+            cities = listOf("All Cities") + result
+        }
+    }
+
+    LaunchedEffect(selectedPlayers, selectedCity) {
+        viewModel.fetchFilteredCourts(selectedPlayers)
     }
 
     Scaffold(
@@ -116,34 +125,42 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            var selectedValue by remember { mutableIntStateOf(2) }
-
-            CourtHeaders(selectedValue = selectedValue, onValueChange = { selectedValue = it }, userCity = "City")
+            CourtHeaders(
+                selectedPlayers = selectedPlayers,
+                onPlayersChange = { viewModel.setSelectedPlayers(it) },
+                selectedCity = selectedCity,
+                onCityChange = { viewModel.setSelectedCity(it) },
+                cities = cities
+            )
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-                .background(color = Color.White)
-            ){
-                items(courts){ court ->
-                    CourtItem(
-                        viewModel = CourtBookingViewModel(),
-                        court = court,
-                        courtId = court.courtId,
-                        courtImage = court.courtImage,
-                        courtName = court.courtName,
-                        courtRating = court.courtRating,
-                        courtNumRating = court.numRating,
-                        courtPrice = court.bookingPrice,
-                        onClick = {
-                            navController.navigate(route = "COURT_DETAILS/${court.courtId}")
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
-                item{
-                    Spacer(modifier = Modifier.height(14.dp))
+            if (courts.isEmpty()) {
+                NoCourtsAlert()
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                        .background(color = Color.White)
+                ){
+                    items(courts){ court ->
+                        CourtItem(
+                            viewModel = CourtBookingViewModel(),
+                            court = court,
+                            courtId = court.courtId,
+                            courtImage = court.courtImage,
+                            courtName = court.courtName,
+                            courtRating = court.courtRating,
+                            courtNumRating = court.numRating,
+                            courtPrice = court.bookingPrice,
+                            onClick = {
+                                navController.navigate(route = "COURT_DETAILS/${court.courtId}")
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    item{
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
                 }
             }
         }
