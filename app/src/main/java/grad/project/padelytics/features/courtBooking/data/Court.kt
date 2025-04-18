@@ -17,5 +17,4 @@ data class Court(
     val secondPhoto: String = "",
     val twoPlayers: Boolean = false,
     val fourPlayers: Boolean = true
-
 )

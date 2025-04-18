@@ -35,7 +35,6 @@ import grad.project.padelytics.appComponents.DetailsAppToolbar
 import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.courtBooking.components.CourtDetails
 import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
-import grad.project.padelytics.navigation.Routes
 
 @Composable
 fun CourtDetailsScreen(modifier: Modifier = Modifier, navController: NavHostController, viewModel: CourtBookingViewModel = viewModel(), courtId: String?) {
@@ -72,7 +71,7 @@ fun CourtDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCont
         modifier = Modifier.nestedScroll(nestedScrollConnection).fillMaxSize(),
         topBar = {
             DetailsAppToolbar(
-                onClick = {navController.navigate(Routes.COURTS)},
+                onClick = { navController.popBackStack() },
                 itemName = court?.courtName ?: "Court Name"
             )
         },
