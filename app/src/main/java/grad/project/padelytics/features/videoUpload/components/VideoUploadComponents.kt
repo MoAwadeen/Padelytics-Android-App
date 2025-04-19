@@ -66,6 +66,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -73,8 +74,9 @@ import coil.request.ImageRequest
 import com.google.firebase.auth.FirebaseAuth
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidDarkHeadline
+import grad.project.padelytics.features.favorites.viewModel.FavoritesViewModel
 import grad.project.padelytics.features.videoUpload.data.FriendData
-import grad.project.padelytics.features.videoUpload.viewModel.FavouriteTournamentsViewModel
+import grad.project.padelytics.features.videoUpload.viewModel.FavouriteCourtsViewModel
 import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
@@ -82,6 +84,7 @@ import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
+
 
 
 @Composable
@@ -177,23 +180,23 @@ fun CourtDropdownMenu(
     selectedCourt: String = "",
     onValueChange: (String) -> Unit,
     isError: Boolean = false,
+    viewModel: FavoritesViewModel = viewModel()
 ) {
-
-    val localViewModel: FavouriteTournamentsViewModel = viewModel()
+    val favoriteCourts by viewModel.favoriteCourts.collectAsState()
+    val isFetching by viewModel.isFetching.collectAsState()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
-    val tournamentNames by localViewModel.tournamentNames.collectAsState()
 
-    LaunchedEffect(key1 = true) {
-        userId?.let {
-            if (localViewModel.tournamentNames.value.isEmpty()) {
-                localViewModel.fetchTournamentNames()
-            }
+    // Automatically fetch once
+    LaunchedEffect(Unit) {
+        if (userId != null) {
+            viewModel.fetchFavoriteCourts(userId)
         }
     }
 
-    LaunchedEffect(tournamentNames) {
-        if (selectedCourt.isEmpty() && tournamentNames.isNotEmpty()) {
-            onValueChange(tournamentNames.first())
+    // Auto-select first court if none selected
+    LaunchedEffect(favoriteCourts) {
+        if (selectedCourt.isEmpty() && favoriteCourts.isNotEmpty()) {
+            onValueChange(favoriteCourts.first().courtName)
         }
     }
 
@@ -249,37 +252,59 @@ fun CourtDropdownMenu(
             containerColor = WhiteGray,
             onDismissRequest = { expanded = false }
         ) {
-            if (tournamentNames.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("No favorites courts found", fontFamily = lexendFontFamily) },
-                    onClick = {}
-                )
-            } else {
-                tournamentNames.forEach { name ->
+            when {
+                isFetching -> {
                     DropdownMenuItem(
-                        text = { Text(name, fontFamily = lexendFontFamily) },
-                        colors = MenuDefaults.itemColors(
-                            textColor = BlueDark
-                        ),
-                        onClick = {
-                            onValueChange(name)
-                            expanded = false
-                        },
-                        trailingIcon = {
-                            if (name == selectedCourt) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = GreenLight
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                    color = GreenLight
                                 )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Loading courts...", fontFamily = lexendFontFamily)
                             }
-                        }
+                        },
+                        onClick = {}
                     )
+                }
+
+                favoriteCourts.isEmpty() -> {
+                    DropdownMenuItem(
+                        text = { Text("No favorite courts found", fontFamily = lexendFontFamily) },
+                        onClick = {}
+                    )
+                }
+
+                else -> {
+                    favoriteCourts.forEach { court ->
+                        DropdownMenuItem(
+                            text = { Text(court.courtName, fontFamily = lexendFontFamily) },
+                            onClick = {
+                                onValueChange(court.courtName)
+                                expanded = false
+                            },
+                            trailingIcon = {
+                                if (court.courtName == selectedCourt) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = GreenLight
+                                    )
+                                }
+                            },
+                            colors = MenuDefaults.itemColors(
+                                textColor = BlueDark
+                            )
+                        )
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun MyPlayerPlaceHolder(
