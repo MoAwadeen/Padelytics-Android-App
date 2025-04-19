@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,7 +95,9 @@ fun FavoriteTournaments(favoriteTournament: FavoriteTournament, onClick: () -> U
 
 @Composable
 fun FavoriteCourts(favoriteCourt: FavoriteCourt, onClick: () -> Unit){
-    Column(modifier = Modifier.clickable { onClick() },
+    Column(modifier = Modifier
+        .width(172.dp)
+        .clickable { onClick() },
         horizontalAlignment = Alignment.Start){
         Box(
             modifier = Modifier
@@ -126,14 +130,20 @@ fun FavoriteCourts(favoriteCourt: FavoriteCourt, onClick: () -> Unit){
             )
         }
 
+        Spacer(modifier = Modifier.height(4.dp))
+
         Text(text = favoriteCourt.courtName,
             style = TextStyle(
                 fontSize = 16.sp,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = Blue
-            )
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
+
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(text = favoriteCourt.bookingPrice,
             style = TextStyle(
@@ -141,21 +151,25 @@ fun FavoriteCourts(favoriteCourt: FavoriteCourt, onClick: () -> Unit){
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = BlueDark
-            )
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
 
 @Composable
-fun FavoriteProducts(favoriteProduct: FavoriteProduct, productBrand:String, onClick: () -> Unit){
-    Column(modifier = Modifier.clickable { onClick() },
+fun FavoriteProducts(favoriteProduct: FavoriteProduct, onClick: () -> Unit){
+    Column(modifier = Modifier
+        .width(172.dp)
+        .clickable { onClick() },
         horizontalAlignment = Alignment.Start){
         Box(
             modifier = Modifier
                 .width(172.dp)
                 .height(172.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(color = Color.White)
+                .background(color = White)
                 .clickable { onClick() }
                 .shadow(
                     elevation = 4.dp,
@@ -175,7 +189,7 @@ fun FavoriteProducts(favoriteProduct: FavoriteProduct, productBrand:String, onCl
                     .width(170.dp)
                     .height(170.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(color = Color.White),
+                    .background(color = White),
                 model = favoriteProduct.productImage,
                 contentDescription = "Product Image",
                 contentScale = ContentScale.Fit,
@@ -183,14 +197,20 @@ fun FavoriteProducts(favoriteProduct: FavoriteProduct, productBrand:String, onCl
             )
         }
 
-        Text(text = productBrand,
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(text = favoriteProduct.productName,
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = Blue
-            )
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
+
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(text = favoriteProduct.productPrice,
             style = TextStyle(
@@ -198,7 +218,9 @@ fun FavoriteProducts(favoriteProduct: FavoriteProduct, productBrand:String, onCl
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = BlueDark
-            )
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

@@ -210,7 +210,6 @@ fun FavoritesScreen(modifier: Modifier = Modifier, navController: NavHostControl
 
                                         FavoriteProducts(
                                             favoriteProduct = favoriteProduct,
-                                            productBrand = "",
                                             onClick = {
                                                 sharedPrefs.edit{ putString("selected_product", productJson) }
                                                 navController.navigate(Routes.PRODUCT_DETAILS)
