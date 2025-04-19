@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -28,9 +29,12 @@ class CourtBookingViewModel : ViewModel() {
     val selectedPlayers: State<Int> = _selectedPlayers
     private val _selectedCity = mutableStateOf("All Cities")
     val selectedCity: State<String> = _selectedCity
+    private val _isFetching = MutableStateFlow(false)
+    val isFetching: StateFlow<Boolean> = _isFetching.asStateFlow()
 
     fun getCourtById(courtId: String?): Flow<Court?> = flow {
         if (courtId != null) {
+            _isFetching.value = true
             try {
                 Log.d("CourtBookingViewModel", "Fetching document: $courtId")
                 val snapshot = db.collection("courts")
@@ -41,9 +45,11 @@ class CourtBookingViewModel : ViewModel() {
                 if (snapshot.exists()) {
                     val court = snapshot.toObject(Court::class.java)
                     emit(court)
+                    _isFetching.value = false
                 } else {
                     Log.d("CourtBookingViewModel", "Court not found")
                     emit(null)
+                    _isFetching.value = false
                 }
             } catch (e: Exception) {
                 Log.e("CourtBookingViewModel", "Error loading court", e)
@@ -145,6 +151,7 @@ class CourtBookingViewModel : ViewModel() {
 
     fun fetchFilteredCourts(playerCount: Int) {
         viewModelScope.launch {
+            _isFetching.value = true
             val filterField = if (playerCount == 2) "twoPlayers" else "fourPlayers"
 
             var query = firestore.collection("courts")
@@ -177,9 +184,11 @@ class CourtBookingViewModel : ViewModel() {
                         )
                     }
                     _courts.value = courtList
+                    _isFetching.value = false
                 }
                 .addOnFailureListener { e ->
                     e.printStackTrace()
+                    _isFetching.value = false
                 }
         }
     }

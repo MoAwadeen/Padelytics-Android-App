@@ -10,6 +10,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import grad.project.padelytics.features.shop.data.remote.model.Product
 import grad.project.padelytics.features.shop.data.remote.network.ShopRetrofitModule
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ShopViewModel : ViewModel() {
@@ -21,9 +24,8 @@ class ShopViewModel : ViewModel() {
     val selectedBrand: State<String> = _selectedBrand
     private val _selectedSorting = mutableStateOf("Featured")
     val selectedSorting: State<String> = _selectedSorting
-
-    private val db = FirebaseFirestore.getInstance()
-    private val userId = FirebaseAuth.getInstance().currentUser?.uid
+    private val _isFetching = MutableStateFlow(false)
+    val isFetching: StateFlow<Boolean> = _isFetching.asStateFlow()
 
     init {
         searchProducts("padel")
@@ -71,6 +73,7 @@ class ShopViewModel : ViewModel() {
 
     private fun searchProducts(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            _isFetching.value = true
             try {
                 val response = ShopRetrofitModule.apiService.searchProducts(
                     apiKey = ShopRetrofitModule.getApiKey(),
@@ -80,10 +83,12 @@ class ShopViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val productList = response.body()?.data?.products ?: emptyList()
                     val sortedProducts = sortProducts(productList, _selectedSorting.value)
-                    _products.value = sortedProducts.take(10)
-                    //.shuffled()
+                    _products.value = sortedProducts
+                    //.shuffled().take(10)
+                    _isFetching.value = false
                 } else {
                     Log.e("ShopViewModel", "API Request Failed: ${response.message()}")
+                    _isFetching.value = false
                 }
             } catch (e: Exception) {
                 Log.e("ShopViewModel", "Error: ${e.message}")
@@ -99,6 +104,8 @@ class ShopViewModel : ViewModel() {
         productUrl: String,
         productRating: String,
         productNumRating: String,
+        productDelivery: String,
+        productOffers: String,
         onComplete: (Boolean) -> Unit
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
@@ -117,6 +124,8 @@ class ShopViewModel : ViewModel() {
                 "productUrl" to productUrl,
                 "productRating" to productRating,
                 "productNumRating" to productNumRating,
+                "productDelivery" to productDelivery,
+                "productOffers" to productOffers
             )
 
             favoriteProductRef.set(favoriteData)

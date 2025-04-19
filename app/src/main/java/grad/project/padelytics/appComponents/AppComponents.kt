@@ -1,8 +1,8 @@
 package grad.project.padelytics.appComponents
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,7 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -32,6 +35,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import grad.project.padelytics.R
 import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
@@ -39,14 +47,6 @@ import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
-
-import androidx.compose.runtime.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import com.airbnb.lottie.compose.*
-import grad.project.padelytics.ui.theme.GreenDark
 
 @Composable
 fun MidWhiteHeadline(text: String,size: Int,){
@@ -72,7 +72,6 @@ fun MidDarkHeadline(text: String,size: Int,){
         fontWeight = FontWeight.Bold)
 }
 
-
 @Composable
 fun MidBlueHeadline(text: String,size: Int,){
     Text(text=text,
@@ -81,7 +80,6 @@ fun MidBlueHeadline(text: String,size: Int,){
         fontFamily = lexendFontFamily,
         fontWeight = FontWeight.Bold)
 }
-
 
 @Composable
 fun SimiMidDarkHeadline(text: String,size: Int,){
@@ -319,7 +317,6 @@ fun DetailsAppToolbar(onClick: () -> Unit, itemName: String) {
 fun DetailsAppToolbarPreview(){
     DetailsAppToolbar(onClick = {}, itemName = "item Name")
 }
-
 
 @Composable
 fun FetchingIndicator(

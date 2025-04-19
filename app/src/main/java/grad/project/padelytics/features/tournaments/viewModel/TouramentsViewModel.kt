@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -21,9 +22,12 @@ class TournamentsViewModel : ViewModel() {
     val tournaments: StateFlow<List<Tournament>> = _tournaments
     private val db = FirebaseFirestore.getInstance()
     private val userId = FirebaseAuth.getInstance().currentUser?.uid
+    private val _isFetching = MutableStateFlow(false)
+    val isFetching: StateFlow<Boolean> = _isFetching.asStateFlow()
 
     fun fetchTournaments() {
         viewModelScope.launch {
+            _isFetching.value = true
             firestore.collection("tournaments")
                 .get()
                 .addOnSuccessListener { result ->
@@ -41,15 +45,18 @@ class TournamentsViewModel : ViewModel() {
                         )
                     }
                     _tournaments.value = tournamentList
+                    _isFetching.value = false
                 }
                 .addOnFailureListener { e ->
                     e.printStackTrace()
+                    _isFetching.value = false
                 }
         }
     }
 
     fun getTournamentById(tournamentId: String?): Flow<Tournament?> = flow {
         if (tournamentId != null) {
+            _isFetching.value = true
             try {
                 Log.d("TournamentsViewModel", "Fetching document: $tournamentId")
                 val snapshot = db.collection("tournaments")
@@ -60,9 +67,11 @@ class TournamentsViewModel : ViewModel() {
                 if (snapshot.exists()) {
                     val tournament = snapshot.toObject(Tournament::class.java)
                     emit(tournament)
+                    _isFetching.value = false
                 } else {
                     Log.d("TournamentsViewModel", "Tournament not found")
                     emit(null)
+                    _isFetching.value = false
                 }
             } catch (e: Exception) {
                 Log.e("TournamentsViewModel", "Error loading tournament", e)
