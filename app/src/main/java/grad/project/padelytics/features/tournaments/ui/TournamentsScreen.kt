@@ -39,6 +39,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.tournaments.components.GridItem
 import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
 import grad.project.padelytics.navigation.Routes
@@ -49,6 +50,7 @@ fun TournamentsScreen(modifier: Modifier = Modifier, navController: NavHostContr
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+    val isFetching by viewModel.isFetching.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -95,41 +97,46 @@ fun TournamentsScreen(modifier: Modifier = Modifier, navController: NavHostContr
             }
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.White)
-                .padding(innerPadding)
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures { _, dragAmount ->
-                        if (dragAmount > 0) {
-                            isBottomBarVisible = true
-                        } else if (dragAmount < 0) {
-                            isBottomBarVisible = false
-                        }
-                    }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+        if (isFetching) {
+            FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
+        }
+        else {
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(8.dp),
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
-                verticalArrangement = Arrangement.spacedBy(30.dp)
-            ) {
-                items(tournaments) { tournament ->
-                    GridItem(
-                        tournament = tournament.tournamentName,
-                        prize = tournament.prize,
-                        date = tournament.date,
-                        imageUrl = tournament.image,
-                        onClick = {
-                            navController.navigate("TOURNAMENT_DETAILS/${tournament.id}")
+                    .background(color = Color.White)
+                    .padding(innerPadding)
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures { _, dragAmount ->
+                            if (dragAmount > 0) {
+                                isBottomBarVisible = true
+                            } else if (dragAmount < 0) {
+                                isBottomBarVisible = false
+                            }
                         }
-                    )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(30.dp)
+                ) {
+                    items(tournaments) { tournament ->
+                        GridItem(
+                            tournament = tournament.tournamentName,
+                            prize = tournament.prize,
+                            date = tournament.date,
+                            imageUrl = tournament.image,
+                            onClick = {
+                                navController.navigate("TOURNAMENT_DETAILS/${tournament.id}")
+                            }
+                        )
+                    }
                 }
             }
         }

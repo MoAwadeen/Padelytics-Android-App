@@ -39,6 +39,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.courtBooking.components.CourtHeaders
 import grad.project.padelytics.features.courtBooking.components.CourtItem
 import grad.project.padelytics.features.courtBooking.components.NoCourtsAlert
@@ -54,6 +55,7 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
     val selectedPlayers by viewModel.selectedPlayers
     val selectedCity by viewModel.selectedCity
     var cities by remember { mutableStateOf(listOf<String>()) }
+    val isFetching by viewModel.isFetching.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -133,33 +135,37 @@ fun CourtsScreen(modifier: Modifier = Modifier, navController: NavHostController
                 cities = cities
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
-
-            if (courts.isEmpty()) {
-                NoCourtsAlert()
+            if (isFetching) {
+                FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.White)
-                ){
-                    items(courts){ court ->
-                        CourtItem(
-                            viewModel = CourtBookingViewModel(),
-                            court = court,
-                            courtId = court.courtId,
-                            courtImage = court.courtImage,
-                            courtName = court.courtName,
-                            courtRating = court.courtRating,
-                            courtNumRating = court.numRating,
-                            courtPrice = court.bookingPrice,
-                            onClick = {
-                                navController.navigate(route = "COURT_DETAILS/${court.courtId}")
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    item{
-                        Spacer(modifier = Modifier.height(14.dp))
+                if (courts.isEmpty()) {
+                    NoCourtsAlert()
+                } else {
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                            .background(color = Color.White)
+                    ){
+                        items(courts){ court ->
+                            CourtItem(
+                                viewModel = CourtBookingViewModel(),
+                                court = court,
+                                courtId = court.courtId,
+                                courtImage = court.courtImage,
+                                courtName = court.courtName,
+                                courtRating = court.courtRating,
+                                courtNumRating = court.numRating,
+                                courtPrice = court.bookingPrice,
+                                onClick = {
+                                    navController.navigate(route = "COURT_DETAILS/${court.courtId}")
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                        item{
+                            Spacer(modifier = Modifier.height(14.dp))
+                        }
                     }
                 }
             }

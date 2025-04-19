@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.shop.components.ShopHeaders
 import grad.project.padelytics.features.shop.components.ShopProduct
 import grad.project.padelytics.features.shop.viewModel.ShopViewModel
@@ -52,6 +54,7 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+    val isFetching by viewModel.isFetching.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -112,13 +115,16 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-                .background(color = Color.White)
-            ){
-                items(viewModel.products.value) { product ->
-                    product.delivery?.let {
-                        product.product_star_rating?.let { it1 ->
+            if (isFetching) {
+                FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
+            }
+            else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                        .background(color = Color.White)
+                ){
+                    items(viewModel.products.value) { product ->
+                        if (product.delivery != null && product.product_star_rating != null){
                             val context = LocalContext.current
                             val sharedPrefs = context.getSharedPreferences("product_prefs", Context.MODE_PRIVATE)
                             val productJson = JSONObject().apply {
@@ -140,9 +146,10 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                                 productId = product.asin,
                                 productImage = product.product_photo,
                                 productName = product.product_title,
-                                productRating = it1,
+                                productRating = product.product_star_rating,
                                 productNumRating = product.product_num_ratings.toString(),
-                                productDelivery = it,
+                                productDelivery = product.delivery,
+                                productOffers = product.product_num_offers.toString(),
                                 productPrice = product.product_price,
                                 productUrl = product.product_url,
                                 onClick = {
@@ -151,8 +158,9 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                                 }
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(14.dp))
                     }
-                    Spacer(modifier = Modifier.height(14.dp))
                 }
             }
         }

@@ -37,7 +37,6 @@ import grad.project.padelytics.appComponents.DetailsAppToolbar
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.shop.components.ProductDetails
 import grad.project.padelytics.features.shop.viewModel.ShopViewModel
-import grad.project.padelytics.navigation.Routes
 import org.json.JSONObject
 
 @Composable
@@ -94,7 +93,7 @@ fun ProductDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCo
         modifier = Modifier.nestedScroll(nestedScrollConnection),
         topBar = {
             DetailsAppToolbar(
-                onClick = { navController.navigate(Routes.SHOP) },
+                onClick = { navController.popBackStack() },
                 itemName = ""
             )
         },
