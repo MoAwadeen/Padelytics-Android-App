@@ -76,7 +76,6 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidDarkHeadline
 import grad.project.padelytics.features.favorites.viewModel.FavoritesViewModel
 import grad.project.padelytics.features.videoUpload.data.FriendData
-import grad.project.padelytics.features.videoUpload.viewModel.FavouriteCourtsViewModel
 import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
