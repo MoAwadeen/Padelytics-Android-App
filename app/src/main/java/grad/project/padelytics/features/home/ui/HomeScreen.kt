@@ -1,10 +1,12 @@
 package grad.project.padelytics.features.home.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,6 +33,8 @@ import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.features.home.components.FeatureList
 import grad.project.padelytics.features.home.components.HomeAppToolbar
+import grad.project.padelytics.features.home.components.ResultWidget
+import grad.project.padelytics.features.home.components.Spotlight
 import grad.project.padelytics.features.home.viewModel.HomeViewModel
 
 @Composable
@@ -41,6 +45,10 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+
+    BackHandler(enabled = true) {
+        // This empty to block
+    }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -89,11 +97,16 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                 .fillMaxSize()
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
-                FeatureList(navController)
-            }
+            item {   FeatureList(navController) }
+            item {  Column(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Spotlight()
+                ResultWidget()
+            } }
         }
 
         }

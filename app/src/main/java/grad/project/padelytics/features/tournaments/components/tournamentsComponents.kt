@@ -16,13 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,8 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
@@ -58,15 +56,16 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.features.tournaments.data.Tournament
 import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
-import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
+import grad.project.padelytics.ui.theme.GreenLight
+import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
 fun GridItem(tournament: String, prize: String, date: String, imageUrl: String, onClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().clickable { onClick() }) {
 
         Box(
             modifier = Modifier
@@ -149,59 +148,81 @@ fun GridItemPreview(){
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TournamentAppToolbar(navController: NavController, tournamentName: String) {
-    TopAppBar(
-        modifier = Modifier.fillMaxWidth().height(80.dp),
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Blue,
-            titleContentColor = White,
-        ),
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        navController.navigate(Routes.TOURNAMENTS)
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.back) ,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-                Text(
-                    text = tournamentName,
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        color = White
-                    ),
-                    modifier = Modifier.padding(start = 18.dp),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    )
-}
-
-@Preview
-@Composable
-fun TournamentAppToolbarPreview(){
-    TournamentAppToolbar(navController = rememberNavController(), tournamentName = "Tournament Name")
-}
-
 @Composable
 fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = viewModel()) {
     val context = LocalContext.current
     var isFavorite by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            containerColor = Blue,
+            titleContentColor = BlueDark,
+            textContentColor = GreenLight,
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(text = "Remove from favorites",
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = WhiteGray
+                    ) )
+            },
+            text = {
+                Text(text = "Are you sure you want to remove this tournament from your favorites?",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    ))
+            },
+            confirmButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenLight,
+                        contentColor = BlueDark
+                    ),
+                    onClick = {
+                        showDialog = false
+                        viewModel.removeFavoriteTournament(tournament.id) { success ->
+                            if (success) {
+                                isFavorite = false
+                                Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Failed to remove", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                ) {
+                    Text(text = "YES",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            color = BlueDark
+                        ))
+                }
+            },
+            dismissButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenDark,
+                        contentColor = GreenLight),
+                    onClick = { showDialog = false }
+                ) {
+                    Text(text = "NO",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            color = GreenLight
+                        ))
+                }
+            }
+        )
+    }
 
     LaunchedEffect(tournament.id) {
         viewModel.checkIfFavorite(tournament.id) { result ->
@@ -268,16 +289,9 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
                     IconButton(
                         onClick = {
                             if (isFavorite) {
-                                viewModel.removeFavoriteTournament(tournament.id) { success ->
-                                    if (success) {
-                                        isFavorite = false
-                                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        Toast.makeText(context, "Failed to remove", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                                showDialog = true
                             } else {
-                                viewModel.saveFavoriteTournament(tournament.id) { success ->
+                                viewModel.saveFavoriteTournament(tournament) { success ->
                                     if (success) {
                                         isFavorite = true
                                         Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()

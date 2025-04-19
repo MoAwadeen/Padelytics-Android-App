@@ -1,23 +1,30 @@
 package grad.project.padelytics.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import grad.project.padelytics.features.auth.components.UsernameUpdateScreen
 import grad.project.padelytics.features.auth.ui.AuthScreen
 import grad.project.padelytics.features.auth.ui.LoginScreen
 import grad.project.padelytics.features.auth.ui.SignUpScreen
 import grad.project.padelytics.features.auth.ui.SignUpSecondScreen
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
-import grad.project.padelytics.features.favorite.ui.FavoriteScreen
+import grad.project.padelytics.features.courtBooking.ui.CourtDetailsScreen
+import grad.project.padelytics.features.courtBooking.ui.CourtsScreen
+import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
+import grad.project.padelytics.features.favorites.ui.FavoritesScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
+import grad.project.padelytics.features.shop.ui.ProductDetailsScreen
+import grad.project.padelytics.features.shop.ui.ShopScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentDetailsScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentsScreen
+import grad.project.padelytics.features.videoUpload.ui.VideoUploadScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -40,7 +47,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             HomeScreen(modifier,navController)
         }
         composable(Routes.FAVORITE) {
-            FavoriteScreen(modifier,navController)
+            FavoritesScreen(modifier,navController)
         }
         composable(Routes.PROFILE) {
             ProfileScreen(modifier,navController)
@@ -54,6 +61,28 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         ) { backStackEntry ->
             val tournamentId = backStackEntry.arguments?.getString("tournamentId")
             TournamentDetailsScreen(modifier, navController, tournamentId)
+        }
+        composable(Routes.VIDEO_UPLOAD) {
+            VideoUploadScreen(modifier,navController)
+        }
+        composable(Routes.USERNAME_UPDATE) {
+            UsernameUpdateScreen(navController = navController)
+        }
+        composable(Routes.SHOP) {
+            ShopScreen(modifier,navController)
+        }
+        composable(Routes.PRODUCT_DETAILS) {
+            ProductDetailsScreen(modifier,navController)
+        }
+        composable(Routes.COURTS) {
+            CourtsScreen(modifier,navController)
+        }
+        composable(
+            route = Routes.COURT_DETAILS,
+            arguments = listOf(navArgument("courtId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val courtId = backStackEntry.arguments?.getString("courtId")
+            CourtDetailsScreen(modifier, navController, viewModel = CourtBookingViewModel(), courtId)
         }
     }
 }

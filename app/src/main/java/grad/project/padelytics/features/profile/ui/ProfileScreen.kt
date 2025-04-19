@@ -1,40 +1,52 @@
 package grad.project.padelytics.features.profile.ui
 
 import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import grad.project.padelytics.R
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberAsyncImagePainter
+import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.*
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
-import grad.project.padelytics.features.auth.components.WideGreenButton
+import grad.project.padelytics.features.profile.components.InfoRow
+import grad.project.padelytics.features.profile.components.LogoutButton
+import grad.project.padelytics.features.profile.components.LogoutConfirmationDialog
+import grad.project.padelytics.features.profile.components.NumberLabelChip
+import grad.project.padelytics.features.profile.components.ProfileHeader
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
-import grad.project.padelytics.appComponents.MidDarkHeadline
-import grad.project.padelytics.features.profile.components.*
+import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
@@ -60,6 +72,10 @@ fun ProfileScreen(
     val photo = userProfile?.photo ?: R.drawable.user
     val city = userProfile?.city.orEmpty()
     val rewardPoints = userProfile?.rewardPoints ?: 0
+    val userName = userProfile?.userName.orEmpty()
+
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showConfirmationDialog by remember { mutableStateOf(false) }
 
 
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -70,8 +86,29 @@ fun ProfileScreen(
         }
     }
 
+    BackHandler {
+        navController.popBackStack()
+    }
+
     fun selectImage() {
         pickImageLauncher.launch("image/*")
+    }
+
+    if (showAddDialog) {
+        SearchFriendDialog(
+            onDismiss = { showAddDialog = false },
+            onUserFound = { username ->
+                Log.d("FriendSearch", "Found user: $username")
+            }
+        )
+    }
+
+    if (showConfirmationDialog) {
+        LogoutConfirmationDialog(
+            showDialog = showConfirmationDialog,
+            onDismiss = { showConfirmationDialog = false },
+            onConfirmLogout = { authViewModel.logout(navController) }
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -96,8 +133,9 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(50.dp))
                 MidDarkHeadline(text = fullname, size = 20)
+                MidBlueHeadline(text = "@$userName", size = 12)
 
                 Row(
                     modifier = Modifier.wrapContentSize(),
@@ -134,7 +172,7 @@ fun ProfileScreen(
             item {
                 Column(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     InfoRow(
                         icon = painterResource(id = R.drawable.reward),
@@ -166,7 +204,8 @@ fun ProfileScreen(
 
                     InfoRow(
                         icon = painterResource(id = R.drawable.add_user),
-                        label = "Invite Friends"
+                        label = "Add Friends",
+                        onClick = { showAddDialog = true }
                     )
 
                     InfoRow(
@@ -174,12 +213,13 @@ fun ProfileScreen(
                         label = "About Us"
                     )
 
-                    LogoutButton{
-                        authViewModel.logout(navController)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
+            }
+            item {
+                Box(modifier = Modifier.padding(horizontal = 24.dp)){
+                LogoutButton{
+                    showConfirmationDialog = true
+                }}
             }
         }
     }

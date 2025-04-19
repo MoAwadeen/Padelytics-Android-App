@@ -7,53 +7,54 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import grad.project.padelytics.R
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.sp
-import grad.project.padelytics.ui.theme.GreenLight
-import grad.project.padelytics.ui.theme.lexendFontFamily
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Shape
-import grad.project.padelytics.appComponents.MidDarkHeadline
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.SimiMidDarkHeadline
-import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
+import grad.project.padelytics.ui.theme.GreenLight
+import grad.project.padelytics.ui.theme.lexendFontFamily
 import grad.project.padelytics.ui.theme.WhiteGray
+import android.widget.Toast
+import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import grad.project.padelytics.ui.theme.Blue
 
 
 @Composable
@@ -169,13 +170,15 @@ fun PreviewNumberChipsRow() {
 fun InfoRow(
     icon: Painter,
     label: String,
-    value: String? = null // Optional value
+    value: String? = null,
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 10.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
             painter = icon,
@@ -278,3 +281,84 @@ fun LogoutButtonPreview() {
     LogoutButton(onClick = {})
 }
 
+@Composable
+fun LogoutConfirmationDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onConfirmLogout: () -> Unit
+) {
+    if (!showDialog) return
+
+    val context = LocalContext.current
+
+    AlertDialog(
+        containerColor = Blue,
+        titleContentColor = BlueDark,
+        textContentColor = GreenLight,
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Log out",
+                style = TextStyle(
+                    fontSize = 22.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    color = WhiteGray
+                )
+            )
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to log out from your account?",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    color = BlueDark
+                )
+            )
+        },
+        confirmButton = {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GreenLight,
+                    contentColor = BlueDark
+                ),
+                onClick = {
+                    onDismiss()
+                    onConfirmLogout()
+                    Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                }
+            ) {
+                Text(
+                    text = "YES",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BlueDark
+                    )
+                )
+            }
+        },
+        dismissButton = {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GreenDark,
+                    contentColor = GreenLight
+                ),
+                onClick = onDismiss
+            ) {
+                Text(
+                    text = "NO",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = GreenLight
+                    )
+                )
+            }
+        }
+    )
+}

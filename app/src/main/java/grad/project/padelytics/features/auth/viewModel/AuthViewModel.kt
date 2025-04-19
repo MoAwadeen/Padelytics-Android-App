@@ -4,24 +4,11 @@ import android.app.Application
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -31,13 +18,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import grad.project.padelytics.R
-import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.data.UserModel
 import grad.project.padelytics.navigation.Routes
-import grad.project.padelytics.ui.theme.GreenLight
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.sql.Types.NULL
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -49,17 +33,20 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         password: String,
         firstName: String,
         lastName: String,
+        userName: String,
         photo: String,
         onResult: (Boolean, String?) -> Unit
     ) {
         viewModelScope.launch {
             try {
+
                 val authResult = auth.createUserWithEmailAndPassword(email, password).await()
                 val userId = authResult.user?.uid ?: throw Exception("User creation failed")
 
                 val userModel = UserModel(
                     firstName = firstName,
                     lastName = lastName,
+                    username = userName,
                     uid = userId,
                     email = email,
                     password = password,
@@ -211,5 +198,63 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun updateUsername(newUsername: String, onResult: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: run {
+            onResult(false, "User not logged in")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+
+                val existingUsers = firestore.collection("users")
+                    .whereEqualTo("userName", newUsername)
+                    .get()
+                    .await()
+
+                val usernameTaken = existingUsers.any { it.id != userId }
+
+                if (usernameTaken) {
+                    onResult(false, "Username is already taken")
+                    return@launch
+                }
+
+                firestore.collection("users")
+                    .document(userId)
+                    .update("userName", newUsername)
+                    .await()
+                onResult(true, null)
+
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Failed to update username", e)
+                onResult(false, e.message ?: "Failed to update username")
+            }
+        }
+    }
+
+    fun checkUsernameAvailable(
+        username: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val existingUsers = firestore.collection("users")
+                    .whereEqualTo("userName", username) // Make sure this matches your Firestore field
+                    .get()
+                    .await()
+
+                if (existingUsers.isEmpty) {
+                    onResult(true, null)
+                } else {
+                    onResult(false, "Username is already taken")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "checkUsernameAvailable failed", e)
+                onResult(false, "Failed to check username availability")
+            }
+        }
+    }
+
 
 }
