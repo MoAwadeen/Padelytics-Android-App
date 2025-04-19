@@ -110,7 +110,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
                     }
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             item {
                 if (isFetching) {

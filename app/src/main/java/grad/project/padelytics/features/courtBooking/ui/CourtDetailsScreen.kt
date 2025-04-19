@@ -109,7 +109,7 @@ fun CourtDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCont
                     }
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             item {
                 if (isFetching) {

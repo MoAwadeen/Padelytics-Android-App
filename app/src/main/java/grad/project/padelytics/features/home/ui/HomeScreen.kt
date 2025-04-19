@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.features.home.components.FeatureList
 import grad.project.padelytics.features.home.components.HomeAppToolbar
+import grad.project.padelytics.features.home.components.ResultWidget
 import grad.project.padelytics.features.home.components.Spotlight
 import grad.project.padelytics.features.home.viewModel.HomeViewModel
 
@@ -97,13 +99,14 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
-                FeatureList(navController)
-            }
-
-            item{
+            item {   FeatureList(navController) }
+            item {  Column(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Spotlight()
-            }
+                ResultWidget()
+            } }
         }
 
         }
