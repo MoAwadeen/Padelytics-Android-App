@@ -61,6 +61,7 @@ fun ProductDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCo
     val productDelivery = productObj.getString("productDelivery")
     val productUrl = productObj.getString("productUrl")
     val productOffers = productObj.getString("productOffers")
+    val productBrand = productObj.getString("productBrand")
     val userCity = userProfile?.city ?: "Unknown City"
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -125,6 +126,7 @@ fun ProductDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCo
                     productDelivery = productDelivery,
                     productUrl = productUrl,
                     productOffers = productOffers,
+                    productBrand = productBrand,
                     userCity = userCity
                 )
             }

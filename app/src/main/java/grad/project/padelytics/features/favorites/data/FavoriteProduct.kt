@@ -9,5 +9,6 @@ data class FavoriteProduct(
     val productRating: String = "",
     val productUrl: String = "",
     val productDelivery: String = "",
-    val productOffers:String = ""
+    val productOffers:String = "",
+    val productBrand:String = ""
 )

@@ -199,7 +199,7 @@ fun FavoriteProducts(favoriteProduct: FavoriteProduct, onClick: () -> Unit){
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(text = favoriteProduct.productName,
+        Text(text = favoriteProduct.productBrand,
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = lexendFontFamily,

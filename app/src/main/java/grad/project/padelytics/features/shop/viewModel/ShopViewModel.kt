@@ -27,8 +27,37 @@ class ShopViewModel : ViewModel() {
     private val _isFetching = MutableStateFlow(false)
     val isFetching: StateFlow<Boolean> = _isFetching.asStateFlow()
 
+    private val brandSynonyms = mapOf(
+        "Adidas" to listOf("Adidas", "اديداس", "أديداس"),
+        "Nike" to listOf("Nike", "نايك"),
+        "Puma" to listOf("Puma", "بوما"),
+        "Head" to listOf("Head", "هيد"),
+        "Wilson" to listOf("Wilson", "ويلسون"),
+        "Asics" to listOf("Asics", "اسيكس"),
+        "NOX" to listOf("NOX", "نوكس"),
+        "Bullpadel" to listOf("Bullpadel", "بولبادل"),
+        "Babolat" to listOf("Babolat", "بابولات"),
+        "Star vie" to listOf("Star vie", "StarVie" , "ستار في" ,"ستارفي"),
+        "Tecnifibre" to listOf("Tecnifibre", "تكنيفايبر", "تكنيفيبر"),
+        "Qshop" to listOf("Qshop", "كيو شوب"),
+        "S SIUX" to listOf("S SIUX", "سيوكس"),
+        "Camewin" to listOf("Camewin", "كاموين")
+    )
+
     init {
         searchProducts("padel")
+    }
+
+    fun detectBrandFromMultiLangTitle(title: String): String {
+        val lowerTitle = title.lowercase()
+        for ((brand, synonyms) in brandSynonyms) {
+            for (synonym in synonyms) {
+                if (lowerTitle.contains(synonym.lowercase())) {
+                    return synonym
+                }
+            }
+        }
+        return "Unknown"
     }
 
     fun updateFilters(category: String, brand: String, sort_by: String) {
@@ -106,6 +135,7 @@ class ShopViewModel : ViewModel() {
         productNumRating: String,
         productDelivery: String,
         productOffers: String,
+        productBrand: String,
         onComplete: (Boolean) -> Unit
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
@@ -125,9 +155,9 @@ class ShopViewModel : ViewModel() {
                 "productRating" to productRating,
                 "productNumRating" to productNumRating,
                 "productDelivery" to productDelivery,
-                "productOffers" to productOffers
+                "productOffers" to productOffers,
+                "productBrand" to productBrand
             )
-
             favoriteProductRef.set(favoriteData)
                 .addOnSuccessListener {
                     onComplete(true)
