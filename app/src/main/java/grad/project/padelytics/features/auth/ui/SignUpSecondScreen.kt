@@ -106,16 +106,7 @@ fun SignUpSecondScreen(
             }
 
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SmallBlueButton("Back") { navController.popBackStack() }
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    SmallGreenButton("Finish") {
+                SmallGreenButton("Finish") {
                         val allFieldsSelected = listOf(selectedGender, selectedLevel, selectedCity, selectedDate)
                             .all { it != null }
 
@@ -140,9 +131,7 @@ fun SignUpSecondScreen(
                             Toast.makeText(context, "Please select all fields", Toast.LENGTH_SHORT).show()
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
