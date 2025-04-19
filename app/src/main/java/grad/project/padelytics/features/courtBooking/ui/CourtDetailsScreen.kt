@@ -7,6 +7,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -42,6 +44,7 @@ fun CourtDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCont
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+    val isFetching by viewModel.isFetching.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -72,7 +75,7 @@ fun CourtDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCont
         topBar = {
             DetailsAppToolbar(
                 onClick = { navController.popBackStack() },
-                itemName = court?.courtName ?: "Court Name"
+                itemName = court?.courtName ?: ""
             )
         },
         bottomBar = {
@@ -104,13 +107,17 @@ fun CourtDetailsScreen(modifier: Modifier = Modifier, navController: NavHostCont
                             isBottomBarVisible = false
                         }
                     }
-                }
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             item {
-                if (court != null) {
-                    CourtDetails(court = court!!)
+                if (isFetching) {
+                    FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
                 } else {
-                    FetchingIndicator(isFetching = true)
+                    if (court != null) {
+                        CourtDetails(court = court!!)
+                    }
                 }
             }
         }

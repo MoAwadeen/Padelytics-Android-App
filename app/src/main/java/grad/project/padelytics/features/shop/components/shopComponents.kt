@@ -396,6 +396,7 @@ fun ShopProduct(
     productNumRating: String,
     productPrice: String,
     productDelivery: String,
+    productOffers: String,
     productUrl: String,
     onClick: () -> Unit
 ) {
@@ -628,7 +629,9 @@ fun ShopProduct(
                                     productImage,
                                     productUrl,
                                     productRating,
-                                    productNumRating
+                                    productNumRating,
+                                    productDelivery,
+                                    productOffers
                                 ) { success ->
                                     if (success) {
                                         isFavorite = true
@@ -665,6 +668,7 @@ fun ShopProductPreview(){
         productRating = "4.5",
         productNumRating = "200",
         productDelivery = "Free Delivery",
+        productOffers = "",
         productPrice = "1000 EGP",
         productUrl = "",
         onClick = {}
@@ -840,7 +844,9 @@ fun ProductDetails(
                                     productImage,
                                     productUrl,
                                     productRating,
-                                    productNumRating
+                                    productNumRating,
+                                    productDelivery,
+                                    productOffers
                                 ) { success ->
                                     if (success) {
                                         isFavorite = true

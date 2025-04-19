@@ -7,6 +7,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -35,7 +37,6 @@ import grad.project.padelytics.appComponents.DetailsAppToolbar
 import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.tournaments.components.TournamentDetails
 import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
-import grad.project.padelytics.navigation.Routes
 
 @Composable
 fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHostController, tournamentId: String?) {
@@ -44,6 +45,7 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+    val isFetching by viewModel.isFetching.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -73,8 +75,8 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
         modifier = Modifier.nestedScroll(nestedScrollConnection).fillMaxSize(),
         topBar = {
             DetailsAppToolbar(
-                onClick = {navController.navigate(Routes.TOURNAMENTS)},
-                itemName = tournament?.tournamentName ?: "Tournament Name"
+                onClick = { navController.popBackStack() },
+                itemName = tournament?.tournamentName ?: ""
             )
         },
         bottomBar = {
@@ -106,13 +108,18 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
                             isBottomBarVisible = false
                         }
                     }
-                }
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             item {
-                if (tournament != null) {
-                    TournamentDetails(tournament = tournament!!)
-                } else {
-                    FetchingIndicator(isFetching = true)
+                if (isFetching) {
+                    FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
+                }
+                else {
+                    if (tournament != null) {
+                        TournamentDetails(tournament = tournament!!)
+                    }
                 }
             }
         }

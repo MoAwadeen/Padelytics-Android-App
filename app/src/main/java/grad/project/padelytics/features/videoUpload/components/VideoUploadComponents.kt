@@ -251,7 +251,7 @@ fun CourtDropdownMenu(
         ) {
             if (tournamentNames.isEmpty()) {
                 DropdownMenuItem(
-                    text = { Text("No favorite courts found", fontFamily = lexendFontFamily) },
+                    text = { Text("No favorites courts found", fontFamily = lexendFontFamily) },
                     onClick = {}
                 )
             } else {

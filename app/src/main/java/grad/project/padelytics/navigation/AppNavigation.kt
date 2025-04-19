@@ -17,7 +17,7 @@ import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.courtBooking.ui.CourtDetailsScreen
 import grad.project.padelytics.features.courtBooking.ui.CourtsScreen
 import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
-import grad.project.padelytics.features.favorite.ui.FavoriteScreen
+import grad.project.padelytics.features.favorites.ui.FavoritesScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
 import grad.project.padelytics.features.shop.ui.ProductDetailsScreen
@@ -47,7 +47,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             HomeScreen(modifier,navController)
         }
         composable(Routes.FAVORITE) {
-            FavoriteScreen(modifier,navController)
+            FavoritesScreen(modifier,navController)
         }
         composable(Routes.PROFILE) {
             ProfileScreen(modifier,navController)
