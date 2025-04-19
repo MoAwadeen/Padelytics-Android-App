@@ -100,7 +100,8 @@ class FavoritesViewModel : ViewModel() {
                             productId = document.getString("productId") ?: "",
                             productNumRating = document.getString("productNumRating") ?: "",
                             productDelivery = document.getString("productDelivery") ?: "",
-                            productOffers = document.getString("productOffers") ?: ""
+                            productOffers = document.getString("productOffers") ?: "",
+                            productBrand = document.getString("productBrand") ?: ""
                         )
                     }
                     _products.value = favoriteList

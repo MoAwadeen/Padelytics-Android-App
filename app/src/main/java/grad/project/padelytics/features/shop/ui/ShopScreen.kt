@@ -125,6 +125,7 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                 ){
                     items(viewModel.products.value) { product ->
                         if (product.delivery != null && product.product_star_rating != null){
+                            val detectedBrand = viewModel.detectBrandFromMultiLangTitle(product.product_title)
                             val context = LocalContext.current
                             val sharedPrefs = context.getSharedPreferences("product_prefs", Context.MODE_PRIVATE)
                             val productJson = JSONObject().apply {
@@ -137,6 +138,7 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                                 put("productDelivery", product.delivery)
                                 put("productUrl", product.product_url)
                                 put("productOffers", product.product_num_offers)
+                                put("productBrand", detectedBrand)
                             }.toString()
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -150,6 +152,7 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                                 productNumRating = product.product_num_ratings.toString(),
                                 productDelivery = product.delivery,
                                 productOffers = product.product_num_offers.toString(),
+                                productBrand = detectedBrand,
                                 productPrice = product.product_price,
                                 productUrl = product.product_url,
                                 onClick = {
