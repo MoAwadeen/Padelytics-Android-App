@@ -32,6 +32,10 @@ class CourtBookingViewModel : ViewModel() {
     private val _isFetching = MutableStateFlow(false)
     val isFetching: StateFlow<Boolean> = _isFetching.asStateFlow()
 
+    init {
+        fetchFilteredCourts(playerCount = 4)
+    }
+
     fun getCourtById(courtId: String?): Flow<Court?> = flow {
         if (courtId != null) {
             _isFetching.value = true
