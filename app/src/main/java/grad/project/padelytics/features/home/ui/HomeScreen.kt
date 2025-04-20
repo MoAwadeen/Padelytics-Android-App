@@ -43,7 +43,6 @@ import grad.project.padelytics.features.home.components.HomeTitlesRow
 import grad.project.padelytics.features.home.components.LazyRowSpotlight
 import grad.project.padelytics.features.home.components.ProductsList
 import grad.project.padelytics.features.home.components.ResultWidget
-import grad.project.padelytics.features.home.components.Spotlight
 import grad.project.padelytics.features.home.components.TournamentsList
 import grad.project.padelytics.features.home.viewModel.HomeViewModel
 import grad.project.padelytics.features.shop.viewModel.ShopViewModel
@@ -123,7 +122,6 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                     padding(horizontal = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    //Spotlight()
 
                     LazyRowSpotlight()
 

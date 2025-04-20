@@ -10,12 +10,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -191,41 +191,6 @@ data class Feature(
 )
 
 @Composable
-fun Spotlight(
-    modifier: Modifier = Modifier,
-) {
-    val url = "https://www.instagram.com/p/DFBSQymNMXH/?hl=en"
-    val context = LocalContext.current
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .border(5.dp, Blue, RoundedCornerShape(16.dp))
-            .background(color = Blue, shape = RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.spotlightwithad),
-            contentDescription = "Upload video",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .clickable(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                        context.startActivity(intent)
-                    }
-                )
-        )
-    }
-}
-
-@Preview()
-@Composable
-fun SpotlightPreview() {
-    Spotlight()
-}
-
-@Composable
 fun MidGreenLightHeadline(text: String, size: Int){
     Text(text=text,
         fontSize = size.sp,
@@ -236,7 +201,7 @@ fun MidGreenLightHeadline(text: String, size: Int){
 
 @Preview
 @Composable
-fun ResultWidget(avatarImage: Painter = painterResource(id = R.drawable.loading_bg)){
+fun ResultWidget(avatarImage: Painter = painterResource(id = R.drawable.user_selected)){
     Box(
         modifier = Modifier
             .background(Blue, RoundedCornerShape(16.dp))
@@ -268,7 +233,7 @@ fun ResultWidget(avatarImage: Painter = painterResource(id = R.drawable.loading_
                     Image(
                         painter = avatarImage,
                         contentDescription = "Avatar",
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxSize()
                             .border(2.dp, GreenLight, CircleShape)
@@ -309,10 +274,9 @@ fun ResultWidget(avatarImage: Painter = painterResource(id = R.drawable.loading_
                     Image(
                         painter = avatarImage,
                         contentDescription = "Avatar",
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxSize()
-                            .border(2.dp, GreenLight, CircleShape)
                             .clip(CircleShape)
                             .background(Transparent)
                     )
@@ -931,9 +895,9 @@ fun LazyRowSpotlight(modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
     val spotlightItems = listOf(
-        R.drawable.spotlightwithad to "https://www.instagram.com/p/DFBSQymNMXH/?hl=en",
-        R.drawable.spotlight to "https://www.instagram.com/p/DFBSQymNMXH/?hl=en",
-        R.drawable.spotlightad to "https://www.instagram.com/p/DFBSQymNMXH/?hl=en"
+        R.drawable.spotlightad to "https://www.instagram.com/p/DFBSQymNMXH/?hl=en",
+        R.drawable.rectangle_100 to "https://allforpadel.com/en/154-adidas-adipower-a1-racket",
+        R.drawable.rectangle_1d to "https://acetown-eg.com/?fbclid=PAZXh0bgNhZW0CMTEAAaeR5myMSVY2pBoDMd5U-Ay5G5p3JF5fDd7-__cFauiWS4pet1fD3lbLEsNNPw_aem_9OhWRDC9ZQvbJQ85eg4a5Q"
     )
 
     val listState = rememberLazyListState()
@@ -952,15 +916,19 @@ fun LazyRowSpotlight(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .height(180.dp)
             .clip(RoundedCornerShape(16.dp))
-            .border(5.dp, Blue, RoundedCornerShape(16.dp))
             .background(Blue)
     ) {
+        Image( painter = painterResource(R.drawable.spotlight),
+            contentDescription = "Spotlight Image",
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp)))
+
         LazyRow(
             state = listState,
             modifier = Modifier.fillMaxSize()
                 .clip(RoundedCornerShape(16.dp))
-                .padding(horizontal = 5.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .offset(y = 46.dp),
         ) {
             items(spotlightItems) { (imageRes, link) ->
                 Image(
@@ -968,9 +936,10 @@ fun LazyRowSpotlight(modifier: Modifier = Modifier) {
                     contentDescription = "Spotlight Image",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .fillParentMaxHeight()
+                        .height(140.dp)
                         .fillParentMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
+                        .padding(bottom = 16.dp)
                         .clickable {
                             val intent = Intent(Intent.ACTION_VIEW, link.toUri())
                             context.startActivity(intent)
@@ -979,4 +948,10 @@ fun LazyRowSpotlight(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun SpotPreview() {
+    LazyRowSpotlight()
 }
