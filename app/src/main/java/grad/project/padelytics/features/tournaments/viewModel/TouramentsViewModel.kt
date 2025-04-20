@@ -25,6 +25,10 @@ class TournamentsViewModel : ViewModel() {
     private val _isFetching = MutableStateFlow(false)
     val isFetching: StateFlow<Boolean> = _isFetching.asStateFlow()
 
+    init {
+        fetchTournaments()
+    }
+
     fun fetchTournaments() {
         viewModelScope.launch {
             _isFetching.value = true
