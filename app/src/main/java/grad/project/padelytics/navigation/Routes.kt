@@ -17,4 +17,6 @@ object Routes {
     const val SPLASH = "SPLASH"
     const val COURTS = "COURTS"
     const val COURT_DETAILS = "COURT_DETAILS/{courtId}"
+    const val RESULTS = "RESULTS"
+    const val ANALYSIS = "ANALYSIS"
 }
