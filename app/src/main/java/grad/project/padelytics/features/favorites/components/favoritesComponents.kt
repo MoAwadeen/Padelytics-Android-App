@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +33,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import grad.project.padelytics.R
 import grad.project.padelytics.features.favorites.data.FavoriteCourt
 import grad.project.padelytics.features.favorites.data.FavoriteProduct
@@ -225,8 +231,18 @@ fun FavoriteProducts(favoriteProduct: FavoriteProduct, onClick: () -> Unit){
     }
 }
 
+@Preview
 @Composable
 fun NoFavoritesAlert(){
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.Asset("Fav.json")
+    )
+
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -237,18 +253,20 @@ fun NoFavoritesAlert(){
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.no_near_courts),
-                contentDescription = "No Results",
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
                 modifier = Modifier
-                    .size(200.dp)
+                    .size(150.dp)
+                    .align(Alignment.CenterHorizontally)
             )
             Text(
                 text = "No Favorites",
                 fontSize = 28.sp,
                 fontFamily = lexendFontFamily,
                 color = BlueDark,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
     }

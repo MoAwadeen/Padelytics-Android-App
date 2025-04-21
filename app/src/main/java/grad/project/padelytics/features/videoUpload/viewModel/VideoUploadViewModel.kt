@@ -38,9 +38,6 @@ class VideoUploadViewModel : ViewModel() {
         _selectedVideoUri.value = uri
     }
 
-    fun clearSelectedVideo() {
-        _selectedVideoUri.value = null
-    }
 
     fun searchUsername(username: String) {
         _isLoading.value = true
