@@ -28,6 +28,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -48,8 +49,11 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3) // Using the BOM, so this is sufficient.
-    //implementation(libs.volley) // Consider OkHttp or Retrofit
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.androidx.media3.common.ktx) // Using the BOM, so this is sufficient.
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,6 +61,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("io.coil-kt:coil-compose:2.6.0")
@@ -67,4 +72,16 @@ dependencies {
     implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.datastore:datastore-preferences:1.1.3")
+    implementation("org.jsoup:jsoup:1.16.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+    implementation("androidx.activity:activity-ktx:1.10.1")
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation (libs.lottie.compose)
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
