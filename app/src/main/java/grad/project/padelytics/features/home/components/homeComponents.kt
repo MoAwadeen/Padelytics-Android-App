@@ -131,7 +131,7 @@ fun HomeAppToolbarPreview(){
 fun FeatureList(navController: NavController) {
     val features = listOf(
         Feature(R.drawable.video, "Upload\nVideo", Routes.VIDEO_UPLOAD),
-        Feature(R.drawable.previousresults, "Previous\nResults", Routes.HOME),
+        Feature(R.drawable.previousresults, "Previous\nResults", Routes.RESULTS),
         Feature(R.drawable.court, "Court\nBooking", Routes.COURTS),
         Feature(R.drawable.tournament, "Tournaments", Routes.TOURNAMENTS),
         Feature(R.drawable.shop, "Shop", Routes.SHOP)

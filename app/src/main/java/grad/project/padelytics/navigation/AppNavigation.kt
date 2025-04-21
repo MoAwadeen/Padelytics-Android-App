@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import grad.project.padelytics.features.analysis.ui.AnalysisScreen
 import grad.project.padelytics.features.auth.components.UsernameUpdateScreen
 import grad.project.padelytics.features.auth.ui.AuthScreen
 import grad.project.padelytics.features.auth.ui.LoginScreen
@@ -20,6 +21,7 @@ import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewM
 import grad.project.padelytics.features.favorites.ui.FavoritesScreen
 import grad.project.padelytics.features.home.ui.HomeScreen
 import grad.project.padelytics.features.profile.ui.ProfileScreen
+import grad.project.padelytics.features.results.ui.ResultsScreen
 import grad.project.padelytics.features.shop.ui.ProductDetailsScreen
 import grad.project.padelytics.features.shop.ui.ShopScreen
 import grad.project.padelytics.features.tournaments.ui.TournamentDetailsScreen
@@ -83,6 +85,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         ) { backStackEntry ->
             val courtId = backStackEntry.arguments?.getString("courtId")
             CourtDetailsScreen(modifier, navController, viewModel = CourtBookingViewModel(), courtId)
+        }
+        composable(Routes.RESULTS) {
+            ResultsScreen(modifier,navController)
+        }
+        composable(Routes.ANALYSIS) {
+            AnalysisScreen(modifier,navController)
         }
     }
 }

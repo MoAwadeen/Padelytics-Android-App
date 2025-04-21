@@ -61,9 +61,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
     val courtBookingViewModel: CourtBookingViewModel = viewModel()
     val shopViewModel: ShopViewModel = viewModel()
 
-    BackHandler(enabled = true) {
-        // This empty to block
-    }
+    BackHandler(enabled = true) { }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -127,7 +125,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
 
                     HomeTitlesRow(featureTitle = "Recent Matches",
                         showAll = "View All",
-                        onClick = { navController.navigate(Routes.HOME) })
+                        onClick = { navController.navigate(Routes.RESULTS) })
 
                     ResultWidget()
 
