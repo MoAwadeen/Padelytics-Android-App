@@ -130,11 +130,11 @@ fun HomeAppToolbarPreview(){
 @Composable
 fun FeatureList(navController: NavController) {
     val features = listOf(
-        Feature(R.drawable.video, "Upload\nVideo", Routes.VIDEO_UPLOAD),
-        Feature(R.drawable.previousresults, "Previous\nResults", Routes.RESULTS),
-        Feature(R.drawable.court, "Court\nBooking", Routes.COURTS),
-        Feature(R.drawable.tournament, "Tournaments", Routes.TOURNAMENTS),
-        Feature(R.drawable.shop, "Shop", Routes.SHOP)
+        Feature(R.drawable.camns, "Upload\nVideo", Routes.VIDEO_UPLOAD),
+        Feature(R.drawable.clockns, "Previous\nResults", Routes.RESULTS),
+        Feature(R.drawable.courtns, "Court\nBooking", Routes.COURTS),
+        Feature(R.drawable.tourns, "Tournaments", Routes.TOURNAMENTS),
+        Feature(R.drawable.cartns, "Shop", Routes.SHOP)
     )
 
     LazyRow(
@@ -178,6 +178,7 @@ fun FeatureItem(feature: Feature,navController: NavController) {
             fontFamily = lexendFontFamily,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
+            lineHeight = 16.sp,
             modifier = Modifier.fillMaxWidth(),
             color = BlueDark
         )

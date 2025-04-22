@@ -198,19 +198,19 @@ fun ProfileScreen(
                     )
 
                     InfoRow(
-                        icon = painterResource(id = R.drawable.coupon),
-                        label = "Vouchers"
-                    )
-
-                    InfoRow(
                         icon = painterResource(id = R.drawable.add_user),
-                        label = "Add Friends",
+                        label = "Add friends",
                         onClick = { showAddDialog = true }
                     )
 
                     InfoRow(
+                        icon = painterResource(id = R.drawable.racket),
+                        label = "About the game"
+                    )
+
+                    InfoRow(
                         icon = painterResource(id = R.drawable.info_circle),
-                        label = "About Us"
+                        label = "About us"
                     )
 
                 }
