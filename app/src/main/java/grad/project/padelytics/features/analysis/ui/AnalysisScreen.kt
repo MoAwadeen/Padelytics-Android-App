@@ -1,6 +1,8 @@
 package grad.project.padelytics.features.analysis.ui
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -8,8 +10,11 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,20 +30,28 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.features.analysis.components.AnalysisHeader
+import grad.project.padelytics.features.analysis.components.AnalysisWideGreenButton
+import grad.project.padelytics.features.analysis.components.PlayersView
 import grad.project.padelytics.features.analysis.viewModel.AnalysisViewModel
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostController, viewModel: AnalysisViewModel = viewModel()) {
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+    val context = LocalContext.current
+    val composeViewRef = remember { mutableStateOf<ComposeView?>(null) }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -62,9 +75,6 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
 
     Scaffold(
         modifier = Modifier.nestedScroll(nestedScrollConnection),
-        topBar = {
-            AppToolbar(toolbarTitle = "Match Results")
-        },
         bottomBar = {
             AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -81,12 +91,12 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
             }
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = Color.White)
                 .padding(innerPadding)
-                .padding(start = 20.dp, end = 20.dp)
+                .padding(start = 30.dp, end = 30.dp)
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, dragAmount ->
                         if (dragAmount > 0) {
@@ -98,11 +108,42 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                 },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            item {
+                AndroidView(
+                    factory = {
+                        ComposeView(it).apply {
+                            setContent {
+                                Column(
+                                    modifier = Modifier
+                                        .background(Color.White)
+                                        .padding(horizontal = 30.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Spacer(modifier = Modifier.height(20.dp))
 
+                                    AnalysisHeader()
+
+                                    Spacer(modifier = Modifier.height(30.dp))
+
+                                    PlayersView()
+
+                                    Spacer(modifier = Modifier.height(40.dp))
+                                }
+                            }
+                            composeViewRef.value = this
+                        }
+                    }
+                )
+                AnalysisWideGreenButton(onClick = {
+                    val bitmap = viewModel.captureComposableToBitmap(composeViewRef.value!!)
+                    viewModel.saveBitmapAsPdf(context, bitmap)
+                })
+            }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Preview(showBackground = true)
 @Composable
 fun AnalysisScreenPreview() {
