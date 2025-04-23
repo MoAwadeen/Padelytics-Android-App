@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.profile.components
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -37,7 +39,9 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -45,17 +49,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.SimiMidDarkHeadline
+import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
-import grad.project.padelytics.ui.theme.lexendFontFamily
 import grad.project.padelytics.ui.theme.WhiteGray
-import android.widget.Toast
-import androidx.compose.material3.AlertDialog
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import grad.project.padelytics.ui.theme.Blue
-
+import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
 fun ProfileHeader(
@@ -146,7 +145,6 @@ fun NumberLabelChip(
     )
 }
 
-
 @Composable
 fun NumberChipsRow() {
     Row(
@@ -204,7 +202,6 @@ fun InfoRow(
     }
 }
 
-
 @Composable
 fun InfoColumn() {
     Column(
@@ -235,7 +232,6 @@ fun InfoColumn() {
 fun PreviewInfoColumn() {
     InfoColumn()
 }
-
 
 @Composable
 fun LogoutButton(onClick: () -> Unit) {

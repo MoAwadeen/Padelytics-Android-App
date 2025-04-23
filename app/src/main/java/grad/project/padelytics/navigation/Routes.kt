@@ -19,4 +19,7 @@ object Routes {
     const val COURT_DETAILS = "COURT_DETAILS/{courtId}"
     const val RESULTS = "RESULTS"
     const val ANALYSIS = "ANALYSIS"
+    const val ABOUT_GAME = "ABOUT_GAME"
+    const val ABOUT_US = "ABOUT_US"
+    const val ABOUT_APP = "ABOUT_APP"
 }

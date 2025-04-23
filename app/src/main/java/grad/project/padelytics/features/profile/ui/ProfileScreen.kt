@@ -38,7 +38,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberAsyncImagePainter
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.BottomAppBar
-import grad.project.padelytics.appComponents.*
+import grad.project.padelytics.appComponents.MidBlueHeadline
+import grad.project.padelytics.appComponents.MidDarkHeadline
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.profile.components.InfoRow
 import grad.project.padelytics.features.profile.components.LogoutButton
@@ -47,6 +48,7 @@ import grad.project.padelytics.features.profile.components.NumberLabelChip
 import grad.project.padelytics.features.profile.components.ProfileHeader
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
+import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
@@ -205,12 +207,14 @@ fun ProfileScreen(
 
                     InfoRow(
                         icon = painterResource(id = R.drawable.racket),
-                        label = "About the game"
+                        label = "About the game",
+                        onClick = { navController.navigate(Routes.ABOUT_GAME) }
                     )
 
                     InfoRow(
                         icon = painterResource(id = R.drawable.info_circle),
-                        label = "About us"
+                        label = "About us",
+                        onClick = { navController.navigate(Routes.ABOUT_US) }
                     )
 
                 }
