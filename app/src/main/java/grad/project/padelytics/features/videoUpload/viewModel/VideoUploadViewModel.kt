@@ -2,9 +2,6 @@ package grad.project.padelytics.features.videoUpload.viewModel
 
 import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -31,6 +28,10 @@ class VideoUploadViewModel : ViewModel() {
 
     private val _selectedFriend = MutableStateFlow<FriendData?>(null)
     val selectedFriend: StateFlow<FriendData?> = _selectedFriend
+
+
+    private val _isFriendSelected = MutableStateFlow(false)
+    val isFriendSelected: StateFlow<Boolean> = _isFriendSelected
 
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -129,6 +130,7 @@ class VideoUploadViewModel : ViewModel() {
 
     fun selectFriend(friend: FriendData) {
         _selectedFriend.value = friend
+        _isFriendSelected.value = true
         Log.d("VideoUploadVM", "Friend selected: ${friend.userName}")
     }
 
