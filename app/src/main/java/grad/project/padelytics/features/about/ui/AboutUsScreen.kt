@@ -41,13 +41,13 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
             memberName = "Merna Hesham",
             memberTitle = "Team Leader\nAndroid developer",
             memberPhoto = R.drawable.merna,
-            memberLinkedIn = ""
+            memberLinkedIn = "https://www.linkedin.com/in/merna-hesham-8a94b92b5?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Mohamed Awadeen",
             memberTitle = "Android developer\nUi/Ux designer",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = R.drawable.mohamed,
+            memberLinkedIn = "https://www.linkedin.com/in/mohamed-awadeen?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Youssef Talaat",
@@ -123,7 +123,7 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                 .fillMaxSize()
                 .background(color = Color.White)
                 .padding(innerPadding)
-                .padding(start = 20.dp, end = 20.dp)
+                .padding(horizontal = 16.dp)
         ){
             item{
                 Spacer(modifier = Modifier.height(16.dp))
@@ -200,7 +200,7 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 3000)
 @Composable
 fun AboutUsScreenPreview() {
     AboutUsScreen(navController = rememberNavController())

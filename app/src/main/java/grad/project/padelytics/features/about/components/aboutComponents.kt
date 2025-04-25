@@ -45,6 +45,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -334,7 +335,7 @@ fun MemberCard(member: TeamInfo, context: Context) {
                 color = Blue
             ),
             textAlign = TextAlign.Center,
-            maxLines = 2,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
@@ -354,6 +355,7 @@ fun MemberCard(member: TeamInfo, context: Context) {
     }
 }
 
+
 @Composable
 fun MemberInfoGrid(teamInfo: List<TeamInfo>) {
     val context = LocalContext.current
@@ -365,13 +367,11 @@ fun MemberInfoGrid(teamInfo: List<TeamInfo>) {
     if (isGrid) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(count = 2),
-            horizontalArrangement = Arrangement.spacedBy(30.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 500.dp)
-                .padding(horizontal = 8.dp),
-            contentPadding = PaddingValues(8.dp)
         ) {
             items(teamInfo.size) { index ->
                 MemberCard(teamInfo[index], context)
@@ -385,4 +385,27 @@ fun MemberInfoGrid(teamInfo: List<TeamInfo>) {
             MemberCard(teamInfo.first(), context)
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AboutUsAppToolbarPreview() {
+    AboutUsAppToolbar()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun InfoScrollerPreview(){
+    MemberInfoGrid(teamInfo = listOf(TeamInfo(
+        memberName = "Merna Hesham",
+        memberTitle = "Team Leader\nAndroid developer",
+        memberPhoto = R.drawable.merna,
+        memberLinkedIn = ""
+    ),
+        TeamInfo(
+            memberName = "Mohamed Awadeen",
+            memberTitle = "Android developer\nUi/Ux designer",
+            memberPhoto = null,
+            memberLinkedIn = ""
+        )))
 }
