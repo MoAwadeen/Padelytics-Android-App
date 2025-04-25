@@ -397,6 +397,7 @@ fun ShopProduct(
     productPrice: String,
     productDelivery: String,
     productOffers: String,
+    productBrand: String,
     productUrl: String,
     onClick: () -> Unit
 ) {
@@ -631,7 +632,8 @@ fun ShopProduct(
                                     productRating,
                                     productNumRating,
                                     productDelivery,
-                                    productOffers
+                                    productOffers,
+                                    productBrand
                                 ) { success ->
                                     if (success) {
                                         isFavorite = true
@@ -669,6 +671,7 @@ fun ShopProductPreview(){
         productNumRating = "200",
         productDelivery = "Free Delivery",
         productOffers = "",
+        productBrand = "",
         productPrice = "1000 EGP",
         productUrl = "",
         onClick = {}
@@ -687,6 +690,7 @@ fun ProductDetails(
     productDelivery: String,
     productUrl: String,
     productOffers: String,
+    productBrand: String,
     userCity : String
 ){
     val context = LocalContext.current
@@ -846,7 +850,8 @@ fun ProductDetails(
                                     productRating,
                                     productNumRating,
                                     productDelivery,
-                                    productOffers
+                                    productOffers,
+                                    productBrand
                                 ) { success ->
                                     if (success) {
                                         isFavorite = true
@@ -885,10 +890,21 @@ fun ProductDetails(
         )
 
         Text(
+            text = "Brand : $productBrand",
+            modifier = Modifier.fillMaxWidth()
+                .padding(top = 15.dp, bottom = 15.dp),
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.Normal,
+                color = Blue
+            )
+        )
+
+        Text(
             text = "Price : $productPrice",
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 15.dp, bottom = 15.dp),
+                .fillMaxWidth(),
             style = TextStyle(
                 fontSize = 22.sp,
                 fontFamily = lexendFontFamily,
@@ -899,7 +915,8 @@ fun ProductDetails(
 
         Text(
             text = "Delivery : $productDelivery",
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .padding(top = 15.dp, bottom = 15.dp),
             style = TextStyle(
                 fontSize = 20.sp,
                 fontFamily = lexendFontFamily,
@@ -909,8 +926,7 @@ fun ProductDetails(
         )
 
         Row(
-            modifier = Modifier.padding(top = 15.dp, bottom = 15.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Rating : $productRating",
@@ -951,13 +967,14 @@ fun ProductDetails(
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Normal,
                 color = Blue
-            )
+            ),
+            modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 15.dp, bottom = 40.dp),
+                .padding(bottom = 40.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -1013,6 +1030,7 @@ fun ProductDetailsPreview(){
         productDelivery = "Free Delivery",
         productUrl = "",
         productOffers = "1",
+        productBrand = "",
         userCity = "City"
         )
 }

@@ -95,28 +95,28 @@ fun TournamentDetailsScreen(modifier: Modifier = Modifier, navController: NavHos
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.White)
-                .padding(innerPadding)
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures { _, dragAmount ->
-                        if (dragAmount > 0) {
-                            isBottomBarVisible = true
-                        } else if (dragAmount < 0) {
-                            isBottomBarVisible = false
+        if (isFetching) {
+            FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
+        }
+        else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.White)
+                    .padding(innerPadding)
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures { _, dragAmount ->
+                            if (dragAmount > 0) {
+                                isBottomBarVisible = true
+                            } else if (dragAmount < 0) {
+                                isBottomBarVisible = false
+                            }
                         }
-                    }
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
-            item {
-                if (isFetching) {
-                    FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
-                }
-                else {
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                item {
                     if (tournament != null) {
                         TournamentDetails(tournament = tournament!!)
                     }

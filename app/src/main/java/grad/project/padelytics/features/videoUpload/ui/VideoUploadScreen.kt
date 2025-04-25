@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.videoUpload.ui
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -54,7 +55,6 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
     val selectedVideo by viewModel.selectedVideoUri.collectAsState()
     val selectedFriend by viewModel.selectedFriend.collectAsState()
     val friendName = selectedFriend?.firstName ?: ""
-    val friendUserName = selectedFriend?.userName ?: ""
     val friendPhoto = selectedFriend?.photo ?: R.drawable.plus
     val friendProfileImage = rememberAsyncImagePainter(model = friendPhoto)
 
@@ -68,6 +68,11 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showFriendsDialog by remember { mutableStateOf(false) }
+
+    val isFriendSelected by viewModel.isFriendSelected.collectAsState()
+
+
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         profileViewModel.fetchUserProfile()
@@ -132,7 +137,9 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                         }
                     )
                     Spacer(modifier = Modifier.height(22.dp))
+
                     MidDarkHeadline("Players", size = 24)
+
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -156,7 +163,7 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
 
                 }
                 item {
-                    WideGreenButton("Analyze", onClick = {})
+                    WideGreenButton("Analyze", onClick = {Toast.makeText(context, isFriendSelected.toString(), Toast.LENGTH_SHORT).show()})
                 }
             }
         }
