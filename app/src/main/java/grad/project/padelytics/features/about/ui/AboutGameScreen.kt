@@ -20,7 +20,6 @@ import grad.project.padelytics.R
 import grad.project.padelytics.features.about.components.InfoScroller
 import grad.project.padelytics.features.about.data.InfoPage
 import grad.project.padelytics.features.about.viewModel.AboutViewModel
-import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 
 @Composable
