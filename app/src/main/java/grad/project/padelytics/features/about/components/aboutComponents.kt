@@ -11,7 +11,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -355,7 +354,6 @@ fun MemberCard(member: TeamInfo, context: Context) {
     }
 }
 
-
 @Composable
 fun MemberInfoGrid(teamInfo: List<TeamInfo>) {
     val context = LocalContext.current
@@ -399,13 +397,13 @@ fun InfoScrollerPreview(){
     MemberInfoGrid(teamInfo = listOf(TeamInfo(
         memberName = "Merna Hesham",
         memberTitle = "Team Leader\nAndroid developer",
-        memberPhoto = R.drawable.merna,
+        memberPhoto = "",
         memberLinkedIn = ""
     ),
         TeamInfo(
             memberName = "Mohamed Awadeen",
             memberTitle = "Android developer\nUi/Ux designer",
-            memberPhoto = null,
+            memberPhoto = "",
             memberLinkedIn = ""
         )))
 }
