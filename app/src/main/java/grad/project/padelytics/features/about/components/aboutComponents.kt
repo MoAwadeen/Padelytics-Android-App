@@ -26,6 +26,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -303,23 +305,51 @@ fun MemberCard(member: TeamInfo, context: Context) {
         Box(
             modifier = Modifier
                 .size(80.dp)
-                .clip(CircleShape)
                 .background(White)
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(member.memberPhoto)
-                    .crossfade(true)
-                    .scale(Scale.FILL)
-                    .build(),
-                contentDescription = "Member Image",
-                contentScale = ContentScale.Crop,
+        ){
+            Box(
                 modifier = Modifier
                     .size(80.dp)
-                    .border(4.dp, Blue, CircleShape)
                     .clip(CircleShape)
                     .background(White)
-            )
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(member.memberPhoto)
+                        .crossfade(true)
+                        .scale(Scale.FILL)
+                        .build(),
+                    contentDescription = "Member Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .border(4.dp, Blue, CircleShape)
+                        .clip(CircleShape)
+                        .background(White)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(RoundedCornerShape(CornerSize(4.dp)))
+                    .background(Blue)
+                    .align(Alignment.BottomEnd),
+                contentAlignment = Alignment.Center
+            ){
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(R.drawable.linkedin)
+                        .crossfade(true)
+                        .scale(Scale.FILL)
+                        .build(),
+                    contentDescription = "LinkedIn",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .background(Blue)
+                )
+            }
         }
 
         Text(

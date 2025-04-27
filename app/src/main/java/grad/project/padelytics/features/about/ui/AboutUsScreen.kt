@@ -97,7 +97,7 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
             memberName = "Rahma Emad",
             memberTitle = "Technical Writer",
             memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1745717892/bzrgzwbxvfizp4pzi8us.jpg",
-            memberLinkedIn = ""
+            memberLinkedIn = "https://www.linkedin.com/in/rahma-emad-1741a4321?trk=contact-info"
         ),
         TeamInfo(
             memberName = "Rewan El-Hady",
