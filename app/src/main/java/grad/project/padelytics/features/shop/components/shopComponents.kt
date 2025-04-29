@@ -189,8 +189,8 @@ fun ShopHeaders(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = GreenLight),
                 modifier = Modifier
-                    .width(106.dp)
-                    .height(41.dp),
+                    .width(100.dp)
+                    .height(40.dp),
                 shape = RoundedCornerShape(22.dp)
             ) {
                 Text(
@@ -206,7 +206,7 @@ fun ShopHeaders(
             }
         }
 
-        Spacer(modifier = Modifier.width(2.dp))
+        Spacer(modifier = Modifier.width(4.dp))
 
         Column(
             modifier = Modifier
@@ -231,8 +231,8 @@ fun ShopHeaders(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = GreenLight),
                 modifier = Modifier
-                    .width(106.dp)
-                    .height(41.dp),
+                    .width(96.dp)
+                    .height(40.dp),
                 shape = RoundedCornerShape(22.dp)
             ) {
                 Text(
@@ -248,7 +248,7 @@ fun ShopHeaders(
             }
         }
 
-        Spacer(modifier = Modifier.width(2.dp))
+        Spacer(modifier = Modifier.width(4.dp))
 
         Column(
             modifier = Modifier
@@ -274,8 +274,8 @@ fun ShopHeaders(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = GreenLight),
                 modifier = Modifier
-                    .width(106.dp)
-                    .height(41.dp),
+                    .width(110.dp)
+                    .height(40.dp),
                 shape = RoundedCornerShape(22.dp)
             ) {
                 Text(
