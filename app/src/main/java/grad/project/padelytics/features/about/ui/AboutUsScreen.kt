@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import grad.project.padelytics.R
 import grad.project.padelytics.features.about.components.AboutUsAppToolbar
 import grad.project.padelytics.features.about.components.Description
 import grad.project.padelytics.features.about.components.MemberInfoGrid
@@ -31,8 +30,8 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         TeamInfo(
             memberName = "Dr. Samar Elbedwehy",
             memberTitle = "Lecturer at KSU",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = "",
+            memberLinkedIn = "https://www.linkedin.com/in/samar-elbedwehy-6a8299128?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
 
@@ -40,20 +39,20 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         TeamInfo(
             memberName = "Merna Hesham",
             memberTitle = "Team Leader\nAndroid developer",
-            memberPhoto = R.drawable.merna,
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1745718155/gl6ga0w2ulisjslnm2ba.jpg",
             memberLinkedIn = "https://www.linkedin.com/in/merna-hesham-8a94b92b5?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Mohamed Awadeen",
             memberTitle = "Android developer\nUi/Ux designer",
-            memberPhoto = R.drawable.mohamed,
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1745313616/file_oqjbcs.jpg",
             memberLinkedIn = "https://www.linkedin.com/in/mohamed-awadeen?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Youssef Talaat",
             memberTitle = "iOS developer",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = "",
+            memberLinkedIn = "https://www.linkedin.com/in/yousef-tal3at?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
 
@@ -61,20 +60,20 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         TeamInfo(
             memberName = "Mostafa Gamal",
             memberTitle = "Ai Engineer",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = "",
+            memberLinkedIn = "https://www.linkedin.com/in/mostafa-gamal-mg?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Omar Gomaa",
             memberTitle = "Ai Engineer",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = "",
+            memberLinkedIn = "https://www.linkedin.com/in/eng-omargomaa?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Dalia Ghazi",
             memberTitle = "Ai Engineer",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = "",
+            memberLinkedIn = "https://www.linkedin.com/in/dalia-ghazy-b36538225?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
 
@@ -82,29 +81,29 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         TeamInfo(
             memberName = "Mona Ahmed",
             memberTitle = "Front end developer",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = "",
+            memberLinkedIn = "https://www.linkedin.com/in/mona-el-qattan-ab751a2b9?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Aya Mostafa",
             memberTitle = "Back end developer",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberPhoto = "",
+            memberLinkedIn = "https://www.linkedin.com/in/aya-mostafa-771993283?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
 
     val documentationTeam = listOf(
         TeamInfo(
             memberName = "Rahma Emad",
-            memberTitle = "",
-            memberPhoto = R.drawable.rahma,
-            memberLinkedIn = ""
+            memberTitle = "Technical Writer",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1745717892/bzrgzwbxvfizp4pzi8us.jpg",
+            memberLinkedIn = "https://www.linkedin.com/in/rahma-emad-1741a4321?trk=contact-info"
         ),
         TeamInfo(
             memberName = "Rewan El-Hady",
-            memberTitle = "",
-            memberPhoto = null,
-            memberLinkedIn = ""
+            memberTitle = "Technical Writer",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1745717892/n1mtiicx4py4pxryyyoz.jpg",
+            memberLinkedIn = "https://www.linkedin.com/in/rawan-elhady-081b2b229?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
 
