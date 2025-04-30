@@ -14,6 +14,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.ViewModel
+import java.io.IOException
 
 class AnalysisViewModel: ViewModel() {
     fun saveBitmapAsPdf(context: Context, bitmap: Bitmap, filename: String = "analysis.pdf") {
@@ -63,5 +64,19 @@ class AnalysisViewModel: ViewModel() {
         val canvas = Canvas(bitmap)
         view.draw(canvas)
         return bitmap
+    }
+
+    fun loadJsonFromAssets(context: Context, filename: String): String? {
+        return try {
+            val inputStream = context.assets.open(filename)
+            val size = inputStream.available()
+            val buffer = ByteArray(size)
+            inputStream.read(buffer)
+            inputStream.close()
+            String(buffer, Charsets.UTF_8)
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+            null
+        }
     }
 }

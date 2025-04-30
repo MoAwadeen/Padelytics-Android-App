@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -55,7 +56,7 @@ import grad.project.padelytics.ui.theme.WhiteGray
 
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier.background(WhiteGray).fillMaxSize(),
+    modifier: Modifier = Modifier.background(Color.White).fillMaxSize(),
     navController: NavHostController,
     authViewModel: AuthViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
@@ -118,7 +119,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        modifier = Modifier.background(WhiteGray),
+        modifier = Modifier.background(White),
         topBar = {
             val profileImage: Painter = rememberAsyncImagePainter(photo)
             ProfileHeader(avatarImage = profileImage, iconOnClick = {selectImage()})
@@ -130,6 +131,7 @@ fun ProfileScreen(
         LazyColumn(
             modifier = modifier
                 .fillMaxSize()
+                .background(White)
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
