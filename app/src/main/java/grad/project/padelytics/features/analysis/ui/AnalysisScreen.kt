@@ -30,7 +30,14 @@ import com.google.gson.reflect.TypeToken
 import grad.project.padelytics.features.analysis.components.AnalysisAppbar
 import grad.project.padelytics.features.analysis.components.AnalysisWideGreenButton
 import grad.project.padelytics.features.analysis.components.BallAnalysisBox
+import grad.project.padelytics.features.analysis.components.BallHitLocationsPlot
+import grad.project.padelytics.features.analysis.components.BallSpeedOverTimeLineChart
+import grad.project.padelytics.features.analysis.components.BallTrajectoryPlot
+import grad.project.padelytics.features.analysis.components.CourtBackground
+import grad.project.padelytics.features.analysis.components.HitCountBarChart
 import grad.project.padelytics.features.analysis.components.PlayersView
+import grad.project.padelytics.features.analysis.components.RectangleBackground
+import grad.project.padelytics.features.analysis.components.TopStrongestHitsBarChart
 import grad.project.padelytics.features.analysis.data.FullAnalysisData
 import grad.project.padelytics.features.analysis.data.MetricValues
 import grad.project.padelytics.features.analysis.viewModel.AnalysisViewModel
@@ -50,6 +57,13 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
         "player2" to analysisData.trajectories["player2"]!!,
         "player3" to analysisData.trajectories["player3"]!!,
         "player4" to analysisData.trajectories["player4"]!!
+    )
+
+    val playerNames = mapOf(
+        "player1" to "Mohamed",
+        "player2" to "Youssef",
+        "player3" to "Merna",
+        "player4" to "Rahma"
     )
 
     val metricData = MetricValues(
@@ -97,7 +111,25 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                                             .padding(horizontal = 16.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
-                                        BallAnalysisBox()
+                                        BallAnalysisBox(
+                                            graphScreens = listOf(
+                                                "Ball Trajectory" to @Composable {
+                                                    CourtBackground { BallTrajectoryPlot(ballTrajectory = analysisData.ball_trajectory) }
+                                                },
+                                                "Ball Speed Timeline" to @Composable {
+                                                    RectangleBackground{ BallSpeedOverTimeLineChart(data = analysisData.ball_speed_over_time) }
+                                                },
+                                                "Top Speeds" to @Composable {
+                                                    RectangleBackground{ TopStrongestHitsBarChart(topHits = analysisData.top_2_strongest_hits) }
+                                                },
+                                                "Number Of Ball Hits" to @Composable {
+                                                    RectangleBackground{ HitCountBarChart(hitCount = analysisData.hit_count_per_player) }
+                                                },
+                                                "Ball Hits Locations" to @Composable {
+                                                    CourtBackground{ BallHitLocationsPlot(ballHits = analysisData.ball_hit_locations) }
+                                                }
+                                            )
+                                        )
                                     }
                                 }
                             }
