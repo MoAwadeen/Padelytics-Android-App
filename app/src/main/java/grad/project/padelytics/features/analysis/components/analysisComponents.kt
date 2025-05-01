@@ -1,13 +1,15 @@
 package grad.project.padelytics.features.analysis.components
 
-import android.annotation.SuppressLint
 import android.graphics.Paint
+import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,9 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.Path
@@ -63,6 +68,7 @@ import grad.project.padelytics.features.analysis.data.StrongestHitItem
 import grad.project.padelytics.features.analysis.data.TrajectoryData
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
+import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.lexendFontFamily
 import kotlinx.coroutines.delay
@@ -298,25 +304,31 @@ fun AnalysisWideGreenButton(onClick: () -> Unit ){
 }
 
 @Composable
-fun BallAnalysisBox() {
+fun BallAnalysisBox(graphScreens: List<Pair<String, @Composable () -> Unit>>) {
+    var currentIndex by remember { mutableIntStateOf(value = 0) }
+    val (currentTitle, currentCourtComposable) = graphScreens[currentIndex]
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(Blue)
     ) {
         Image(
-            painter = painterResource(R.drawable.ball_box),
+            painter = painterResource(R.drawable.ball_analysis_bg),
             contentDescription = "Ball Analysis Background",
             contentScale = ContentScale.Fit,
-            modifier = Modifier.matchParentSize().clip(RoundedCornerShape(16.dp))
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
         )
 
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(14.dp),
+                .fillMaxWidth()
+                .height(180.dp)
+                .align(Alignment.Center)
+                .padding(horizontal = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -324,38 +336,418 @@ fun BallAnalysisBox() {
                 painter = painterResource(R.drawable.left_arrow),
                 contentDescription = "Left Arrow",
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable {
+                        currentIndex = if (currentIndex == 0) graphScreens.lastIndex else currentIndex - 1
+                    }
             )
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            Column(modifier = Modifier.fillMaxHeight()
-                .padding(horizontal = 10.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally){
-                Spacer(modifier = Modifier.weight(1f))
-
-                Text(
-                    text = "Ball Trajectory",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = White,
-                        textAlign = TextAlign.Center
-                    ),
-                    modifier = Modifier.padding(bottom = 6.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
+            currentCourtComposable()
 
             Image(
                 painter = painterResource(R.drawable.right_arrow),
                 contentDescription = "Right Arrow",
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable {
+                        currentIndex = (currentIndex + 1) % graphScreens.size
+                    }
             )
+        }
+
+        Text(
+            text = currentTitle,
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = White,
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 20.dp)
+        )
+    }
+}
+
+@Composable
+fun CourtBackground(content: @Composable BoxScope.() -> Unit = {}) {
+    Box(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .background(Blue),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(
+            modifier = Modifier.matchParentSize()
+        ) {
+            val borderColor = BlueDark
+            val lineColor = BlueDark
+            val borderStroke = 4.dp.toPx()
+            val lineStroke = 4.dp.toPx()
+
+            val totalWidth = size.width
+            val totalHeight = size.height
+
+            // x is the padding from the edge to the first/third vertical lines
+            val x = totalWidth / 8f
+
+            val v1 = x                          // First vertical line
+            val v2 = totalWidth / 2f            // Middle of the court (second vertical line)
+            val v3 = totalWidth - x             // Third vertical line
+
+            val horizontalY = totalHeight / 2f  // Half the height
+
+            // Horizontal line: from center of v1 to center of v3
+            drawLine(
+                color = lineColor,
+                start = Offset(x = v1, y = horizontalY),
+                end = Offset(x = v3, y = horizontalY),
+                strokeWidth = lineStroke
+            )
+
+            // Vertical lines
+            listOf(v1, v2, v3).forEach { xPos ->
+                drawLine(
+                    color = lineColor,
+                    start = Offset(x = xPos, y = 0f),
+                    end = Offset(x = xPos, y = totalHeight),
+                    strokeWidth = lineStroke
+                )
+            }
+
+            // Outer border
+            drawRoundRect(
+                color = borderColor,
+                topLeft = Offset.Zero,
+                size = size,
+                cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx()),
+                style = Stroke(width = borderStroke)
+            )
+        }
+        content()
+    }
+}
+
+@Composable
+fun RectangleBackground(content: @Composable BoxScope.() -> Unit = {}) {
+    Box(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .background(Blue),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(
+            modifier = Modifier.matchParentSize()
+        ) {
+            val borderColor = BlueDark
+            val borderStroke = 4.dp.toPx()
+
+            drawRoundRect(
+                color = borderColor,
+                topLeft = Offset.Zero,
+                size = size,
+                cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx()),
+                style = Stroke(width = borderStroke)
+            )
+        }
+        content()
+    }
+}
+
+@Composable
+fun BallTrajectoryPlot(ballTrajectory: BallTrajectory) {
+    val points = ballTrajectory.x.zip(ballTrajectory.y)
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        val width = size.width
+        val height = size.height
+
+        // Determine the min and max values for X and Y axes
+        val minX = points.minOf { it.first }
+        val maxX = points.maxOf { it.first }
+        val minY = points.minOf { it.second }
+        val maxY = points.maxOf { it.second }
+
+        // Calculate ranges
+        val rangeX = maxX - minX
+        val rangeY = maxY - minY
+
+        // Function to map data points to the canvas dimensions
+        fun mapX(x: Float) = ((x - minX) / rangeX) * width
+        fun mapY(y: Float) = height - ((y - minY) / rangeY) * height
+
+        // Draw the line connecting the points
+        points.zipWithNext().forEach { (start, end) ->
+            val startX = mapX(start.first)
+            val startY = mapY(start.second)
+            val endX = mapX(end.first)
+            val endY = mapY(end.second)
+
+            drawLine(
+                color = GreenLight,
+                start = Offset(startX, startY),
+                end = Offset(endX, endY),
+                strokeWidth = 5f
+            )
+        }
+    }
+}
+
+@Composable
+fun BallSpeedOverTimeLineChart(data: BallSpeedOverTime) {
+    val frameData = data.frame
+    val speedData = data.speed
+
+    if (frameData.isEmpty() || speedData.isEmpty() || frameData.size != speedData.size) {
+        Text("No speed data available")
+        return
+    }
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        val width = size.width
+        val height = size.height
+
+        val minX = frameData.minOrNull() ?: 0f
+        val maxX = frameData.maxOrNull() ?: 1f
+        val minY = speedData.minOrNull() ?: 0f
+        val maxY = speedData.maxOrNull() ?: 1f
+
+        val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
+        val rangeY = (maxY - minY).takeIf { it != 0f } ?: 1f
+
+        for (i in 1 until frameData.size) {
+            val x1 = ((frameData[i - 1] - minX) / rangeX) * width
+            val y1 = height - ((speedData[i - 1] - minY) / rangeY) * height
+
+            val x2 = ((frameData[i] - minX) / rangeX) * width
+            val y2 = height - ((speedData[i] - minY) / rangeY) * height
+
+            drawLine(
+                color = GreenLight,
+                start = Offset(x1, y1),
+                end = Offset(x2, y2),
+                strokeWidth = 1.dp.toPx()
+            )
+        }
+    }
+}
+
+@Composable
+fun TopStrongestHitsBarChart(topHits: List<StrongestHitItem>) {
+    if (topHits.isEmpty()) {
+        Text("No data available", color = White)
+        return
+    }
+
+    val sortedHits = topHits.sortedByDescending { it.speed }
+    val barColors = GreenLight
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        val width = size.width
+        val height = size.height
+
+        val barCount = sortedHits.size
+        val spacing = width * 0.1f / barCount
+        val barAreaWidth = width - spacing * (barCount + 1)
+
+        val maxSpeed = sortedHits.maxOfOrNull { it.speed } ?: 1f
+
+        val labelPaint = Paint().apply {
+            color = android.graphics.Color.WHITE
+            textSize = 34f
+            textAlign = Paint.Align.CENTER
+            isFakeBoldText = true
+        }
+
+        val rankPaint = Paint().apply {
+            color = 0xFF163300.toInt()
+            textSize = 44f
+            textAlign = Paint.Align.CENTER
+            isFakeBoldText = true
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        sortedHits.forEachIndexed { index, hit ->
+            val normalizedHeight = (hit.speed / maxSpeed)
+            val barHeight = normalizedHeight * height * 0.7f
+
+            val widthFactor = 0.6f + (1f - normalizedHeight) * 0.3f
+            val barWidth = (barAreaWidth / barCount) * widthFactor
+
+            val left = spacing + index * ((barAreaWidth / barCount) + spacing)
+            val top = height - barHeight
+            val centerX = left + barWidth / 2
+
+            drawRoundRect(
+                color = barColors,
+                topLeft = Offset(left, top),
+                size = Size(barWidth, barHeight),
+                cornerRadius = CornerRadius(x = 4.dp.toPx(), y = 4.dp.toPx())
+            )
+
+            val rank = index + 1
+            drawContext.canvas.nativeCanvas.drawText(
+                "$rank",
+                centerX,
+                top + barHeight / 2 + 12f,
+                rankPaint
+            )
+
+            drawContext.canvas.nativeCanvas.drawText(
+                "${hit.speed.toInt()} m/s",
+                centerX,
+                top - 16f,
+                labelPaint
+            )
+
+            drawContext.canvas.nativeCanvas.drawText(
+                "Player ${hit.player}",
+                centerX,
+                top - 56f,
+                labelPaint
+            )
+        }
+    }
+}
+
+@Composable
+fun HitCountBarChart(hitCount: Map<String, Int>?) {
+    val hits = hitCount ?: emptyMap()
+    if (hits.isEmpty()) {
+        Text("No data available", color = White)
+        return
+    }
+
+    val playerNames = hits.keys.toList()
+    val hitValues = hits.values.toList()
+    val barColor = GreenLight
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        val labelPaint = Paint().apply {
+            color = android.graphics.Color.WHITE
+            textSize = 34f
+            textAlign = Paint.Align.CENTER
+            isFakeBoldText = true
+        }
+
+        val valuePaint = Paint().apply {
+            color = 0xFF163300.toInt()
+            textSize = 40f
+            textAlign = Paint.Align.CENTER
+            isFakeBoldText = true
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        val barCount = hitValues.size
+        val spacing = size.width * 0.05f / barCount
+        val slotWidth = (size.width - (barCount + 1) * spacing) / barCount
+        val barWidth = slotWidth * 0.6f
+        val maxHitCount = hitValues.maxOrNull()?.toFloat() ?: 1f
+
+        val topTextHeight = 20.dp.toPx()
+
+        hitValues.forEachIndexed { index, hitCount ->
+            val centerX = spacing + index * (slotWidth + spacing) + slotWidth / 2
+
+            // Y calculations
+            val barHeight = (hitCount / maxHitCount) * (size.height - topTextHeight - 12.dp.toPx())
+            val barTop = size.height - barHeight
+            val barLeft = centerX - barWidth / 2
+
+            // 👤 Player label above bar
+            drawContext.canvas.nativeCanvas.drawText(
+                playerNames[index],
+                centerX,
+                barTop - 8f,
+                labelPaint
+            )
+
+            // 🟩 Rounded bar from bottom up
+            drawRoundRect(
+                color = barColor,
+                topLeft = Offset(barLeft, barTop),
+                size = Size(barWidth, barHeight),
+                cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
+            )
+
+            // 🔢 Hit count inside bar, vertically centered
+            drawContext.canvas.nativeCanvas.drawText(
+                hitCount.toString(),
+                centerX,
+                barTop + barHeight / 2 + 10f,
+                valuePaint
+            )
+        }
+    }
+}
+
+@Composable
+fun BallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>) {
+    val playerColors = listOf(GreenLight, GreenDark, White, Black)
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        val width = size.width
+        val height = size.height
+
+        val allPoints = ballHits.flatMap { it.value.x.zip(it.value.y) }
+
+        val minX = allPoints.minOf { it.first }
+        val maxX = allPoints.maxOf { it.first }
+        val minY = allPoints.minOf { it.second }
+        val maxY = allPoints.maxOf { it.second }
+
+        val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
+        val rangeY = (maxY - minY).takeIf { it != 0f } ?: 1f
+
+        ballHits.entries.forEachIndexed { index, (playerName, playerHits) ->
+            val color = playerColors.getOrElse(index) { Color.Gray }
+
+            playerHits.x.zip(playerHits.y).forEach { (x, y) ->
+                val px = ((x - minX) / rangeX) * width
+                val py = ((-y - (-maxY)) / rangeY) * height
+
+                drawCircle(
+                    color = color,
+                    radius = 3.dp.toPx(),
+                    center = Offset(px, py)
+                )
+            }
         }
     }
 }
@@ -772,546 +1164,5 @@ fun PlayerRadarChart(radarData: RadarPerformance) {
                 style = Stroke(width = 2.dp.toPx())
             )
         }
-    }
-}
-
-@Composable
-fun BallTrajectoryPlot(ballTrajectory: BallTrajectory) {
-    val points = ballTrajectory.x.zip(ballTrajectory.y)
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .background(White)
-    ) {
-        val width = size.width
-        val height = size.height
-
-        // Determine the min and max values for X and Y axes
-        val minX = points.minOf { it.first }
-        val maxX = points.maxOf { it.first }
-        val minY = points.minOf { it.second }
-        val maxY = points.maxOf { it.second }
-
-        // Calculate ranges
-        val rangeX = maxX - minX
-        val rangeY = maxY - minY
-
-        // Function to map data points to the canvas dimensions
-        fun mapX(x: Float) = ((x - minX) / rangeX) * width
-        fun mapY(y: Float) = height - ((y - minY) / rangeY) * height
-
-        // Draw grid lines (both vertical and horizontal)
-        val gridLinesCount = 10
-        for (i in 0 until gridLinesCount) {
-            // Draw vertical grid lines
-            val gridX = i * width / gridLinesCount
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(gridX, 0f),
-                end = Offset(gridX, height)
-            )
-
-            // Draw horizontal grid lines
-            val gridY = i * height / gridLinesCount
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(0f, gridY),
-                end = Offset(width, gridY)
-            )
-        }
-
-        // Draw the X and Y axes
-        drawLine(
-            color = Color.Black,
-            start = Offset(0f, height),
-            end = Offset(width, height)
-        ) // X axis
-
-        drawLine(
-            color = Color.Black,
-            start = Offset(0f, 0f),
-            end = Offset(0f, height)
-        ) // Y axis
-
-        // Draw axis values (you can customize the number of ticks)
-        for (i in 0..5) {
-            val xValue = minX + (rangeX * i / 5)
-            val yValue = minY + (rangeY * i / 5)
-
-            // Draw X axis labels
-            drawContext.canvas.nativeCanvas.drawText(
-                "%.2f".format(xValue),
-                mapX(xValue),
-                height - 5f, // Slightly below the axis
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 30f
-                    textAlign = Paint.Align.CENTER
-                }
-            )
-
-            // Draw Y axis labels
-            drawContext.canvas.nativeCanvas.drawText(
-                "%.2f".format(yValue),
-                5f, // Slightly to the left of the axis
-                mapY(yValue),
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 30f
-                    textAlign = Paint.Align.RIGHT
-                }
-            )
-        }
-
-        // Draw the line connecting the points
-        points.zipWithNext().forEach { (start, end) ->
-            val startX = mapX(start.first)
-            val startY = mapY(start.second)
-            val endX = mapX(end.first)
-            val endY = mapY(end.second)
-
-            drawLine(
-                color = Color.Blue,
-                start = Offset(startX, startY),
-                end = Offset(endX, endY),
-                strokeWidth = 2f
-            )
-        }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun BallSpeedOverTimeLineChart(data: BallSpeedOverTime) {
-    val frameData = data.frame
-    val speedData = data.speed
-
-    if (frameData.isEmpty() || speedData.isEmpty() || frameData.size != speedData.size) {
-        Text("No speed data available")
-        return
-    }
-
-    val gridLinesCount = 5
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(350.dp)
-            .padding(16.dp)
-            .background(White)
-    ) {
-        val width = size.width
-        val height = size.height
-
-        val minX = frameData.minOrNull() ?: 0f
-        val maxX = frameData.maxOrNull() ?: 1f
-        val minY = speedData.minOrNull() ?: 0f
-        val maxY = speedData.maxOrNull() ?: 1f
-
-        val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
-        val rangeY = (maxY - minY).takeIf { it != 0f } ?: 1f
-
-        val xStep = width / (frameData.size - 1)
-
-        // Draw grid
-        for (i in 0..gridLinesCount) {
-            val y = i * height / gridLinesCount
-            drawLine(Color.LightGray, Offset(0f, y), Offset(width, y), 1.dp.toPx())
-
-            val x = i * width / gridLinesCount
-            drawLine(Color.LightGray, Offset(x, 0f), Offset(x, height), 1.dp.toPx())
-        }
-
-        // Draw X and Y axis
-        drawLine(Color.Black, Offset(0f, height), Offset(width, height), 2.dp.toPx())
-        drawLine(Color.Black, Offset(0f, 0f), Offset(0f, height), 2.dp.toPx())
-
-        // Y-axis labels
-        val yStepValue = rangeY / gridLinesCount
-        for (i in 0..gridLinesCount) {
-            val yValue = minY + yStepValue * i
-            val y = height - ((yValue - minY) / rangeY) * height
-
-            drawContext.canvas.nativeCanvas.drawText(
-                "%.1f".format(yValue),
-                5f,
-                y + 10f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 26f
-                    textAlign = Paint.Align.LEFT
-                }
-            )
-        }
-
-        // X-axis labels
-        val xStepValue = rangeX / gridLinesCount
-        for (i in 0..gridLinesCount) {
-            val xValue = minX + xStepValue * i
-            val x = ((xValue - minX) / rangeX) * width
-
-            drawContext.canvas.nativeCanvas.drawText(
-                "%.0f".format(xValue),
-                x,
-                height + 30f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 26f
-                    textAlign = Paint.Align.CENTER
-                }
-            )
-        }
-
-        // Draw the line chart
-        for (i in 1 until frameData.size) {
-            val x1 = ((frameData[i - 1] - minX) / rangeX) * width
-            val y1 = height - ((speedData[i - 1] - minY) / rangeY) * height
-
-            val x2 = ((frameData[i] - minX) / rangeX) * width
-            val y2 = height - ((speedData[i] - minY) / rangeY) * height
-
-            drawLine(
-                color = Color.Green,
-                start = Offset(x1, y1),
-                end = Offset(x2, y2),
-                strokeWidth = 2.dp.toPx()
-            )
-        }
-
-        // Titles
-        drawContext.canvas.nativeCanvas.drawText(
-            "Ball Speed Over Time",
-            width / 2f,
-            -10f,
-            Paint().apply {
-                color = android.graphics.Color.BLACK
-                textSize = 34f
-                textAlign = Paint.Align.CENTER
-            }
-        )
-
-        drawContext.canvas.nativeCanvas.drawText(
-            "Frame",
-            width / 2f,
-            height + 60f,
-            Paint().apply {
-                color = android.graphics.Color.BLACK
-                textSize = 30f
-                textAlign = Paint.Align.CENTER
-            }
-        )
-
-        drawContext.canvas.nativeCanvas.save()
-        drawContext.canvas.nativeCanvas.rotate(-90f, 10f, height / 2f)
-        drawContext.canvas.nativeCanvas.drawText(
-            "Speed (m/s)",
-            10f,
-            height / 2f,
-            Paint().apply {
-                color = android.graphics.Color.BLACK
-                textSize = 30f
-                textAlign = Paint.Align.CENTER
-            }
-        )
-        drawContext.canvas.nativeCanvas.restore()
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun HitCountBarChart(hitCount: Map<String, Int>?) {
-    val hits = hitCount ?: emptyMap()
-    if (hits.isEmpty()) {
-        Text("No data available")
-        return
-    }
-
-    val playerNames = hits.keys.toList()
-    val hitValues = hits.values.toList()
-    val colors = listOf(Color.Blue, Color.Red, Color.Green, Color.Magenta)
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(350.dp)
-            .padding(16.dp)
-    ) {
-        val yAxisLabelPadding = 80.dp.toPx()
-        val bottomPadding = 40.dp.toPx()
-
-        val contentWidth = size.width - yAxisLabelPadding
-        val contentHeight = size.height - bottomPadding
-
-        val slotWidth = contentWidth / hitValues.size
-        val barWidth = slotWidth * 0.6f // 60% of slot for bar, 40% gap
-        val maxHitCount = hitValues.maxOrNull() ?: 1
-
-        val yAxisSteps = 5
-        val yStepValue = maxHitCount / yAxisSteps.toFloat()
-        val yStepHeight = contentHeight / yAxisSteps
-
-        // 🟩 Draw Y-axis grid lines and labels
-        for (i in 0..yAxisSteps) {
-            val y = contentHeight - i * yStepHeight
-
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(yAxisLabelPadding, y),
-                end = Offset(size.width, y),
-                strokeWidth = 1.dp.toPx()
-            )
-
-            drawContext.canvas.nativeCanvas.drawText(
-                String.format("%.0f", i * yStepValue),
-                yAxisLabelPadding - 10.dp.toPx(),
-                y + 10f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 28f
-                    textAlign = Paint.Align.RIGHT
-                }
-            )
-        }
-
-        // 🟥 Draw bars + labels
-        hitValues.forEachIndexed { index, hitCount ->
-            val barHeight = (hitCount.toFloat() / maxHitCount) * contentHeight
-
-            val barLeft = yAxisLabelPadding + index * slotWidth + (slotWidth - barWidth) / 2
-            val barTop = contentHeight - barHeight
-
-            drawRect(
-                color = colors.getOrElse(index) { Color.Gray },
-                topLeft = Offset(barLeft, barTop),
-                size = Size(barWidth, barHeight)
-            )
-
-            // Draw player name under the bar
-            drawContext.canvas.nativeCanvas.drawText(
-                playerNames[index],
-                barLeft + barWidth / 2,
-                contentHeight + 30f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 28f
-                    textAlign = Paint.Align.CENTER
-                }
-            )
-        }
-
-        // ⬛ Axes
-        drawLine(
-            color = Color.Black,
-            start = Offset(yAxisLabelPadding, 0f),
-            end = Offset(yAxisLabelPadding, contentHeight),
-            strokeWidth = 2.dp.toPx()
-        )
-        drawLine(
-            color = Color.Black,
-            start = Offset(yAxisLabelPadding, contentHeight),
-            end = Offset(size.width, contentHeight),
-            strokeWidth = 2.dp.toPx()
-        )
-
-        // 🏷️ Y-axis label
-        drawContext.canvas.nativeCanvas.drawText(
-            "Hit Count",
-            5f,
-            contentHeight / 2f,
-            Paint().apply {
-                color = android.graphics.Color.BLACK
-                textSize = 36f
-                textAlign = Paint.Align.LEFT
-            }
-        )
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun BallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>) {
-    val playerColors = listOf(Color.Blue, Color.Red, Color.Green, Color.Magenta)
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp)
-            .padding(8.dp)
-            .background(White)
-    ) {
-
-        val width = size.width
-        val height = size.height
-
-        val allPoints = ballHits.flatMap { it.value.x.zip(it.value.y) }
-
-        val minX = allPoints.minOf { it.first }
-        val maxX = allPoints.maxOf { it.first }
-        val minY = allPoints.minOf { it.second }
-        val maxY = allPoints.maxOf { it.second }
-
-        val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
-        val rangeY = (maxY - minY).takeIf { it != 0f } ?: 1f
-
-        val gridCount = 5
-        val stepX = width / gridCount
-        val stepY = height / gridCount
-
-        val xStepValue = rangeX / gridCount
-        val yStepValue = rangeY / gridCount
-
-        // 🟩 Grid and axis labels
-        for (i in 0..gridCount) {
-            val x = i * stepX
-            val y = i * stepY
-
-            // Grid lines
-            drawLine(Color.LightGray, Offset(x, 0f), Offset(x, height), 1.dp.toPx())
-            drawLine(Color.LightGray, Offset(0f, y), Offset(width, y), 1.dp.toPx())
-
-            // Axis labels
-            drawContext.canvas.nativeCanvas.drawText(
-                String.format("%.0f", minY + i * xStepValue), // bottom X
-                x,
-                height + 30f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 26f
-                    textAlign = Paint.Align.CENTER
-                }
-            )
-            drawContext.canvas.nativeCanvas.drawText(
-                String.format("%.0f", minX + (gridCount - i) * yStepValue), // left Y
-                -10f,
-                y + 10f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 26f
-                    textAlign = Paint.Align.RIGHT
-                }
-            )
-        }
-
-        // ⬛ Axes
-        drawLine(Color.Black, Offset(0f, height), Offset(width, height), 2.dp.toPx()) // bottom axis
-        drawLine(Color.Black, Offset(0f, 0f), Offset(0f, height), 2.dp.toPx()) // left axis
-
-        // 🔴 Draw flipped points
-        ballHits.entries.forEachIndexed { index, (playerName, playerHits) ->
-            val color = playerColors.getOrNull(index) ?: Color.Black
-
-            playerHits.x.zip(playerHits.y).forEach { (x, y) ->
-                val px = ((x - minX) / rangeX) * width
-                val py = ((y - minY) / rangeY) * height
-
-                drawCircle(color = color, radius = 5.dp.toPx(), center = Offset(px, py))
-            }
-        }
-    }
-}
-
-@Composable
-fun Top2StrongestHitsBarChart(topHits: List<StrongestHitItem>) {
-    if (topHits.isEmpty()) {
-        Text("No data available")
-        return
-    }
-
-    val barColors = listOf(Color.Red, Color.Blue)
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(350.dp)
-            .padding(16.dp)
-    ) {
-        val yAxisLabelPadding = 80.dp.toPx()
-        val bottomPadding = 40.dp.toPx()
-
-        val width = size.width - yAxisLabelPadding
-        val height = size.height - bottomPadding
-
-        val barWidth = width / (topHits.size * 2f)
-        val maxSpeed = topHits.maxOfOrNull { it.speed } ?: 1f
-
-        val yAxisSteps = 5
-        val yStepValue = maxSpeed / yAxisSteps
-        val yStepHeight = height / yAxisSteps
-
-        // 🟩 Grid lines + Y-axis labels
-        for (i in 0..yAxisSteps) {
-            val y = height - i * yStepHeight
-
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(yAxisLabelPadding, y),
-                end = Offset(size.width, y),
-                strokeWidth = 1.dp.toPx()
-            )
-
-            drawContext.canvas.nativeCanvas.drawText(
-                "${(i * yStepValue).toInt()}",
-                yAxisLabelPadding - 10.dp.toPx(),
-                y + 10f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 28f
-                    textAlign = Paint.Align.RIGHT
-                }
-            )
-        }
-
-        // 📊 Draw bars and player labels
-        topHits.forEachIndexed { index, hit ->
-            val barHeight = (hit.speed / maxSpeed) * height
-            val left = yAxisLabelPadding + index * barWidth * 2
-            val top = height - barHeight
-            val right = left + barWidth
-
-            drawRect(
-                color = barColors.getOrElse(index) { Color.Gray },
-                topLeft = Offset(left, top),
-                size = Size(barWidth, barHeight)
-            )
-
-            drawContext.canvas.nativeCanvas.drawText(
-                "Player ${hit.player}",
-                left + barWidth / 2,
-                height + 30f,
-                Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    textSize = 28f
-                    textAlign = Paint.Align.CENTER
-                }
-            )
-        }
-
-        // ⬛ Axes
-        drawLine(
-            color = Color.Black,
-            start = Offset(yAxisLabelPadding, 0f),
-            end = Offset(yAxisLabelPadding, height),
-            strokeWidth = 2.dp.toPx()
-        )
-        drawLine(
-            color = Color.Black,
-            start = Offset(yAxisLabelPadding, height),
-            end = Offset(size.width, height),
-            strokeWidth = 2.dp.toPx()
-        )
-
-        // 🏷️ Y-axis label
-        drawContext.canvas.nativeCanvas.drawText(
-            "Speed (m/s)",
-            5f,
-            height / 2f,
-            Paint().apply {
-                color = android.graphics.Color.BLACK
-                textSize = 34f
-                textAlign = Paint.Align.LEFT
-            }
-        )
     }
 }
