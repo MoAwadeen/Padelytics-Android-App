@@ -12726,13 +12726,13 @@
     ]
   },
   "hit_count_per_player": {
-    "Player 1": 1,
-    "Player 2": 4,
-    "Player 3": 4,
-    "Player 4": 4
+    "player1": 1,
+    "player2": 4,
+    "player3": 4,
+    "player4": 4
   },
   "ball_hit_locations": {
-    "Player 1": {
+    "player1": {
       "x": [
         481.0
       ],
@@ -12740,7 +12740,7 @@
         748.0
       ]
     },
-    "Player 2": {
+    "player2": {
       "x": [
         982.0,
         1027.0,
@@ -12754,7 +12754,7 @@
         465.0
       ]
     },
-    "Player 3": {
+    "player3": {
       "x": [
         1166.0,
         1203.0,
@@ -12768,7 +12768,7 @@
         377.0
       ]
     },
-    "Player 4": {
+    "player4": {
       "x": [
         941.0,
         888.0,

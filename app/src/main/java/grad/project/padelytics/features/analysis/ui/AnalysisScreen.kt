@@ -35,11 +35,12 @@ import grad.project.padelytics.features.analysis.components.BallSpeedOverTimeLin
 import grad.project.padelytics.features.analysis.components.BallTrajectoryPlot
 import grad.project.padelytics.features.analysis.components.CourtBackground
 import grad.project.padelytics.features.analysis.components.HitCountBarChart
+import grad.project.padelytics.features.analysis.components.MatchAnimationCard
+import grad.project.padelytics.features.analysis.components.PlayerAnalysisCard
 import grad.project.padelytics.features.analysis.components.PlayersView
 import grad.project.padelytics.features.analysis.components.RectangleBackground
 import grad.project.padelytics.features.analysis.components.TopStrongestHitsBarChart
 import grad.project.padelytics.features.analysis.data.FullAnalysisData
-import grad.project.padelytics.features.analysis.data.MetricValues
 import grad.project.padelytics.features.analysis.viewModel.AnalysisViewModel
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -52,27 +53,11 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
     val type = object : TypeToken<FullAnalysisData>() {}.type
     val analysisData: FullAnalysisData = gson.fromJson(jsonString, type)
 
-    val playersData = mapOf(
-        "player1" to analysisData.trajectories["player1"]!!,
-        "player2" to analysisData.trajectories["player2"]!!,
-        "player3" to analysisData.trajectories["player3"]!!,
-        "player4" to analysisData.trajectories["player4"]!!
-    )
-
     val playerNames = mapOf(
         "player1" to "Mohamed",
         "player2" to "Youssef",
         "player3" to "Merna",
         "player4" to "Rahma"
-    )
-
-    val metricData = MetricValues(
-        distanceTotal = analysisData.distance_total,
-        distanceAvgPerFrame = analysisData.distance_avg_per_frame,
-        averageSpeed = analysisData.average_speed,
-        maxSpeed = analysisData.max_speed,
-        averageAcceleration = analysisData.average_acceleration,
-        zonePresencePercentages = analysisData.zone_presence_percentages
     )
 
     BackHandler {
@@ -120,16 +105,39 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                                                     RectangleBackground{ BallSpeedOverTimeLineChart(data = analysisData.ball_speed_over_time) }
                                                 },
                                                 "Top Speeds" to @Composable {
-                                                    RectangleBackground{ TopStrongestHitsBarChart(topHits = analysisData.top_2_strongest_hits) }
+                                                    RectangleBackground{
+                                                        TopStrongestHitsBarChart(
+                                                            topHits = analysisData.top_2_strongest_hits,
+                                                            playerName = playerNames
+                                                        )
+                                                    }
                                                 },
                                                 "Number Of Ball Hits" to @Composable {
-                                                    RectangleBackground{ HitCountBarChart(hitCount = analysisData.hit_count_per_player) }
+                                                    RectangleBackground{
+                                                        HitCountBarChart(
+                                                            hitCount = analysisData.hit_count_per_player,
+                                                            playerDisplayNames = playerNames
+                                                        )
+                                                    }
                                                 },
                                                 "Ball Hits Locations" to @Composable {
                                                     CourtBackground{ BallHitLocationsPlot(ballHits = analysisData.ball_hit_locations) }
                                                 }
                                             )
                                         )
+
+                                        Spacer(modifier = Modifier.height(20.dp))
+
+                                        MatchAnimationCard(analysisData = analysisData)
+
+                                        Spacer(modifier = Modifier.height(20.dp))
+
+                                        PlayerAnalysisCard(
+                                            analysisData = analysisData,
+                                            playerList = listOf("player1", "player2", "player3", "player4"),
+                                            analysisViewModel = viewModel(),
+                                            playerNames = playerNames
+                                            )
                                     }
                                 }
                             }

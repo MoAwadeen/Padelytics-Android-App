@@ -41,15 +41,6 @@ data class PlayerHeatmap(
     val y: List<Float>
 )
 
-data class MetricValues(
-    val distanceTotal: Map<String, Float>,
-    val distanceAvgPerFrame: Map<String, Float>,
-    val averageSpeed: Map<String, Float>,
-    val maxSpeed: Map<String, Float>,
-    val averageAcceleration: Map<String, Float>,
-    val zonePresencePercentages: Map<String, Map<String, Float>>
-)
-
 data class RadarPerformance(
     val metrics: List<String>,
     val players: Map<String, Map<String, Float>>

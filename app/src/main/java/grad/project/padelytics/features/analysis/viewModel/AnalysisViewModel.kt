@@ -79,4 +79,8 @@ class AnalysisViewModel: ViewModel() {
             null
         }
     }
+
+    fun getDisplayName(rawKey: String, map: Map<String, String>): String {
+        return map[rawKey] ?: rawKey
+    }
 }
