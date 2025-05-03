@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class VideoUploadViewModel : ViewModel() {
-
     private val _selectedVideoUri = MutableStateFlow<Uri?>(null)
     val selectedVideoUri: StateFlow<Uri?> = _selectedVideoUri
 
@@ -26,19 +25,17 @@ class VideoUploadViewModel : ViewModel() {
     private val _isLoadingFriends = MutableStateFlow(false)
     val isLoadingFriends: StateFlow<Boolean> = _isLoadingFriends
 
-    private val _selectedFriend = MutableStateFlow<FriendData?>(null)
-    val selectedFriend: StateFlow<FriendData?> = _selectedFriend
-
-
     private val _isFriendSelected = MutableStateFlow(false)
     val isFriendSelected: StateFlow<Boolean> = _isFriendSelected
 
     private val firestore = FirebaseFirestore.getInstance()
 
+    private val _selectedFriends = MutableStateFlow<List<FriendData?>>(listOf(null, null, null))
+    val selectedFriends: StateFlow<List<FriendData?>> = _selectedFriends
+
     fun setSelectedVideo(uri: Uri) {
         _selectedVideoUri.value = uri
     }
-
 
     fun searchUsername(username: String) {
         _isLoading.value = true
@@ -111,30 +108,67 @@ class VideoUploadViewModel : ViewModel() {
             .collection("playerFriends")
             .get()
             .addOnSuccessListener { documents ->
-                val friends = documents.mapNotNull { doc ->
-                    FriendData(
-                        userName = doc.getString("userName") ?: "",
-                        firstName = doc.getString("firstName") ?: "",
-                        lastName = doc.getString("lastName") ?: "",
-                        photo = doc.getString("photo") ?: ""
-                    )
+                val friendIds = documents.mapNotNull { it.id }
+
+                if (friendIds.isEmpty()) {
+                    _friendsList.value = emptyList()
+                    _isLoadingFriends.value = false
+                    return@addOnSuccessListener
                 }
-                _friendsList.value = friends
-                _isLoadingFriends.value = false
+
+                val updatedFriends = mutableListOf<FriendData>()
+                var fetchedCount = 0
+
+                friendIds.forEach { friendId ->
+                    firestore.collection("users")
+                        .document(friendId)
+                        .get()
+                        .addOnSuccessListener { doc ->
+                            if (doc.exists()) {
+                                val friend = FriendData(
+                                    userName = doc.getString("userName") ?: "",
+                                    firstName = doc.getString("firstName") ?: "",
+                                    lastName = doc.getString("lastName") ?: "",
+                                    photo = doc.getString("photo") ?: ""
+                                )
+                                updatedFriends.add(friend)
+                            }
+
+                            fetchedCount++
+                            if (fetchedCount == friendIds.size) {
+                                _friendsList.value = updatedFriends
+                                _isLoadingFriends.value = false
+                            }
+                        }
+                        .addOnFailureListener {
+                            fetchedCount++
+                            Log.e("FriendsFetch", "Failed to fetch friend user data", it)
+                            if (fetchedCount == friendIds.size) {
+                                _friendsList.value = updatedFriends
+                                _isLoadingFriends.value = false
+                            }
+                        }
+                }
             }
             .addOnFailureListener {
                 _isLoadingFriends.value = false
-                Log.e("FriendsFetch", "Error fetching friends", it)
+                Log.e("FriendsFetch", "Error fetching friend IDs", it)
             }
     }
 
-    fun selectFriend(friend: FriendData) {
-        _selectedFriend.value = friend
-        _isFriendSelected.value = true
-        Log.d("VideoUploadVM", "Friend selected: ${friend.userName}")
+    fun selectFriendAt(index: Int, friend: FriendData) {
+        val mutableList = _selectedFriends.value.toMutableList()
+        if (index in 0..2) {
+            mutableList[index] = friend
+            _selectedFriends.value = mutableList
+        }
     }
 
-    fun clearSelectedFriend() {
-        _selectedFriend.value = null
+    fun unselectFriendAt(index: Int) {
+        val mutableList = _selectedFriends.value.toMutableList()
+        if (index in 0..2) {
+            mutableList[index] = null
+            _selectedFriends.value = mutableList
+        }
     }
 }

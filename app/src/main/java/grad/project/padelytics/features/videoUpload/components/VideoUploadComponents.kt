@@ -36,10 +36,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MenuDefaults
@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -82,7 +83,6 @@ import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
-
 
 @Composable
 fun VideoUploadCard(
@@ -138,7 +138,6 @@ fun VideoUploadCard(
     }
 }
 
-
 @Composable
 fun VideoThumbnail(
     videoUri: Uri,
@@ -168,7 +167,6 @@ fun VideoThumbnail(
 fun VideoUploadPreview() {
     VideoUploadCard(){}
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -301,7 +299,6 @@ fun CourtDropdownMenu(
     }
 }
 
-
 @Composable
 fun MyPlayerPlaceHolder(
     avatarImage: Painter = painterResource(id = R.drawable.user),
@@ -351,9 +348,8 @@ fun MyPlayerPlaceHolder(
     }
 }
 
-
 @Composable
-fun FriendPlaceHolder(
+fun FirstFriendPlaceHolder(
     avatarImage: Painter = painterResource(id = R.drawable.plus),
     friendName: String = "",
     modifier: Modifier = Modifier,
@@ -373,7 +369,7 @@ fun FriendPlaceHolder(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth().wrapContentSize()
         ) {
             Text(
@@ -402,6 +398,103 @@ fun FriendPlaceHolder(
     }
 }
 
+@Composable
+fun SecondFriendPlaceHolder(
+    avatarImage: Painter = painterResource(id = R.drawable.plus),
+    friendName: String = "",
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (friendName.isNotEmpty()) GreenDark else WhiteGray,
+            contentColor = GreenLight
+        ),
+        shape = RoundedCornerShape(60.dp),
+        border = BorderStroke(3.dp, GreenDark),
+        elevation = ButtonDefaults.buttonElevation(0.dp),
+        modifier = modifier
+            .height(50.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.fillMaxWidth().wrapContentSize()
+        ) {
+            Image(
+                painter = avatarImage,
+                contentDescription = "Avatar",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(35.dp)
+                    .border(3.dp, GreenLight, CircleShape)
+                    .clip(CircleShape)
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Text(
+                text = friendName,
+                fontSize = 14.sp,
+                color = GreenLight,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun ThirdFriendPlaceHolder(
+    avatarImage: Painter = painterResource(id = R.drawable.plus),
+    friendName: String = "",
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (friendName.isNotEmpty()) GreenDark else WhiteGray,
+            contentColor = GreenLight
+        ),
+        shape = RoundedCornerShape(60.dp),
+        border = BorderStroke(3.dp, GreenDark),
+        elevation = ButtonDefaults.buttonElevation(0.dp),
+        modifier = modifier
+            .height(50.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End,
+            modifier = Modifier.fillMaxWidth().wrapContentSize()
+        ) {
+            Text(
+                text = friendName,
+                fontSize = 14.sp,
+                color = GreenLight,
+                fontFamily = lexendFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Image(
+                painter = avatarImage,
+                contentDescription = "Avatar",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(35.dp)
+                    .border(3.dp, GreenLight, CircleShape)
+                    .clip(CircleShape)
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -412,9 +505,9 @@ fun MyPlayerPlaceHolderPreview(){
         modifier = Modifier.fillMaxWidth()
     ){
     MyPlayerPlaceHolder(modifier = Modifier.weight(1f))
-    FriendPlaceHolder(friendName = "",modifier = Modifier.weight(1f))}
-}
 
+    FirstFriendPlaceHolder(friendName = "",modifier = Modifier.weight(1f))}
+}
 
 @Composable
 fun SearchFriendDialog(
@@ -535,15 +628,17 @@ fun SearchFriendDialogPreview() {
 
 @Composable
 fun FriendsListDialog(
+    selectedIndex: Int,
     onDismiss: () -> Unit,
+    onFriendSelected: (FriendData) -> Unit,
     onAddFriendClick: () -> Unit,
     viewModel: VideoUploadViewModel = viewModel()
 ) {
     val friendsList by viewModel.friendsList.collectAsState()
     val isLoading by viewModel.isLoadingFriends.collectAsState()
-    val selectedFriend by viewModel.selectedFriend.collectAsState()
+    val selectedFriends by viewModel.selectedFriends.collectAsState()
     val context = LocalContext.current
-
+    val selectedFriend = selectedFriends.getOrNull(selectedIndex)
 
     LaunchedEffect(Unit) {
         viewModel.fetchFriendsList()
@@ -564,13 +659,16 @@ fun FriendsListDialog(
             )
         },
         text = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 selectedFriend?.let { friend ->
-                    SelectedFriendPreview(friend = friend)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Divider(color = GreenLight.copy(alpha = 0.3f))
+                    SelectedFriendPreview(
+                        friend = friend,
+                        onRemove = {
+                            viewModel.unselectFriendAt(selectedIndex)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(color = GreenLight.copy(alpha = 0.3f))
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
@@ -602,17 +700,18 @@ fun FriendsListDialog(
                     }
 
                     else -> {
-                        LazyColumn(
-                            modifier = Modifier.heightIn(max = 400.dp)
-                        ) {
-                            items(friendsList) { friend ->
+                        val availableFriends = friendsList.filter { friend ->
+                            selectedFriends.none { it?.userName == friend.userName }
+                        }
+
+                        LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                            items(availableFriends) { friend ->
                                 FriendListItem(
                                     friend = friend,
-                                    isSelected = selectedFriend?.userName == friend.userName,
                                     onClick = {
-                                        viewModel.selectFriend(friend)
-                                        // Optional: auto-dismiss on selection
-                                        // onDismiss()
+                                        viewModel.selectFriendAt(selectedIndex, friend)
+                                        onFriendSelected(friend)
+                                        onDismiss()
                                     }
                                 )
                             }
@@ -624,8 +723,11 @@ fun FriendsListDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    selectedFriend?.let { onDismiss() }
-                        ?: Toast.makeText(context, "Please select a friend", Toast.LENGTH_SHORT).show()
+                    if (selectedFriend != null) {
+                        onDismiss()
+                    } else {
+                        Toast.makeText(context, "Please select a friend", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GreenLight,
@@ -644,7 +746,8 @@ fun FriendsListDialog(
                 onClick = onAddFriendClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GreenDark,
-                    contentColor = GreenLight)
+                    contentColor = GreenLight
+                )
             ) {
                 Text(
                     text = "ADD PLAYER",
@@ -657,11 +760,12 @@ fun FriendsListDialog(
 }
 
 @Composable
-private fun SelectedFriendPreview(friend: FriendData) {
+private fun SelectedFriendPreview(friend: FriendData, onRemove: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { onRemove() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
@@ -692,26 +796,21 @@ private fun SelectedFriendPreview(friend: FriendData) {
     }
 }
 
-
 @Composable
-private fun FriendListItem(
-    friend: FriendData,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
+private fun FriendListItem(friend: FriendData, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) GreenLight.copy(alpha = 0.15f) else Color.Transparent
+            containerColor = Transparent
         ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp), // Keep padding inside the Row
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -741,23 +840,8 @@ private fun FriendListItem(
                     fontSize = 12.sp
                 )
             }
-
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
-                    tint = GreenLight,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
         }
     }
-}
-
-@Preview
-@Composable
-fun FriendsListDialogPreview() {
-    FriendsListDialog(onDismiss = {}, onAddFriendClick = {})
 }
 
 @Preview(showBackground = true)
@@ -770,7 +854,6 @@ fun FriendListItemPreview() {
             lastName = "Doe",
             photo = "https://example.com/photo.jpg"
         ),
-        onClick = {},
-        isSelected = false
+        onClick = {}
     )
 }
