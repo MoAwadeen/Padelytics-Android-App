@@ -7,7 +7,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
-
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
     private var firstName: String? = null
@@ -33,4 +32,3 @@ class HomeViewModel : ViewModel() {
         }
     }
 }
-

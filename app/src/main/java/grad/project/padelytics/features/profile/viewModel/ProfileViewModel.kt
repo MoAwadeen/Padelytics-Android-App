@@ -12,16 +12,13 @@ import com.cloudinary.utils.ObjectUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
-import grad.project.padelytics.appComponents.AppUtils.showToast
 import grad.project.padelytics.data.UserProfileModel
-import grad.project.padelytics.navigation.Routes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlin.Result.Companion.success
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -79,8 +76,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-
-    fun addExtraFeature(photo: String,onResult: (Boolean, String?) -> Unit) {
+    private fun addExtraFeature(photo: String, onResult: (Boolean, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: run {
             onResult(false, "User not found")
             return
@@ -104,5 +100,4 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-
 }

@@ -66,7 +66,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -83,7 +82,6 @@ import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
-
 
 
 @Composable
@@ -114,7 +112,6 @@ fun VideoUploadCard(
     ) {
         when {
             videoUri != null -> {
-                // Show video thumbnail with play icon overlay
                 Box(contentAlignment = Alignment.Center) {
                     VideoThumbnail(
                         videoUri = videoUri!!,

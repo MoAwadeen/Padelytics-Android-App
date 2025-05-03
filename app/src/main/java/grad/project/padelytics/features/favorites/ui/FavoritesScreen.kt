@@ -206,6 +206,7 @@ fun FavoritesScreen(modifier: Modifier = Modifier, navController: NavHostControl
                                             put("productDelivery", favoriteProduct.productDelivery)
                                             put("productUrl", favoriteProduct.productUrl)
                                             put("productOffers", favoriteProduct.productOffers)
+                                            put("productBrand", favoriteProduct.productBrand)
                                         }.toString()
 
                                         FavoriteProducts(
