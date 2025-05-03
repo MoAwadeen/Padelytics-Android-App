@@ -751,7 +751,7 @@ fun BallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>) {
 }
 
 @Composable
-fun MatchAnimationCard(analysisData: FullAnalysisData){
+fun MatchAnimationCard(analysisData: FullAnalysisData, playerName: Map<String, String>){
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -777,19 +777,20 @@ fun MatchAnimationCard(analysisData: FullAnalysisData){
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            CourtBackground{ AnimatedPlayerScatterPlot(frames = analysisData.animation) }
+            CourtBackground{ AnimatedPlayerScatterPlot(frames = analysisData.animation, playerNameMap = playerName) }
         }
     }
 }
 
 @Composable
-fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>) {
+fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<String, String>) {
     if (frames.isEmpty()) {
-        Text("No animation data available")
+        Text("No animation data available", color = White)
         return
     }
 
-    val playerColors = listOf(GreenLight, GreenDark, White, Black)
+    val playerColors = listOf(GreenLight, GreenLight, BlueDark, BlueDark)
+    val playerKeys = listOf("player1", "player2", "player3", "player4")
 
     var frameIndex by remember { mutableIntStateOf(0) }
 
@@ -821,18 +822,39 @@ fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>) {
             val yRangeMax = 10f
             val rangeY = yRangeMax - yRangeMin
 
-
-            val playerPositions = listOf(
-                currentFrame.player1 to playerColors[0],
-                currentFrame.player2 to playerColors[1],
-                currentFrame.player3 to playerColors[2],
-                currentFrame.player4 to playerColors[3]
+            val positions = listOf(
+                currentFrame.player1,
+                currentFrame.player2,
+                currentFrame.player3,
+                currentFrame.player4
             )
 
-            playerPositions.forEach { (pos, color) ->
+            val labelPaint = Paint().apply {
+                color = android.graphics.Color.WHITE
+                textSize = 20f
+                textAlign = Paint.Align.CENTER
+                isFakeBoldText = true
+            }
+
+            positions.forEachIndexed { index, pos ->
                 val px = ((pos.y - fixedXMin) / rangeX) * width
                 val py = ((-pos.x - yRangeMin) / rangeY) * height
+                val color = playerColors.getOrElse(index) { GreenLight }
+                val playerName = playerNameMap[playerKeys[index]] ?: playerKeys[index]
+
                 drawCircle(color, radius = 3.dp.toPx(), center = Offset(px, py))
+
+                drawContext.canvas.nativeCanvas.apply {
+                    save()
+                    rotate(-180f, px, py + 14f)
+                    drawText(
+                        playerName,
+                        px,
+                        py + 14f,
+                        labelPaint
+                    )
+                    restore()
+                }
             }
         }
     }
@@ -904,6 +926,7 @@ fun TextGraphHeader(title: String) {
 fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>, analysisViewModel: AnalysisViewModel, playerNames: Map<String, String>) {
     var currentPlayerIndex by remember { mutableIntStateOf(value = 0) }
     val player = playerList[currentPlayerIndex]
+    val avatarBorderColors = listOf(GreenLight, GreenLight, BlueDark, BlueDark)
 
     Box(
         modifier = Modifier
@@ -954,7 +977,7 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>,
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .border(2.dp, GreenLight, CircleShape)
+                                    .border(2.dp, avatarBorderColors.getOrElse(currentPlayerIndex) { GreenLight }, CircleShape)
                                     .clip(CircleShape)
                             )
                         }
@@ -1080,6 +1103,19 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>,
                         PlayerBallHitLocationsPlot(
                             ballHits = analysisData.ball_hit_locations,
                             targetPlayer = player
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                TextGraphHeader(title = "Attack vs Defence")
+
+                Row(modifier = Modifier.padding(start = 6.dp)){
+                    RectangleBackground{
+                        PlayerZoneScatterGraph(
+                            frames = analysisData.animation,
+                            targetPlayerKey = player
                         )
                     }
                 }
@@ -1277,6 +1313,72 @@ fun PlayerBallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>, target
                     center = Offset(px, py)
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun PlayerZoneScatterGraph(frames: List<AnimationFrame>, targetPlayerKey: String) {
+    if (frames.isEmpty()) {
+        Text("No frame data available", color = White)
+        return
+    }
+
+    val ySeries = remember(frames, targetPlayerKey) {
+        frames.mapNotNull { frame ->
+            val playerY = when (targetPlayerKey) {
+                "player1" -> frame.player1.y
+                "player2" -> frame.player2.y
+                "player3" -> frame.player3.y
+                "player4" -> frame.player4.y
+                else -> null
+            }
+
+            if (playerY != null && playerY.isFinite()) {
+                frame.Frame to playerY
+            } else null
+        }
+    }
+
+    if (ySeries.isEmpty()) {
+        Text("No data for player", color = White)
+        return
+    }
+
+    val zoneColor: (Float) -> Color = { y ->
+        if (y in -5f..5f) GreenLight else OrangeLight
+    }
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        val width = size.width
+        val height = size.height
+
+        val framesList = ySeries.map { it.first }
+        val yList = ySeries.map { -it.second }
+
+        val minFrame = framesList.minOrNull() ?: 0
+        val maxFrame = framesList.maxOrNull() ?: 1
+        val rangeX = (maxFrame - minFrame).toFloat().takeIf { it != 0f } ?: 1f
+
+        val minY = yList.minOrNull() ?: -10f
+        val maxY = yList.maxOrNull() ?: 10f
+        val rangeY = (maxY - minY).takeIf { it != 0f } ?: 1f
+
+        framesList.zip(yList).forEach { (frame, yVal) ->
+            val px = ((frame - minFrame) / rangeX) * width
+            val py = ((yVal - minY) / rangeY) * height
+
+            drawCircle(
+                color = zoneColor(-yVal),
+                radius = 2.dp.toPx(),
+                center = Offset(px, py)
+            )
         }
     }
 }
