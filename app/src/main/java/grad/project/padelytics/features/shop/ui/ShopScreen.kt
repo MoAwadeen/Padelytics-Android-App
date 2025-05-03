@@ -119,50 +119,54 @@ fun ShopScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                 FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
             }
             else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.White)
-                ){
-                    items(viewModel.products.value) { product ->
-                        if (product.delivery != null && product.product_star_rating != null){
-                            val detectedBrand = viewModel.detectBrandFromMultiLangTitle(product.product_title)
-                            val context = LocalContext.current
-                            val sharedPrefs = context.getSharedPreferences("product_prefs", Context.MODE_PRIVATE)
-                            val productJson = JSONObject().apply {
-                                put("productId", product.asin)
-                                put("productImage", product.product_photo)
-                                put("productName", product.product_title)
-                                put("productRating", product.product_star_rating)
-                                put("productNumRating", product.product_num_ratings.toString())
-                                put("productPrice", product.product_price)
-                                put("productDelivery", product.delivery)
-                                put("productUrl", product.product_url)
-                                put("productOffers", product.product_num_offers)
-                                put("productBrand", detectedBrand)
-                            }.toString()
+                if (viewModel.products.value.isEmpty()) {
+                    FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                            .background(color = Color.White)
+                    ){
+                        items(viewModel.products.value) { product ->
+                            if (product.delivery != null && product.product_star_rating != null){
+                                val detectedBrand = viewModel.detectBrandFromMultiLangTitle(product.product_title)
+                                val context = LocalContext.current
+                                val sharedPrefs = context.getSharedPreferences("product_prefs", Context.MODE_PRIVATE)
+                                val productJson = JSONObject().apply {
+                                    put("productId", product.asin)
+                                    put("productImage", product.product_photo)
+                                    put("productName", product.product_title)
+                                    put("productRating", product.product_star_rating)
+                                    put("productNumRating", product.product_num_ratings.toString())
+                                    put("productPrice", product.product_price)
+                                    put("productDelivery", product.delivery)
+                                    put("productUrl", product.product_url)
+                                    put("productOffers", product.product_num_offers)
+                                    put("productBrand", detectedBrand)
+                                }.toString()
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
 
-                            ShopProduct(
-                                viewModel = viewModel,
-                                productId = product.asin,
-                                productImage = product.product_photo,
-                                productName = product.product_title,
-                                productRating = product.product_star_rating,
-                                productNumRating = product.product_num_ratings.toString(),
-                                productDelivery = product.delivery,
-                                productOffers = product.product_num_offers.toString(),
-                                productBrand = detectedBrand,
-                                productPrice = product.product_price,
-                                productUrl = product.product_url,
-                                onClick = {
-                                    sharedPrefs.edit{ putString("selected_product", productJson) }
-                                    navController.navigate(Routes.PRODUCT_DETAILS)
-                                }
-                            )
+                                ShopProduct(
+                                    viewModel = viewModel,
+                                    productId = product.asin,
+                                    productImage = product.product_photo,
+                                    productName = product.product_title,
+                                    productRating = product.product_star_rating,
+                                    productNumRating = product.product_num_ratings.toString(),
+                                    productDelivery = product.delivery,
+                                    productOffers = product.product_num_offers.toString(),
+                                    productBrand = detectedBrand,
+                                    productPrice = product.product_price,
+                                    productUrl = product.product_url,
+                                    onClick = {
+                                        sharedPrefs.edit{ putString("selected_product", productJson) }
+                                        navController.navigate(Routes.PRODUCT_DETAILS)
+                                    }
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
                         }
-
-                        Spacer(modifier = Modifier.height(14.dp))
                     }
                 }
             }

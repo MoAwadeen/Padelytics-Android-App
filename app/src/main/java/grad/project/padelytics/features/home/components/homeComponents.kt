@@ -5,7 +5,6 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -49,9 +47,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -69,7 +65,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.FetchingIndicator
-import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.features.courtBooking.data.Court
 import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
 import grad.project.padelytics.features.shop.data.remote.model.Product
@@ -190,121 +185,6 @@ data class Feature(
     val title: String,
     val route: String
 )
-
-@Composable
-fun MidGreenLightHeadline(text: String, size: Int){
-    Text(text=text,
-        fontSize = size.sp,
-        color = GreenLight,
-        fontFamily = lexendFontFamily,
-        fontWeight = FontWeight.Bold)
-}
-
-@Preview
-@Composable
-fun ResultWidget(avatarImage: Painter = painterResource(id = R.drawable.user_selected)){
-    Box(
-        modifier = Modifier
-            .background(Blue, RoundedCornerShape(16.dp))
-            .border(5.dp, BlueDark, RoundedCornerShape(16.dp)) // Border with rounded corners ) // Dark blue border
-            .padding(8.dp) // Inner padding for content,
-            .fillMaxWidth()
-            .height(120.dp),
-        contentAlignment = Alignment.Center
-
-    ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .align(Alignment.Start)
-                    .height(40.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .shadow(8.dp, CircleShape)
-                        .background(Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = avatarImage,
-                        contentDescription = "Avatar",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .border(2.dp, GreenLight, CircleShape)
-                            .clip(CircleShape)
-                            .background(Transparent)
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Column(horizontalAlignment = Alignment.Start) {
-                    MidWhiteHeadline("Name1",14)
-                    Spacer(modifier = Modifier.weight(1f))
-                    MidGreenLightHeadline("Level1",12)
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                MidWhiteHeadline("[ 3 - 6 ]",14)
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Column(horizontalAlignment = Alignment.End) {
-                    MidWhiteHeadline("Name1",14)
-                    Spacer(modifier = Modifier.weight(1f))
-                    MidGreenLightHeadline("Level1",12)
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .shadow(8.dp, CircleShape)
-                        .background(Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = avatarImage,
-                        contentDescription = "Avatar",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(Transparent)
-                    )
-                }
-
-
-            }
-            //----------------------------------//
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Column {
-                    MidWhiteHeadline("21:00 Feb 18 2025",14)
-                    MidWhiteHeadline("Padel-H Mansoura",14)
-                }
-                Spacer(modifier = Modifier.weight(1f))
-
-                MidGreenLightHeadline("View Analysis",16)
-            }
-        }
-    }
-}
 
 @Composable
 fun HomeTitlesRow(featureTitle: String, showAll: String, onClick: () -> Unit){
@@ -841,51 +721,55 @@ fun ProductsList(shopViewModel: ShopViewModel = viewModel(), navController: NavC
     val isFetching by shopViewModel.isFetching.collectAsState()
 
     if (isFetching) {
-        FetchingIndicator(modifier = Modifier.fillMaxWidth().height(270.dp), isFetching = true)
+        FetchingIndicator(modifier = Modifier.fillMaxWidth().height(220.dp), isFetching = true)
     } else {
-        LazyRow(
-            modifier = Modifier.fillMaxWidth().height(220.dp).background(color = White)
-        ) {
-            items(products.take(5)) { product ->
-                if (product.delivery != null && product.product_star_rating != null){
-                    val detectedBrand = shopViewModel.detectBrandFromMultiLangTitle(product.product_title)
-                    val context = LocalContext.current
-                    val sharedPrefs = context.getSharedPreferences("product_prefs", Context.MODE_PRIVATE)
-                    val productJson = JSONObject().apply {
-                        put("productId", product.asin)
-                        put("productImage", product.product_photo)
-                        put("productName", product.product_title)
-                        put("productRating", product.product_star_rating)
-                        put("productNumRating", product.product_num_ratings.toString())
-                        put("productPrice", product.product_price)
-                        put("productDelivery", product.delivery)
-                        put("productUrl", product.product_url)
-                        put("productOffers", product.product_num_offers)
-                        put("productBrand", detectedBrand)
-                    }.toString()
+        if (products.isEmpty()) {
+            FetchingIndicator(modifier = Modifier.fillMaxWidth().height(220.dp), isFetching = true)
+        } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().height(220.dp).background(color = White)
+            ) {
+                items(products.take(5)) { product ->
+                    if (product.delivery != null && product.product_star_rating != null){
+                        val detectedBrand = shopViewModel.detectBrandFromMultiLangTitle(product.product_title)
+                        val context = LocalContext.current
+                        val sharedPrefs = context.getSharedPreferences("product_prefs", Context.MODE_PRIVATE)
+                        val productJson = JSONObject().apply {
+                            put("productId", product.asin)
+                            put("productImage", product.product_photo)
+                            put("productName", product.product_title)
+                            put("productRating", product.product_star_rating)
+                            put("productNumRating", product.product_num_ratings.toString())
+                            put("productPrice", product.product_price)
+                            put("productDelivery", product.delivery)
+                            put("productUrl", product.product_url)
+                            put("productOffers", product.product_num_offers)
+                            put("productBrand", detectedBrand)
+                        }.toString()
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    HomeProducts(
-                        product = product,
-                        productId = product.asin,
-                        productBrand = detectedBrand,
-                        productImage = product.product_photo,
-                        productName = product.product_title,
-                        productRating = product.product_star_rating ?: "0.0",
-                        productNumRating = product.product_num_ratings.toString(),
-                        productPrice = product.product_price,
-                        productDelivery = product.delivery,
-                        productUrl = product.product_url,
-                        productOffers = product.product_num_offers.toString(),
-                        onClick = {
-                            sharedPrefs.edit{ putString("selected_product", productJson) }
-                            navController.navigate(Routes.PRODUCT_DETAILS)
-                        }
-                    )
+                        HomeProducts(
+                            product = product,
+                            productId = product.asin,
+                            productBrand = detectedBrand,
+                            productImage = product.product_photo,
+                            productName = product.product_title,
+                            productRating = product.product_star_rating ?: "0.0",
+                            productNumRating = product.product_num_ratings.toString(),
+                            productPrice = product.product_price,
+                            productDelivery = product.delivery,
+                            productUrl = product.product_url,
+                            productOffers = product.product_num_offers.toString(),
+                            onClick = {
+                                sharedPrefs.edit{ putString("selected_product", productJson) }
+                                navController.navigate(Routes.PRODUCT_DETAILS)
+                            }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
-
-                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }

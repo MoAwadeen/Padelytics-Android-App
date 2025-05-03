@@ -128,7 +128,7 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
 
                                         Spacer(modifier = Modifier.height(20.dp))
 
-                                        MatchAnimationCard(analysisData = analysisData)
+                                        MatchAnimationCard(analysisData = analysisData, playerName = playerNames)
 
                                         Spacer(modifier = Modifier.height(20.dp))
 

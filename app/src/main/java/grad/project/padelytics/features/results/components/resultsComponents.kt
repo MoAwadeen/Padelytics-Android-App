@@ -26,11 +26,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -41,16 +39,6 @@ import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.lexendFontFamily
-import okhttp3.Route
-
-@Composable
-fun MidGreenLightHeadline(text: String, size: Int){
-    Text(text=text,
-        fontSize = size.sp,
-        color = GreenLight,
-        fontFamily = lexendFontFamily,
-        fontWeight = FontWeight.Bold)
-}
 
 @Composable
 fun ResultWidget(navController: NavController){
@@ -59,8 +47,7 @@ fun ResultWidget(navController: NavController){
             .background(Blue, RoundedCornerShape(16.dp))
             .border(5.dp, BlueDark, RoundedCornerShape(16.dp))
             .padding(8.dp)
-            .fillMaxWidth()
-            .height(120.dp),
+            .fillMaxWidth(),
         contentAlignment = Alignment.Center
 
     ) {
@@ -69,74 +56,122 @@ fun ResultWidget(navController: NavController){
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .align(Alignment.Start)
-                    .height(40.dp),
+                    .align(Alignment.Start),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = Alignment.CenterVertically,
 
                 ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .shadow(8.dp, CircleShape)
-                        .background(Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.user_selected),
-                        contentDescription = "Avatar",
-                        contentScale = ContentScale.Fit,
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .border(2.dp, GreenLight, CircleShape)
-                            .clip(CircleShape)
-                            .background(Transparent)
-                    )
-                }
+                            .size(40.dp)
+                            .shadow(8.dp, CircleShape)
+                            .background(Transparent),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.user_selected),
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(2.dp, GreenLight, CircleShape)
+                                .clip(CircleShape)
+                                .background(Transparent)
+                        )
+                    }
 
-                Spacer(modifier = Modifier.weight(1f))
-
-                Column(horizontalAlignment = Alignment.Start) {
-                    MidWhiteHeadline("Name1",14)
                     Spacer(modifier = Modifier.weight(1f))
-                    MidGreenLightHeadline("Level1",12)
+
+                    MidWhiteHeadline(text = "Player1", size = 14)
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                MidWhiteHeadline("[ 3 - 6 ]",14)
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Column(horizontalAlignment = Alignment.End) {
-                    MidWhiteHeadline("Name1",14)
-                    Spacer(modifier = Modifier.weight(1f))
-                    MidGreenLightHeadline("Level1",12)
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .shadow(8.dp, CircleShape)
-                        .background(Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.user_selected),
-                        contentDescription = "Avatar",
-                        contentScale = ContentScale.Fit,
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(Transparent)
-                    )
+                            .size(40.dp)
+                            .shadow(8.dp, CircleShape)
+                            .background(Transparent),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.user_selected),
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(2.dp, GreenLight, CircleShape)
+                                .clip(CircleShape)
+                                .background(Transparent)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    MidWhiteHeadline(text = "Player2", size = 14)
                 }
 
+                Spacer(modifier = Modifier.weight(1f))
 
+                MidWhiteHeadline(text = "VS", size = 16)
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .shadow(8.dp, CircleShape)
+                            .background(Transparent),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.user_selected),
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(2.dp, BlueDark, CircleShape)
+                                .clip(CircleShape)
+                                .background(Transparent)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    MidWhiteHeadline(text = "Player3", size = 14)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .shadow(8.dp, CircleShape)
+                            .background(Transparent),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.user_selected),
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(2.dp, BlueDark, CircleShape)
+                                .clip(CircleShape)
+                                .background(Transparent)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    MidWhiteHeadline(text = "Player4", size = 14)
+                }
             }
-            //----------------------------------//
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
