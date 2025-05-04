@@ -846,11 +846,11 @@ fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<S
 
                 drawContext.canvas.nativeCanvas.apply {
                     save()
-                    rotate(-180f, px, py + 14f)
+                    rotate(-180f, px, py + 18f)
                     drawText(
                         playerName,
                         px,
-                        py + 14f,
+                        py + 18f,
                         labelPaint
                     )
                     restore()
@@ -1432,7 +1432,7 @@ fun PlayerRadarChart(radarData: RadarPerformance, targetPlayer: String) {
 
             drawLine(BlueDark, center, end, strokeWidth = 3.dp.toPx())
 
-            val labelOffset = 20.dp.toPx()
+            val labelOffset = 24.dp.toPx()
             val labelX = center.x + cos(angle) * (radius + labelOffset)
             val labelY = center.y + sin(angle) * (radius + labelOffset)
 

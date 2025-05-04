@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,10 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
+import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.results.components.HorizontalLine
+import grad.project.padelytics.features.results.components.NoMatchesAlert
 import grad.project.padelytics.features.results.components.ResultWidget
 import grad.project.padelytics.features.results.viewModel.ResultsViewModel
 import grad.project.padelytics.ui.theme.BlueDark
@@ -45,6 +47,8 @@ fun ResultsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
     var isBottomBarVisible by remember { mutableStateOf(true) }
     var lastOffset by remember { mutableFloatStateOf(0f) }
     var isScrollingUp by remember { mutableStateOf(true) }
+    val matches by viewModel.matchData.collectAsState(initial = emptyList())
+    val isFetching by viewModel.isFetching.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -87,32 +91,38 @@ fun ResultsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.White)
-                .padding(innerPadding)
-                .padding(start = 20.dp, end = 20.dp)
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures { _, dragAmount ->
-                        if (dragAmount > 0) {
-                            isBottomBarVisible = true
-                        } else if (dragAmount < 0) {
-                            isBottomBarVisible = false
+        if (isFetching) {
+            FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
+        } else {
+            if (matches.isEmpty()) {
+                NoMatchesAlert()
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.White)
+                        .padding(innerPadding)
+                        .padding(start = 20.dp, end = 20.dp)
+                        .pointerInput(Unit) {
+                            detectVerticalDragGestures { _, dragAmount ->
+                                isBottomBarVisible = dragAmount > 0
+                            }
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(matches.size) { index ->
+                        val match = matches[index]
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        ResultWidget(navController = navController, matchData = match)
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        if (index < matches.size - 1) {
+                            HorizontalLine(color = BlueDark, thickness = 5f)
                         }
                     }
-                },
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            items(count = 5) { index ->
-                Spacer(modifier = Modifier.height(20.dp))
-
-                ResultWidget(navController)
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                if (index < 4) {
-                    HorizontalLine(color = BlueDark, thickness = 5f)
                 }
             }
         }

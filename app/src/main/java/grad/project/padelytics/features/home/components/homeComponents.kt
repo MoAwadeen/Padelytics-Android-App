@@ -67,6 +67,8 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.courtBooking.data.Court
 import grad.project.padelytics.features.courtBooking.viewModel.CourtBookingViewModel
+import grad.project.padelytics.features.results.components.ResultWidget
+import grad.project.padelytics.features.results.viewModel.ResultsViewModel
 import grad.project.padelytics.features.shop.data.remote.model.Product
 import grad.project.padelytics.features.shop.viewModel.ShopViewModel
 import grad.project.padelytics.features.tournaments.data.Tournament
@@ -839,4 +841,42 @@ fun LazyRowSpotlight(modifier: Modifier = Modifier) {
 @Composable
 fun SpotPreview() {
     LazyRowSpotlight()
+}
+
+@Composable
+fun ResultsList(resultsViewModel: ResultsViewModel = viewModel(), navController: NavController) {
+    val matches by resultsViewModel.matchData.collectAsState()
+    val isFetching by resultsViewModel.isFetching.collectAsState()
+
+    if (isFetching) {
+        FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
+    } else {
+        if (matches.isEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "No Uploaded Matches",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = BlueDark
+                    )
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                matches.take(n = 1).forEach { match ->
+                    ResultWidget(navController = navController, matchData = match)
+                }
+            }
+        }
+    }
 }

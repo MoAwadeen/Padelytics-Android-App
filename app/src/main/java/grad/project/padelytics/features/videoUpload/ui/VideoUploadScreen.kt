@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,10 +40,12 @@ import grad.project.padelytics.appComponents.MidDarkHeadline
 import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
-import grad.project.padelytics.features.videoUpload.components.FriendPlaceHolder
+import grad.project.padelytics.features.videoUpload.components.FirstFriendPlaceHolder
 import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
 import grad.project.padelytics.features.videoUpload.components.MyPlayerPlaceHolder
 import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
+import grad.project.padelytics.features.videoUpload.components.SecondFriendPlaceHolder
+import grad.project.padelytics.features.videoUpload.components.ThirdFriendPlaceHolder
 import grad.project.padelytics.features.videoUpload.components.VideoUploadCard
 import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
 
@@ -53,17 +56,12 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                       viewModel: VideoUploadViewModel = viewModel())
 {
     val selectedVideo by viewModel.selectedVideoUri.collectAsState()
-    val selectedFriend by viewModel.selectedFriend.collectAsState()
-    val friendName = selectedFriend?.firstName ?: ""
-    val friendPhoto = selectedFriend?.photo ?: R.drawable.plus
-    val friendProfileImage = rememberAsyncImagePainter(model = friendPhoto)
 
     val userProfile by profileViewModel.userProfile.collectAsState()
     val userPhoto = userProfile?.photo ?: R.drawable.user
     val profileImage = rememberAsyncImagePainter(model = userPhoto)
 
-
-    var isBottomBarVisible by remember { mutableStateOf(true) }
+    val isBottomBarVisible by remember { mutableStateOf(true) }
     var selectedCourt by remember { mutableStateOf<String?>(null) }
 
     var showAddDialog by remember { mutableStateOf(false) }
@@ -71,6 +69,9 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
 
     val isFriendSelected by viewModel.isFriendSelected.collectAsState()
 
+    val selectedFriends by viewModel.selectedFriends.collectAsState()
+    var showFriendDialogIndex by remember { mutableIntStateOf(value = -1) }
+    val selectedDialogIndex by remember { mutableIntStateOf(value = -1) }
 
     val context = LocalContext.current
 
@@ -91,13 +92,21 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
         )
     }
 
-    if (showFriendsDialog) {
+    if (showFriendsDialog && showFriendDialogIndex != -1) {
         FriendsListDialog(
-            onDismiss = { showFriendsDialog = false },
+            selectedIndex = selectedDialogIndex,
+            onDismiss = {
+                showFriendsDialog = false
+                showFriendDialogIndex = -1
+            },
+            onFriendSelected = { friend ->
+                viewModel.selectFriendAt(showFriendDialogIndex, friend)
+                showFriendsDialog = false
+                showFriendDialogIndex = -1
+            },
             onAddFriendClick = { showAddDialog = true }
         )
     }
-
 
     Scaffold(
         modifier = Modifier,
@@ -148,28 +157,77 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                     ){
                         MyPlayerPlaceHolder(
                             avatarImage = profileImage,
-                            modifier = Modifier.weight(0.5f,fill = true))
+                            modifier = Modifier.weight(0.5f,fill = true)
+                        )
 
-                        FriendPlaceHolder(
-                            friendName = friendName,
-                            onClick = { showFriendsDialog = true }
-                            ,avatarImage = friendProfileImage
-                            ,modifier = Modifier.weight(0.5f,fill = true))
+                        FirstFriendPlaceHolder(
+                            friendName = selectedFriends.getOrNull(index = 0)?.firstName ?: "",
+                            avatarImage = rememberAsyncImagePainter(model = selectedFriends.getOrNull(index = 0)?.photo ?: R.drawable.plus),
+                            modifier = Modifier.weight(0.5f,fill = true),
+                            onClick = {
+                                showFriendDialogIndex = 0
+                                showFriendsDialog = true
+                            }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        SecondFriendPlaceHolder(
+                            friendName = selectedFriends.getOrNull(index = 1)?.firstName ?: "",
+                            avatarImage = rememberAsyncImagePainter(model = selectedFriends.getOrNull(index = 1)?.photo ?: R.drawable.plus),
+                            modifier = Modifier.weight(0.5f,fill = true),
+                            onClick = {
+                                showFriendDialogIndex = 1
+                                showFriendsDialog = true
+                            }
+                        )
+
+                        ThirdFriendPlaceHolder(
+                            friendName = selectedFriends.getOrNull(index = 2)?.firstName ?: "",
+                            avatarImage = rememberAsyncImagePainter(model = selectedFriends.getOrNull(index = 2)?.photo ?: R.drawable.plus),
+                            modifier = Modifier.weight(0.5f,fill = true),
+                            onClick = {
+                                showFriendDialogIndex = 2
+                                showFriendsDialog = true
+                            }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(22.dp))
                     CourtDropdownMenu(selectedCourt = selectedCourt ?: "",
-                        onValueChange = { selectedCourt = it })
-
+                        onValueChange = { selectedCourt = it }
+                    )
                 }
                 item {
-                    WideGreenButton("Analyze", onClick = {Toast.makeText(context, isFriendSelected.toString(), Toast.LENGTH_SHORT).show()})
+                    WideGreenButton(label = "Analyze", onClick = {
+                        val allFriendsSelected = selectedFriends.all { it != null }
+                        if (!allFriendsSelected || selectedCourt.isNullOrEmpty()) {
+                            Toast.makeText(context, "Please select 3 friends and a court", Toast.LENGTH_SHORT).show()
+                        } else {
+                            viewModel.saveMatchDetails(
+                                selectedCourt = selectedCourt!!,
+                                onSuccess = {
+                                    Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
+                                    navController.popBackStack()
+                                },
+                                onFailure = {
+                                    Toast.makeText(context, "Failed to save match: ${it.message}", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        }
+                    }
+                    )
                 }
             }
         }
     }
 }
-
 
 @Preview
 @Composable

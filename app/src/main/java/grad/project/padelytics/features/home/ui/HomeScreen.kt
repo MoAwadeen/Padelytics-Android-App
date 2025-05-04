@@ -42,9 +42,10 @@ import grad.project.padelytics.features.home.components.HomeAppToolbar
 import grad.project.padelytics.features.home.components.HomeTitlesRow
 import grad.project.padelytics.features.home.components.LazyRowSpotlight
 import grad.project.padelytics.features.home.components.ProductsList
+import grad.project.padelytics.features.home.components.ResultsList
 import grad.project.padelytics.features.home.components.TournamentsList
 import grad.project.padelytics.features.home.viewModel.HomeViewModel
-import grad.project.padelytics.features.results.components.ResultWidget
+import grad.project.padelytics.features.results.viewModel.ResultsViewModel
 import grad.project.padelytics.features.shop.viewModel.ShopViewModel
 import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
 import grad.project.padelytics.navigation.Routes
@@ -60,6 +61,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
     val tournamentsViewModel: TournamentsViewModel = viewModel()
     val courtBookingViewModel: CourtBookingViewModel = viewModel()
     val shopViewModel: ShopViewModel = viewModel()
+    val resultsViewModel: ResultsViewModel = viewModel()
 
     BackHandler(enabled = true) { }
 
@@ -127,7 +129,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
                         showAll = "View All",
                         onClick = { navController.navigate(Routes.RESULTS) })
 
-                    ResultWidget(navController = navController)
+                    ResultsList(resultsViewModel, navController)
 
                     HomeTitlesRow(featureTitle = "Upcoming Tournaments",
                         showAll = "View All",
