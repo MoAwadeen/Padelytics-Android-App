@@ -26,14 +26,19 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidWhiteHeadline
+import grad.project.padelytics.features.results.data.MatchData
+import grad.project.padelytics.features.results.data.PlayerInfo
 import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
@@ -41,77 +46,26 @@ import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
-fun ResultWidget(navController: NavController){
+fun ResultWidget(navController: NavController, matchData: MatchData){
     Box(
         modifier = Modifier
+            .fillMaxWidth()
             .background(Blue, RoundedCornerShape(16.dp))
             .border(5.dp, BlueDark, RoundedCornerShape(16.dp))
             .padding(8.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
-
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-                    .align(Alignment.Start),
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-
                 ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .shadow(8.dp, CircleShape)
-                            .background(Transparent),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.user_selected),
-                            contentDescription = "Avatar",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .border(2.dp, GreenLight, CircleShape)
-                                .clip(CircleShape)
-                                .background(Transparent)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    MidWhiteHeadline(text = "Player1", size = 14)
-                }
+                PlayerAvatar(matchData.players[0], GreenLight)
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .shadow(8.dp, CircleShape)
-                            .background(Transparent),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.user_selected),
-                            contentDescription = "Avatar",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .border(2.dp, GreenLight, CircleShape)
-                                .clip(CircleShape)
-                                .background(Transparent)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    MidWhiteHeadline(text = "Player2", size = 14)
-                }
+                PlayerAvatar(matchData.players[1], GreenLight)
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -119,83 +73,70 @@ fun ResultWidget(navController: NavController){
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .shadow(8.dp, CircleShape)
-                            .background(Transparent),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.user_selected),
-                            contentDescription = "Avatar",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .border(2.dp, BlueDark, CircleShape)
-                                .clip(CircleShape)
-                                .background(Transparent)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    MidWhiteHeadline(text = "Player3", size = 14)
-                }
+                PlayerAvatar(matchData.players[2], BlueDark)
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .shadow(8.dp, CircleShape)
-                            .background(Transparent),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.user_selected),
-                            contentDescription = "Avatar",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .border(2.dp, BlueDark, CircleShape)
-                                .clip(CircleShape)
-                                .background(Transparent)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    MidWhiteHeadline(text = "Player4", size = 14)
-                }
+                PlayerAvatar(matchData.players[3], BlueDark)
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Column {
-                    MidWhiteHeadline("21:00 Feb 18 2025",14)
-                    MidWhiteHeadline("Padel-H Mansoura",14)
-                }
-                Spacer(modifier = Modifier.weight(1f))
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Bottom){
+                MidWhiteHeadline(text = matchData.formattedTime, size = 14)
 
-                Text(
-                    text="View Analysis",
-                    fontSize = 16.sp,
-                    color = GreenLight,
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { navController.navigate(Routes.ANALYSIS) }
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    MidWhiteHeadline(text = matchData.court.limitWords(maxWords = 2), size = 14)
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        text="View Analysis",
+                        fontSize = 16.sp,
+                        color = GreenLight,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.clickable { navController.navigate(Routes.ANALYSIS) }
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+fun PlayerAvatar(player: PlayerInfo, borderColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .shadow(8.dp, CircleShape)
+                .background(Transparent),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = player.photo,
+                contentDescription = "Player Photo",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(2.dp, borderColor, CircleShape)
+                    .clip(CircleShape)
+                    .background(Transparent)
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        MidWhiteHeadline(text = player.firstName, size = 14)
     }
 }
 
@@ -213,4 +154,39 @@ fun HorizontalLine(color: Color, thickness: Float) {
             strokeWidth = thickness
         )
     }
+}
+
+@Composable
+fun NoMatchesAlert(){
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = White),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.no_near_courts),
+                contentDescription = "No Results",
+                modifier = Modifier
+                    .size(200.dp)
+            )
+            Text(
+                text = "No Uploaded Matches",
+                fontSize = 28.sp,
+                fontFamily = lexendFontFamily,
+                color = BlueDark,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+fun String.limitWords(maxWords: Int): String {
+    val words = this.trim().split("\\s+".toRegex())
+    return if (words.size <= maxWords) this
+    else words.take(maxWords).joinToString(" ") + "..."
 }

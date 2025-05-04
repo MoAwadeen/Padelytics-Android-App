@@ -205,7 +205,24 @@ fun VideoUploadScreen(modifier: Modifier = Modifier,
                     )
                 }
                 item {
-                    WideGreenButton("Analyze", onClick = {Toast.makeText(context, isFriendSelected.toString(), Toast.LENGTH_SHORT).show()})
+                    WideGreenButton(label = "Analyze", onClick = {
+                        val allFriendsSelected = selectedFriends.all { it != null }
+                        if (!allFriendsSelected || selectedCourt.isNullOrEmpty()) {
+                            Toast.makeText(context, "Please select 3 friends and a court", Toast.LENGTH_SHORT).show()
+                        } else {
+                            viewModel.saveMatchDetails(
+                                selectedCourt = selectedCourt!!,
+                                onSuccess = {
+                                    Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
+                                    navController.popBackStack()
+                                },
+                                onFailure = {
+                                    Toast.makeText(context, "Failed to save match: ${it.message}", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        }
+                    }
+                    )
                 }
             }
         }

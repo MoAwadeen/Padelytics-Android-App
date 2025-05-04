@@ -8,8 +8,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import grad.project.padelytics.features.videoUpload.data.FriendData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class VideoUploadViewModel : ViewModel() {
+class VideoUploadViewModel: ViewModel() {
     private val _selectedVideoUri = MutableStateFlow<Uri?>(null)
     val selectedVideoUri: StateFlow<Uri?> = _selectedVideoUri
 
@@ -75,6 +78,7 @@ class VideoUploadViewModel : ViewModel() {
                     val photo = doc.getString("photo") ?: ""
 
                     val friendData = mapOf(
+                        "uid" to friendDocId,
                         "userName" to username,
                         "firstName" to firstName,
                         "lastName" to lastName,
@@ -126,6 +130,7 @@ class VideoUploadViewModel : ViewModel() {
                         .addOnSuccessListener { doc ->
                             if (doc.exists()) {
                                 val friend = FriendData(
+                                    uid = friendId,
                                     userName = doc.getString("userName") ?: "",
                                     firstName = doc.getString("firstName") ?: "",
                                     lastName = doc.getString("lastName") ?: "",
@@ -170,5 +175,37 @@ class VideoUploadViewModel : ViewModel() {
             mutableList[index] = null
             _selectedFriends.value = mutableList
         }
+    }
+
+    fun saveMatchDetails(selectedCourt: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val selected = _selectedFriends.value
+        val formattedDate = SimpleDateFormat("EEEE, dd MMMM yyyy - HH:mm", Locale.getDefault()).format(Date())
+
+        if (currentUser == null || selected.any { it == null }) {
+            onFailure(Exception("Invalid data: Check authentication or friend selection."))
+            return
+        }
+
+        val matchData = hashMapOf(
+            "player1" to currentUser.uid,
+            "player2" to selected[0]?.uid,
+            "player3" to selected[1]?.uid,
+            "player4" to selected[2]?.uid,
+            "court" to selectedCourt,
+            "timestamp" to System.currentTimeMillis(),
+            "formattedTime" to formattedDate
+        )
+
+        firestore.collection("matches")
+            .add(matchData)
+            .addOnSuccessListener {
+                Log.d("MatchUpload", "Match data saved with ID: ${it.id}")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                Log.e("MatchUpload", "Failed to save match", e)
+                onFailure(e)
+            }
     }
 }
