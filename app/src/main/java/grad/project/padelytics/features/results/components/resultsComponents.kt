@@ -60,6 +60,7 @@ fun ResultWidget(navController: NavController, matchData: MatchData){
                     .fillMaxWidth()
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
                 ) {
                 PlayerAvatar(matchData.players[0], GreenLight)
 
@@ -91,7 +92,7 @@ fun ResultWidget(navController: NavController, matchData: MatchData){
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     MidWhiteHeadline(text = matchData.court.limitWords(maxWords = 2), size = 14)
 
