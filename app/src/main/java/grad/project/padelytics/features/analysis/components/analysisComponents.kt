@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,6 +59,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.withSave
+import coil.compose.AsyncImage
 import grad.project.padelytics.R
 import grad.project.padelytics.features.analysis.data.AnimationFrame
 import grad.project.padelytics.features.analysis.data.BallSpeedOverTime
@@ -68,7 +71,7 @@ import grad.project.padelytics.features.analysis.data.PlayerHitLocations
 import grad.project.padelytics.features.analysis.data.RadarPerformance
 import grad.project.padelytics.features.analysis.data.StrongestHitItem
 import grad.project.padelytics.features.analysis.data.TrajectoryData
-import grad.project.padelytics.features.analysis.viewModel.AnalysisViewModel
+import grad.project.padelytics.features.results.data.PlayerInfo
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
@@ -100,7 +103,7 @@ fun AnalysisAppbar() {
 }
 
 @Composable
-fun PlayersView(){
+fun PlayersView(players: List<PlayerInfo>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -108,181 +111,81 @@ fun PlayersView(){
             .padding(16.dp)
             .height(100.dp),
         horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-        Column(
-            modifier = Modifier.fillMaxHeight()
-                .wrapContentWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .shadow(8.dp, CircleShape)
-                    .background(Transparent),
-                contentAlignment = Alignment.Center
+    ) {
+        players.forEachIndexed { index, player ->
+            if (index == 2) {
+                Spacer(modifier = Modifier.weight(1f))
+                Column(
+                    modifier = Modifier.fillMaxHeight().wrapContentWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "VS",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            color = White
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
+            Column(
+                modifier = Modifier.fillMaxHeight().wrapContentWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.user_selected),
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Fit,
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .border(2.dp, GreenLight, CircleShape)
-                        .clip(CircleShape)
-                        .background(Transparent)
+                        .size(50.dp)
+                        .shadow(8.dp, CircleShape)
+                        .background(Transparent),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (player.photo.isNotBlank()) {
+                        AsyncImage(
+                            model = player.photo,
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(2.dp, if (index < 2) GreenLight else BlueDark, CircleShape)
+                                .clip(CircleShape)
+                                .background(Transparent)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.user_selected),
+                            contentDescription = "Default Avatar",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(2.dp, if (index < 2) GreenLight else BlueDark, CircleShape)
+                                .clip(CircleShape)
+                                .background(Transparent)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = player.firstName,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = White
+                    )
                 )
             }
 
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(
-                text = "Player",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.Medium,
-                    color = White
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Column(
-            modifier = Modifier.fillMaxHeight()
-                .wrapContentWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .shadow(8.dp, CircleShape)
-                    .background(Transparent),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.user_selected),
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(2.dp, GreenLight, CircleShape)
-                        .clip(CircleShape)
-                        .background(Transparent)
-                )
+            if (index != 1 && index != 3) {
+                Spacer(modifier = Modifier.weight(1f))
             }
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(
-                text = "Player",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.Medium,
-                    color = White
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Column(modifier = Modifier.fillMaxHeight()
-            .wrapContentWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "VS",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    color = White
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Column(
-            modifier = Modifier.fillMaxHeight()
-                .wrapContentWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .shadow(8.dp, CircleShape)
-                    .background(Transparent),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.user_selected),
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(2.dp, BlueDark, CircleShape)
-                        .clip(CircleShape)
-                        .background(Transparent)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(
-                text = "Player",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.Medium,
-                    color = White
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Column(
-            modifier = Modifier.fillMaxHeight()
-                .wrapContentWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .shadow(8.dp, CircleShape)
-                    .background(Transparent),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.user_selected),
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(2.dp, BlueDark, CircleShape)
-                        .clip(CircleShape)
-                        .background(Transparent)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(
-                text = "Player",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.Medium,
-                    color = White
-                )
-            )
         }
     }
 }
@@ -555,7 +458,7 @@ fun BallSpeedOverTimeLineChart(data: BallSpeedOverTime) {
 }
 
 @Composable
-fun TopStrongestHitsBarChart(topHits: List<StrongestHitItem>, playerName: Map<String, String> = emptyMap()) {
+fun TopStrongestHitsBarChart(topHits: List<StrongestHitItem>, playerName: Map<String, String?> = emptyMap()) {
     if (topHits.isEmpty()) {
         Text("No data available", color = White)
         return
@@ -628,7 +531,7 @@ fun TopStrongestHitsBarChart(topHits: List<StrongestHitItem>, playerName: Map<St
             )
 
             drawContext.canvas.nativeCanvas.drawText(
-                playerName["player${hit.player}"] ?: "Player ${hit.player}",
+                playerName[hit.player] ?: hit.player,
                 centerX,
                 top - 56f,
                 labelPaint
@@ -638,7 +541,7 @@ fun TopStrongestHitsBarChart(topHits: List<StrongestHitItem>, playerName: Map<St
 }
 
 @Composable
-fun HitCountBarChart(hitCount: Map<String, Int>?, playerDisplayNames: Map<String, String> = emptyMap()) {
+fun HitCountBarChart(hitCount: Map<String, Int>?, playerDisplayNames: Map<String, String?> = emptyMap()) {
     val hits = hitCount ?: emptyMap()
     if (hits.isEmpty()) {
         Text("No data available", color = White)
@@ -733,7 +636,7 @@ fun BallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>) {
         val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
         val rangeY = (maxY - minY).takeIf { it != 0f } ?: 1f
 
-        ballHits.entries.forEachIndexed { index, (playerName, playerHits) ->
+        ballHits.entries.forEachIndexed { index, (_, playerHits) ->
             val color = playerColors.getOrElse(index) { Color.Gray }
 
             playerHits.x.zip(playerHits.y).forEach { (x, y) ->
@@ -751,7 +654,7 @@ fun BallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>) {
 }
 
 @Composable
-fun MatchAnimationCard(analysisData: FullAnalysisData, playerName: Map<String, String>){
+fun MatchAnimationCard(analysisData: FullAnalysisData, playerName: Map<String, String?>){
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -782,8 +685,9 @@ fun MatchAnimationCard(analysisData: FullAnalysisData, playerName: Map<String, S
     }
 }
 
+@SuppressLint("UseKtx")
 @Composable
-fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<String, String>) {
+fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<String, String?>) {
     if (frames.isEmpty()) {
         Text("No animation data available", color = White)
         return
@@ -837,7 +741,7 @@ fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<S
             }
 
             positions.forEachIndexed { index, pos ->
-                val px = ((pos.y - fixedXMin) / rangeX) * width
+                val px = ((-pos.y - fixedXMin) / rangeX) * width
                 val py = ((-pos.x - yRangeMin) / rangeY) * height
                 val color = playerColors.getOrElse(index) { GreenLight }
                 val playerName = playerNameMap[playerKeys[index]] ?: playerKeys[index]
@@ -845,15 +749,15 @@ fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<S
                 drawCircle(color, radius = 3.dp.toPx(), center = Offset(px, py))
 
                 drawContext.canvas.nativeCanvas.apply {
-                    save()
-                    rotate(-180f, px, py + 18f)
-                    drawText(
-                        playerName,
-                        px,
-                        py + 18f,
-                        labelPaint
-                    )
-                    restore()
+                    withSave {
+                        rotate(-180f, px, py + 18f)
+                        drawText(
+                            playerName,
+                            px,
+                            py + 18f,
+                            labelPaint
+                        )
+                    }
                 }
             }
         }
@@ -923,10 +827,41 @@ fun TextGraphHeader(title: String) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>, analysisViewModel: AnalysisViewModel, playerNames: Map<String, String>) {
-    var currentPlayerIndex by remember { mutableIntStateOf(value = 0) }
-    val player = playerList[currentPlayerIndex]
+fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>, playerFirstNames: List<String>, playerPhotos: List<String>, playerLevels: List<String>) {
+    if (analysisData == null || playerList.size < 4) {
+        CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+        return
+    }
+
+    var currentPlayerIndex by remember { mutableIntStateOf(0) }
+    val playerKey = playerList.getOrNull(currentPlayerIndex) ?: return
+    val name = playerFirstNames.getOrNull(currentPlayerIndex) ?: "Player"
+    val photo = playerPhotos.getOrNull(currentPlayerIndex).orEmpty()
+    val level = playerLevels.getOrNull(currentPlayerIndex) ?: "N/A"
     val avatarBorderColors = listOf(GreenLight, GreenLight, BlueDark, BlueDark)
+
+    val maxSpeed = analysisData.max_speed[playerKey] ?: 0.0
+    val distance = analysisData.distance_total[playerKey] ?: 0.0
+    val attackPresence = analysisData.zone_presence_percentages["Attack Zone"]?.get(playerKey) ?: 0.0
+    val avgAcceleration = analysisData.average_acceleration[playerKey] ?: 0.0
+    val totalHits = analysisData.hit_count_per_player[playerKey] ?: 0
+    val defensePresence = analysisData.zone_presence_percentages["Defense Zone"]?.get(playerKey) ?: 0.0
+
+    val reactionEfficiency = analysisData.reaction_time_efficiency[playerKey] ?: 0
+    val reactionAdvice = analysisData.reaction_advice[playerKey] ?: "N/A"
+    val shotEffectiveness = analysisData.shot_effectiveness[playerKey] ?: 0
+    val shotAdvice = analysisData.shot_advice[playerKey] ?: "N/A"
+    val role = analysisData.role[playerKey] ?: "Unknown"
+    val roleAdvice = analysisData.role_advice[playerKey] ?: "No advice"
+    val hitShare = analysisData.player_contribution[playerKey]?.toInt() ?: 0
+    val hitAdvice = analysisData.player_contribution_advice[playerKey] ?: "No advice"
+    val staminaDrop = analysisData.stamina_drop_time[playerKey] ?: 0
+    val staminaAdvice = analysisData.stamina_advice[playerKey] ?: "No advice"
+
+    val playerTrajectory = analysisData.trajectories[playerKey]
+    val playerHeatmap = analysisData.heatmaps[playerKey]
+    val playerAnimation = analysisData.animation
+    val playerBallHits = analysisData.ball_hit_locations
 
     Box(
         modifier = Modifier
@@ -935,150 +870,158 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>,
             .background(Blue)
             .padding(horizontal = 20.dp, vertical = 26.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().background(Blue),
-            verticalArrangement = Arrangement.SpaceBetween
+        Column(modifier = Modifier.fillMaxWidth()
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().background(Blue),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.b_left_arrow),
-                        contentDescription = "Left Arrow",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable {
-                                currentPlayerIndex =
-                                    if (currentPlayerIndex == 0) playerList.lastIndex else currentPlayerIndex - 1
-                            }
-                    )
+                Image(
+                    painter = painterResource(R.drawable.b_left_arrow),
+                    contentDescription = "Left Arrow",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            currentPlayerIndex =
+                                if (currentPlayerIndex == 0) playerList.lastIndex else currentPlayerIndex - 1
+                        }
+                )
 
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .shadow(8.dp, CircleShape)
+                            .background(Transparent),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .shadow(8.dp, CircleShape)
-                                .background(Transparent),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        if (photo.isNotBlank()) {
+                            AsyncImage(
+                                model = photo,
+                                contentDescription = "Player Avatar",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(
+                                        2.dp,
+                                        avatarBorderColors.getOrElse(currentPlayerIndex) { GreenLight },
+                                        CircleShape
+                                    )
+                                    .clip(CircleShape)
+                            )
+                        } else {
                             Image(
                                 painter = painterResource(id = R.drawable.user_selected),
-                                contentDescription = "Avatar",
+                                contentDescription = "Default Avatar",
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .border(2.dp, avatarBorderColors.getOrElse(currentPlayerIndex) { GreenLight }, CircleShape)
+                                    .border(
+                                        2.dp,
+                                        avatarBorderColors.getOrElse(currentPlayerIndex) { GreenLight },
+                                        CircleShape
+                                    )
                                     .clip(CircleShape)
                             )
                         }
+                    }
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                        Column(
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Text(
-                                text = analysisViewModel.getDisplayName(player, playerNames),
-                                style = TextStyle(
-                                    fontSize = 20.sp,
-                                    fontFamily = lexendFontFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    color = White
-                                )
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(
+                            text = name,
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = White
                             )
-                            Text(
-                                text = "Level",
-                                style = TextStyle(
-                                    fontSize = 18.sp,
-                                    fontFamily = lexendFontFamily,
-                                    fontWeight = FontWeight.Normal,
-                                    color = GreenLight
-                                )
+                        )
+                        Text(
+                            text = level,
+                            style = TextStyle(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = GreenLight
                             )
+                        )
+                    }
+                }
+
+                Image(
+                    painter = painterResource(R.drawable.b_right_arrow),
+                    contentDescription = "Right Arrow",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            currentPlayerIndex = (currentPlayerIndex + 1) % playerList.size
                         }
-                    }
-
-                    Image(
-                        painter = painterResource(R.drawable.b_right_arrow),
-                        contentDescription = "Right Arrow",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable {
-                                currentPlayerIndex = (currentPlayerIndex + 1) % playerList.size
-                            }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        StatText(label = "Max Speed", value = "${String.format("%.2f", analysisData.max_speed[player])} m/s")
-
-                        StatText(label = "Distance", value = "${String.format("%.2f", analysisData.distance_total[player])} m")
-
-                        StatText(label = "Attack", value = "${String.format("%.2f", analysisData.zone_presence_percentages["Attack Zone"]?.get(player))} %")
-                    }
-
-                    Spacer(modifier = Modifier.width(20.dp))
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        StatText(label = "Avg Acceleration", value = "${String.format("%.2f", analysisData.average_acceleration[player])} m/s²")
-
-                        StatText(label = "Total Hits", value = "${analysisData.hit_count_per_player[player] ?: 0}")
-
-                        StatText(label = "Defense", value = "${String.format("%.2f", analysisData.zone_presence_percentages["Defense Zone"]?.get(player))} %")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 3.dp, color = BlueDark)
-
-                Spacer(modifier = Modifier.height(24.dp))
+                )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    StatText(label = "Max Speed", value = "${"%.2f".format(maxSpeed)} m/s")
+
+                    StatText(label = "Distance", value = "${"%.2f".format(distance)} m")
+
+                    StatText(label = "Attack", value = "${"%.2f".format(attackPresence)} %")
+                }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    StatText(
+                        label = "Avg Acceleration",
+                        value = "${"%.2f".format(avgAcceleration)} m/s²"
+                    )
+
+                    StatText(label = "Total Hits", value = "$totalHits")
+
+                    StatText(label = "Defense", value = "${"%.2f".format(defensePresence)} %")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            HorizontalDivider(thickness = 3.dp, color = BlueDark)
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
-                InsightText(title = "Reaction Time Efficiency", desc = "96% Excellent — rarely out of position", color = GreenLight)
+                InsightText(title = "Reaction Time Efficiency", desc = "$reactionEfficiency% — $reactionAdvice", color = GreenLight)
 
-                InsightText(title = "Shot Effectiveness", desc = "80% Average — Needs more control and timing", color = OrangeLight)
+                InsightText(title = "Shot Effectiveness", desc = "$shotEffectiveness% — $shotAdvice", color = OrangeLight)
 
-                InsightText(title = "Role Detection", desc = "Aggressor :\nHigh speed, many hits, advanced zone", color = GreenLight)
+                InsightText(title = "Role Detection", desc = "$role :\n$roleAdvice", color = GreenLight)
 
-                InsightText(title = "Inefficient Shots", desc = "10% Excellent — Very consistent", color = GreenLight)
+                InsightText(title = "Team Imbalance (Hit Share)", desc = "$hitShare% — $hitAdvice", color = OrangeLight)
 
-                InsightText(title = "Team Imbalance (Hit Share)", desc = "20% Low — move into more active zones", color = OrangeLight)
+                InsightText(title = "Fatigue Detection Over Time", desc = "Drop in $staminaDrop minutes — $staminaAdvice", color = OrangeLight)
+            }
 
-                InsightText(title = "Fatigue Detection Over Time", desc = "Drop in 15 minutes - Practice stamina under match-like conditions", color = OrangeLight)
+            Spacer(modifier = Modifier.height(24.dp))
 
-                Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider(thickness = 3.dp, color = BlueDark)
 
-                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 3.dp, color = BlueDark)
+            Spacer(modifier = Modifier.height(24.dp))
 
-                Spacer(modifier = Modifier.height(24.dp))
-
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
                 TextGraphHeader(title = "Player Trajectory")
 
-                Row(modifier = Modifier.padding(start = 6.dp)){
+                Row(modifier = Modifier.padding(start = 6.dp)) {
                     CourtBackground {
-                        PlayerScatterPlot(analysisData.trajectories, targetPlayer = player)
+                        playerTrajectory?.let {
+                            PlayerScatterPlot(analysisData.trajectories, playerKey)
+                        }
                     }
                 }
 
@@ -1086,10 +1029,10 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>,
 
                 TextGraphHeader(title = "Positioning Heatmap")
 
-                Row(modifier = Modifier.padding(start = 6.dp)){
+                Row(modifier = Modifier.padding(start = 6.dp)) {
                     CourtBackground {
-                        analysisData.heatmaps[player]?.let {
-                            PlayerHeatmap(playerHeatmap = it, allHeatmaps = analysisData.heatmaps)
+                        playerHeatmap?.let {
+                            PlayerHeatmap(it, analysisData.heatmaps)
                         }
                     }
                 }
@@ -1098,12 +1041,9 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>,
 
                 TextGraphHeader(title = "Hit Points")
 
-                Row(modifier = Modifier.padding(start = 6.dp)){
+                Row(modifier = Modifier.padding(start = 6.dp)) {
                     CourtBackground {
-                        PlayerBallHitLocationsPlot(
-                            ballHits = analysisData.ball_hit_locations,
-                            targetPlayer = player
-                        )
+                        PlayerBallHitLocationsPlot(playerBallHits, playerKey)
                     }
                 }
 
@@ -1111,23 +1051,18 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>,
 
                 TextGraphHeader(title = "Attack vs Defence")
 
-                Row(modifier = Modifier.padding(start = 6.dp)){
-                    RectangleBackground{
-                        PlayerZoneScatterGraph(
-                            frames = analysisData.animation,
-                            targetPlayerKey = player
-                        )
+                Row(modifier = Modifier.padding(start = 6.dp)) {
+                    RectangleBackground {
+                        PlayerZoneScatterGraph(playerAnimation, playerKey)
                     }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 3.dp, color = BlueDark)
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            HorizontalDivider(thickness = 3.dp, color = BlueDark)
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             Column(
                 modifier = Modifier.fillMaxWidth().background(Blue),
@@ -1145,7 +1080,7 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData, playerList: List<String>,
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                PlayerRadarChart(radarData = analysisData.radar_performance, targetPlayer = player)
+                PlayerRadarChart(analysisData.radar_performance, playerKey)
             }
         }
     }
@@ -1182,33 +1117,31 @@ fun PlayerScatterPlot(playersData: Map<String, TrajectoryData>, targetPlayer: St
             .padding(4.dp)
             .background(Transparent)
     ) {
-        rotate(degrees = 180f, pivot = Offset(size.width / 2, size.height / 2)) {
-            val width = size.width
-            val height = size.height
+        val width = size.width
+        val height = size.height
 
-            val fixedYMin = -10f
-            val fixedYMax = 10f
-            val rangeY = fixedYMax - fixedYMin
+        val fixedYMin = -10f
+        val fixedYMax = 10f
+        val rangeY = fixedYMax - fixedYMin
 
-            val minX = allPoints.minOf { it.first }
-            val maxX = allPoints.maxOf { it.first }
-            val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
+        val minX = allPoints.minOf { it.first }
+        val maxX = allPoints.maxOf { it.first }
+        val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
 
-            if (playerPoints.size > 1) {
-                val path = Path().apply {
-                    val first = playerPoints.first()
-                    moveTo(
-                        x = ((first.second - fixedYMin) / rangeY) * width,
-                        y = ((first.first - minX) / rangeX) * height
-                    )
-                    playerPoints.drop(1).forEach { (x, y) ->
-                        val px = ((y - fixedYMin) / rangeY) * width
-                        val py = ((x - minX) / rangeX) * height
-                        lineTo(px, py)
-                    }
+        if (playerPoints.size > 1) {
+            val path = Path().apply {
+                val first = playerPoints.first()
+                moveTo(
+                    x = ((first.second - fixedYMin) / rangeY) * width,
+                    y = height - ((first.first - minX) / rangeX) * height // Invert Y here
+                )
+                playerPoints.drop(1).forEach { (x, y) ->
+                    val px = ((y - fixedYMin) / rangeY) * width
+                    val py = height - ((x - minX) / rangeX) * height // Invert Y here
+                    lineTo(px, py)
                 }
-                drawPath(path, color = playerColor, style = Stroke(width = 2.dp.toPx()))
             }
+            drawPath(path, color = playerColor, style = Stroke(width = 2.dp.toPx()))
         }
     }
 }
@@ -1239,29 +1172,27 @@ fun PlayerHeatmap(playerHeatmap: PlayerHeatmap, allHeatmaps: Map<String, PlayerH
             .padding(4.dp)
             .background(Transparent)
     ) {
-        rotate(degrees = 180f, pivot = Offset(size.width / 2, size.height / 2)) {
-            val width = size.width
-            val height = size.height
+        val width = size.width
+        val height = size.height
 
-            val fixedYMin = -10f
-            val fixedYMax = 10f
-            val rangeY = fixedYMax - fixedYMin
+        val fixedYMin = -10f
+        val fixedYMax = 10f
+        val rangeY = fixedYMax - fixedYMin
 
-            val allX = allPoints.map { it.first }
-            val minX = allX.minOrNull() ?: -10f
-            val maxX = allX.maxOrNull() ?: 10f
-            val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
+        val allX = allPoints.map { it.first }
+        val minX = allX.minOrNull() ?: -10f
+        val maxX = allX.maxOrNull() ?: 10f
+        val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
 
-            playerPoints.forEach { (x, y) ->
-                val px = ((y - fixedYMin) / rangeY) * width
-                val py = ((x - minX) / rangeX) * height
+        playerPoints.forEach { (x, y) ->
+            val px = ((y - fixedYMin) / rangeY) * width
+            val py = height - ((x - minX) / rangeX) * height // Inverted Y
 
-                drawCircle(
-                    color = pointColor,
-                    radius = 3.dp.toPx(),
-                    center = Offset(px, py)
-                )
-            }
+            drawCircle(
+                color = pointColor,
+                radius = 3.dp.toPx(),
+                center = Offset(px, py)
+            )
         }
     }
 }
@@ -1360,7 +1291,7 @@ fun PlayerZoneScatterGraph(frames: List<AnimationFrame>, targetPlayerKey: String
         val height = size.height
 
         val framesList = ySeries.map { it.first }
-        val yList = ySeries.map { -it.second }
+        val yList = ySeries.map { it.second }
 
         val minFrame = framesList.minOrNull() ?: 0
         val maxFrame = framesList.maxOrNull() ?: 1
@@ -1375,7 +1306,7 @@ fun PlayerZoneScatterGraph(frames: List<AnimationFrame>, targetPlayerKey: String
             val py = ((yVal - minY) / rangeY) * height
 
             drawCircle(
-                color = zoneColor(-yVal),
+                color = zoneColor(yVal),
                 radius = 2.dp.toPx(),
                 center = Offset(px, py)
             )

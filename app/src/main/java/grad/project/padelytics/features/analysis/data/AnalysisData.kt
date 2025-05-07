@@ -1,22 +1,33 @@
 package grad.project.padelytics.features.analysis.data
 
 data class FullAnalysisData(
-    val trajectories: Map<String, TrajectoryData>,
-    val distance_total: Map<String, Float>,
-    val distance_avg_per_frame: Map<String, Float>,
-    val average_speed: Map<String, Float>,
-    val max_speed: Map<String, Float>,
-    val average_acceleration: Map<String, Float>,
-    val zone_presence_percentages: Map<String, Map<String, Float>>,
+    val trajectories: Map<String, TrajectoryData> = emptyMap(),
+    val distance_total: Map<String, Float> = emptyMap(),
+    val distance_avg_per_frame: Map<String, Float> = emptyMap(),
+    val average_speed: Map<String, Float> = emptyMap(),
+    val max_speed: Map<String, Float> = emptyMap(),
+    val average_acceleration: Map<String, Float> = emptyMap(),
+    val zone_presence_percentages: Map<String, Map<String, Float>> = emptyMap(),
     val radar_performance: RadarPerformance,
     val ball_trajectory: BallTrajectory,
     val ball_speed_over_time: BallSpeedOverTime,
-    val hit_count_per_player: Map<String, Int>,
-    val ball_hit_locations: Map<String, PlayerHitLocations>,
-    val top_2_strongest_hits: List<StrongestHitItem>,
-    val heatmaps: Map<String, PlayerHeatmap>,
-    val animation: List<AnimationFrame>
-)
+    val hit_count_per_player: Map<String, Int> = emptyMap(),
+    val ball_hit_locations: Map<String, PlayerHitLocations> = emptyMap(),
+    val top_3_strongest_hits: List<StrongestHitItem>,
+    val heatmaps: Map<String, PlayerHeatmap> = emptyMap(),
+    val animation: List<AnimationFrame>,
+    val role: Map<String, String> = emptyMap(),
+    val role_advice: Map<String, String> = emptyMap(),
+    val reaction_time_efficiency: Map<String, Float?> = emptyMap(),
+    val reaction_advice: Map<String, String> = emptyMap(),
+    val shot_effectiveness: Map<String, Float?> = emptyMap(),
+    val shot_advice: Map<String, String> = emptyMap(),
+    val team_hits: Map<String, Int?> = emptyMap(),
+    val player_contribution: Map<String, Float?> = emptyMap(),
+    val player_contribution_advice: Map<String, String> = emptyMap(),
+    val stamina_drop_time: Map<String, Float?> = emptyMap(),
+    val stamina_advice: Map<String, String> = emptyMap(),
+    )
 
 data class TrajectoryData(
     val x: List<Float?>,
@@ -43,7 +54,7 @@ data class PlayerHeatmap(
 
 data class RadarPerformance(
     val metrics: List<String>,
-    val players: Map<String, Map<String, Float>>
+    val players: Map<String, Map<String, Float>> = emptyMap()
 )
 
 data class BallTrajectory(
@@ -62,6 +73,6 @@ data class PlayerHitLocations(
 )
 
 data class StrongestHitItem(
-    val player: Int,
+    val player: String,
     val speed: Float
 )

@@ -187,25 +187,28 @@ class VideoUploadViewModel: ViewModel() {
             return
         }
 
+        // Ensure consistent order: current user + 3 selected friends
+        val orderedPlayerIds = listOf(currentUser.uid) + selected.mapNotNull { it?.uid }
+
         val matchData = hashMapOf(
-            "player1" to currentUser.uid,
-            "player2" to selected[0]?.uid,
-            "player3" to selected[1]?.uid,
-            "player4" to selected[2]?.uid,
+            "players" to orderedPlayerIds,
             "court" to selectedCourt,
             "timestamp" to System.currentTimeMillis(),
             "formattedTime" to formattedDate
         )
 
-        firestore.collection("matches")
-            .add(matchData)
-            .addOnSuccessListener {
-                Log.d("MatchUpload", "Match data saved with ID: ${it.id}")
-                onSuccess()
-            }
-            .addOnFailureListener { e ->
-                Log.e("MatchUpload", "Failed to save match", e)
-                onFailure(e)
-            }
+        val batch = FirebaseFirestore.getInstance().batch()
+        val matchId = FirebaseFirestore.getInstance().collection("temp").document().id
+
+        orderedPlayerIds.forEach { uid ->
+            val docRef = FirebaseFirestore.getInstance()
+                .collection("users").document(uid)
+                .collection("uploadedMatches").document(matchId)
+            batch.set(docRef, matchData + mapOf("matchId" to matchId))
+        }
+
+        batch.commit()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
     }
 }

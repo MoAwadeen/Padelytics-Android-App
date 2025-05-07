@@ -2,6 +2,7 @@ package grad.project.padelytics.features.results.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import grad.project.padelytics.features.results.data.MatchData
 import grad.project.padelytics.features.results.data.PlayerInfo
@@ -22,9 +23,13 @@ class ResultsViewModel: ViewModel() {
 
     private fun fetchMatchesData() {
         val db = FirebaseFirestore.getInstance()
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         _isFetching.value = true
 
-        db.collection("matches").get()
+        db.collection("users")
+            .document(currentUserId)
+            .collection("uploadedMatches")
+            .get()
             .addOnSuccessListener { documents ->
                 val allMatches = mutableListOf<MatchData>()
                 var processedCount = 0
@@ -36,14 +41,9 @@ class ResultsViewModel: ViewModel() {
                 }
 
                 for (doc in documents) {
-                    val playerIds = listOf(
-                        doc.getString("player1"),
-                        doc.getString("player2"),
-                        doc.getString("player3"),
-                        doc.getString("player4")
-                    )
+                    val playerIds = doc.get("players") as? List<*>
 
-                    if (playerIds.any { it == null }) {
+                    if (playerIds == null || playerIds.size != 4) {
                         processedCount++
                         if (processedCount == documents.size()) {
                             _matchData.value = allMatches
@@ -52,26 +52,28 @@ class ResultsViewModel: ViewModel() {
                         continue
                     }
 
-                    val playersInfo = mutableListOf<PlayerInfo>()
+                    val playersInfo = MutableList<PlayerInfo?>(4) { null }
                     var fetchedPlayers = 0
 
-                    playerIds.forEach { uid ->
-                        db.collection("users").document(uid!!).get()
+                    playerIds.forEachIndexed { index, uid ->
+                        db.collection("users").document(uid.toString()).get()
                             .addOnSuccessListener { userDoc ->
                                 val firstName = userDoc.getString("firstName") ?: "Unknown"
                                 val photo = userDoc.getString("photo") ?: ""
                                 val level = userDoc.getString("level") ?: "N/A"
-
-                                playersInfo.add(PlayerInfo(uid, firstName, photo, level))
+                                playersInfo[index] = PlayerInfo(uid.toString(), firstName, photo, level)
                                 fetchedPlayers++
 
                                 if (fetchedPlayers == 4) {
+                                    val finalPlayers = playersInfo.map { it!! }
                                     allMatches.add(
                                         MatchData(
-                                            players = playersInfo,
+                                            matchId = doc.id,
+                                            players = finalPlayers,
                                             court = doc.getString("court") ?: "Unknown",
                                             formattedTime = doc.getString("formattedTime") ?: "",
-                                            timestamp = doc.getLong("timestamp") ?: 0
+                                            timestamp = doc.getLong("timestamp") ?: 0,
+                                            matchUrl = doc.getString("matchUrl") ?: ""
                                         )
                                     )
                                     processedCount++

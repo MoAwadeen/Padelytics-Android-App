@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.results.components
 
+import android.content.Context
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,11 +29,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import grad.project.padelytics.R
@@ -47,6 +50,9 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 
 @Composable
 fun ResultWidget(navController: NavController, matchData: MatchData){
+    val context = LocalContext.current
+    val sharedPrefs = context.getSharedPreferences("match_prefs", Context.MODE_PRIVATE)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,13 +105,16 @@ fun ResultWidget(navController: NavController, matchData: MatchData){
                     Spacer(modifier = Modifier.weight(1f))
 
                     Text(
-                        text="View Analysis",
+                        text = "View Analysis",
                         fontSize = 16.sp,
                         color = GreenLight,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.clickable { navController.navigate(Routes.ANALYSIS) }
+                        modifier = Modifier.clickable {
+                            sharedPrefs.edit { putString("match_id", matchData.matchId) }
+                            navController.navigate(Routes.ANALYSIS)
+                        }
                     )
                 }
             }

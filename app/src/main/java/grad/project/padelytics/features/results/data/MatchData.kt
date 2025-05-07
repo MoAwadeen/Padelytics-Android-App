@@ -11,5 +11,7 @@ data class MatchData(
     val players: List<PlayerInfo>,
     val court: String,
     val formattedTime: String,
-    val timestamp: Number
+    val timestamp: Number,
+    val matchId: String,
+    val matchUrl: String
 )
