@@ -4,12 +4,14 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +23,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -36,10 +37,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MenuDefaults
@@ -55,17 +56,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -82,7 +88,6 @@ import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
-
 
 @Composable
 fun VideoUploadCard(
@@ -138,7 +143,6 @@ fun VideoUploadCard(
     }
 }
 
-
 @Composable
 fun VideoThumbnail(
     videoUri: Uri,
@@ -168,7 +172,6 @@ fun VideoThumbnail(
 fun VideoUploadPreview() {
     VideoUploadCard(){}
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -301,120 +304,24 @@ fun CourtDropdownMenu(
     }
 }
 
-
 @Composable
-fun MyPlayerPlaceHolder(
-    avatarImage: Painter = painterResource(id = R.drawable.user),
-    onClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
-) {
-
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = GreenLight,
-            contentColor = BlueDark
-        ),
-        shape = RoundedCornerShape(60.dp),
-        border = BorderStroke(3.dp, GreenLight),
-        elevation = ButtonDefaults.buttonElevation(0.dp),
-        modifier = modifier
-            .height(50.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Image(
-                painter = avatarImage,
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(35.dp)
-                    .border(3.dp, BlueDark, CircleShape)
-                    .clip(CircleShape)
-            )
-
-            Spacer(modifier = Modifier.width(6.dp))
-
-            Text(
-                text = "You",
-                fontSize = 16.sp,
-                color = BlueDark,
-                fontFamily = lexendFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-
-@Composable
-fun FriendPlaceHolder(
+fun PlayerPlaceHolder(
     avatarImage: Painter = painterResource(id = R.drawable.plus),
-    friendName: String = "",
+    borderColor: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (friendName.isNotEmpty()) GreenDark else WhiteGray,
-            contentColor = GreenLight
-        ),
-        shape = RoundedCornerShape(60.dp),
-        border = BorderStroke(3.dp, GreenDark),
-        elevation = ButtonDefaults.buttonElevation(0.dp),
+    Image(
+        painter = avatarImage,
+        contentDescription = "Player Image",
+        contentScale = ContentScale.Fit,
         modifier = modifier
-            .height(50.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.fillMaxWidth().wrapContentSize()
-        ) {
-            Text(
-                text = friendName,
-                fontSize = 14.sp,
-                color = GreenLight,
-                fontFamily = lexendFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-
-            )
-
-            Spacer(modifier = Modifier.width(6.dp))
-
-            Image(
-                painter = avatarImage,
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(35.dp)
-                    .border(3.dp, GreenLight, CircleShape)
-                    .clip(CircleShape)
-            )
-        }
-    }
+            .size(50.dp)
+            .border(3.dp, borderColor, CircleShape)
+            .clip(CircleShape)
+            .clickable { onClick() }
+    )
 }
-
-
-@Preview(showBackground = true)
-@Composable
-fun MyPlayerPlaceHolderPreview(){
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ){
-    MyPlayerPlaceHolder(modifier = Modifier.weight(1f))
-    FriendPlaceHolder(friendName = "",modifier = Modifier.weight(1f))}
-}
-
 
 @Composable
 fun SearchFriendDialog(
@@ -535,15 +442,17 @@ fun SearchFriendDialogPreview() {
 
 @Composable
 fun FriendsListDialog(
+    selectedIndex: Int,
     onDismiss: () -> Unit,
+    onFriendSelected: (FriendData) -> Unit,
     onAddFriendClick: () -> Unit,
     viewModel: VideoUploadViewModel = viewModel()
 ) {
     val friendsList by viewModel.friendsList.collectAsState()
     val isLoading by viewModel.isLoadingFriends.collectAsState()
-    val selectedFriend by viewModel.selectedFriend.collectAsState()
+    val selectedFriends by viewModel.selectedFriends.collectAsState()
     val context = LocalContext.current
-
+    val selectedFriend = selectedFriends.getOrNull(selectedIndex)
 
     LaunchedEffect(Unit) {
         viewModel.fetchFriendsList()
@@ -564,13 +473,16 @@ fun FriendsListDialog(
             )
         },
         text = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 selectedFriend?.let { friend ->
-                    SelectedFriendPreview(friend = friend)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Divider(color = GreenLight.copy(alpha = 0.3f))
+                    SelectedFriendPreview(
+                        friend = friend,
+                        onRemove = {
+                            viewModel.unselectFriendAt(selectedIndex)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(color = GreenLight.copy(alpha = 0.3f))
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
@@ -602,17 +514,18 @@ fun FriendsListDialog(
                     }
 
                     else -> {
-                        LazyColumn(
-                            modifier = Modifier.heightIn(max = 400.dp)
-                        ) {
-                            items(friendsList) { friend ->
+                        val availableFriends = friendsList.filter { friend ->
+                            selectedFriends.none { it?.userName == friend.userName }
+                        }
+
+                        LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                            items(availableFriends) { friend ->
                                 FriendListItem(
                                     friend = friend,
-                                    isSelected = selectedFriend?.userName == friend.userName,
                                     onClick = {
-                                        viewModel.selectFriend(friend)
-                                        // Optional: auto-dismiss on selection
-                                        // onDismiss()
+                                        viewModel.selectFriendAt(selectedIndex, friend)
+                                        onFriendSelected(friend)
+                                        onDismiss()
                                     }
                                 )
                             }
@@ -624,8 +537,11 @@ fun FriendsListDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    selectedFriend?.let { onDismiss() }
-                        ?: Toast.makeText(context, "Please select a friend", Toast.LENGTH_SHORT).show()
+                    if (selectedFriend != null) {
+                        onDismiss()
+                    } else {
+                        Toast.makeText(context, "Please select a friend", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GreenLight,
@@ -644,7 +560,8 @@ fun FriendsListDialog(
                 onClick = onAddFriendClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GreenDark,
-                    contentColor = GreenLight)
+                    contentColor = GreenLight
+                )
             ) {
                 Text(
                     text = "ADD PLAYER",
@@ -657,11 +574,12 @@ fun FriendsListDialog(
 }
 
 @Composable
-private fun SelectedFriendPreview(friend: FriendData) {
+private fun SelectedFriendPreview(friend: FriendData, onRemove: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { onRemove() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
@@ -692,26 +610,21 @@ private fun SelectedFriendPreview(friend: FriendData) {
     }
 }
 
-
 @Composable
-private fun FriendListItem(
-    friend: FriendData,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
+private fun FriendListItem(friend: FriendData, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) GreenLight.copy(alpha = 0.15f) else Color.Transparent
+            containerColor = Transparent
         ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp), // Keep padding inside the Row
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -741,23 +654,8 @@ private fun FriendListItem(
                     fontSize = 12.sp
                 )
             }
-
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
-                    tint = GreenLight,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
         }
     }
-}
-
-@Preview
-@Composable
-fun FriendsListDialogPreview() {
-    FriendsListDialog(onDismiss = {}, onAddFriendClick = {})
 }
 
 @Preview(showBackground = true)
@@ -770,7 +668,147 @@ fun FriendListItemPreview() {
             lastName = "Doe",
             photo = "https://example.com/photo.jpg"
         ),
-        onClick = {},
-        isSelected = false
+        onClick = {}
     )
+}
+
+@Composable
+fun PlayersTitleRow() {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (showDialog) Modifier.blur(4.dp) else Modifier)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Players",
+                    fontSize = 24.sp,
+                    color = BlueDark,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(
+                    modifier = Modifier
+                        .clickable { showDialog = true }
+                        .padding(start = 8.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .padding(end = 4.dp),
+                        painter = painterResource(R.drawable.info),
+                        contentDescription = "Info",
+                        tint = GreenDark
+                    )
+
+                    Text(
+                        text = "How to assign",
+                        fontSize = 16.sp,
+                        color = GreenDark,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+
+        if (showDialog) {
+            Dialog(onDismissRequest = { showDialog = false }) {
+                Box(
+                    modifier = Modifier
+                        .width(290.dp)
+                        .height(340.dp)
+                        .background(BlueDark, shape = RoundedCornerShape(16.dp))
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.court_assign),
+                        contentDescription = "Dialog Background",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.width(290.dp).height(340.dp)
+                    )
+
+                    Box(modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.TopEnd){
+                        Icon(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .padding(top = 22.dp, end = 20.dp)
+                                .clickable { showDialog = false },
+                            painter = painterResource(R.drawable.x),
+                            contentDescription = "Exit",
+                            tint = GreenLight
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CourtBackground(content: @Composable BoxScope.() -> Unit = {}) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .background(Blue),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(
+            modifier = Modifier.matchParentSize()
+        ) {
+            val borderColor = BlueDark
+            val lineColor = BlueDark
+            val borderStroke = 4.dp.toPx()
+            val lineStroke = 4.dp.toPx()
+
+            val totalWidth = size.width
+            val totalHeight = size.height
+
+            // x is the padding from the edge to the first/third vertical lines
+            val x = totalWidth / 8f
+
+            val v1 = x                          // First vertical line
+            val v2 = totalWidth / 2f            // Middle of the court (second vertical line)
+            val v3 = totalWidth - x             // Third vertical line
+
+            val horizontalY = totalHeight / 2f  // Half the height
+
+            // Horizontal line: from center of v1 to center of v3
+            drawLine(
+                color = lineColor,
+                start = Offset(x = v1, y = horizontalY),
+                end = Offset(x = v3, y = horizontalY),
+                strokeWidth = lineStroke
+            )
+
+            // Vertical lines
+            listOf(v1, v2, v3).forEach { xPos ->
+                drawLine(
+                    color = lineColor,
+                    start = Offset(x = xPos, y = 0f),
+                    end = Offset(x = xPos, y = totalHeight),
+                    strokeWidth = lineStroke
+                )
+            }
+
+            // Outer border
+            drawRoundRect(
+                color = borderColor,
+                topLeft = Offset.Zero,
+                size = size,
+                cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx()),
+                style = Stroke(width = borderStroke)
+            )
+        }
+        content()
+    }
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.features.about.components.AboutUsAppToolbar
 import grad.project.padelytics.features.about.components.Description
 import grad.project.padelytics.features.about.components.MemberInfoGrid
@@ -194,12 +195,16 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                 MemberInfoGrid(teamInfo = documentationTeam)
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                WideGreenButton(label = "Back", onClick = { navController.popBackStack() })
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
-@Preview(showBackground = true, heightDp = 3000)
+@Preview(showBackground = true, heightDp = 2000)
 @Composable
 fun AboutUsScreenPreview() {
     AboutUsScreen(navController = rememberNavController())

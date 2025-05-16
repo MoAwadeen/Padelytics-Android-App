@@ -53,7 +53,8 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
-    implementation(libs.androidx.media3.common.ktx) // Using the BOM, so this is sufficient.
+    implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.compose.testing) // Using the BOM, so this is sufficient.
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
