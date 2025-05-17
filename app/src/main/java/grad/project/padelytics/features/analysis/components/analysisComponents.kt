@@ -239,29 +239,45 @@ fun BallAnalysisBox(graphScreens: List<Pair<String, @Composable () -> Unit>>) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(R.drawable.left_arrow),
-                contentDescription = "Left Arrow",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(20.dp)
+            Column(
+                modifier = Modifier.height(180.dp)
                     .clickable {
-                        currentIndex = if (currentIndex == 0) graphScreens.lastIndex else currentIndex - 1
-                    }
-            )
+                    currentIndex = if (currentIndex == 0) graphScreens.lastIndex else currentIndex - 1
+                },
+                verticalArrangement = Arrangement.Center
+            ){
+                Image(
+                    painter = painterResource(R.drawable.left_arrow),
+                    contentDescription = "Left Arrow",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable {
+                            currentIndex = if (currentIndex == 0) graphScreens.lastIndex else currentIndex - 1
+                        }
+                )
+            }
 
             currentCourtComposable()
 
-            Image(
-                painter = painterResource(R.drawable.right_arrow),
-                contentDescription = "Right Arrow",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(20.dp)
+            Column(
+                modifier = Modifier.height(180.dp)
                     .clickable {
-                        currentIndex = (currentIndex + 1) % graphScreens.size
-                    }
-            )
+                    currentIndex = (currentIndex + 1) % graphScreens.size
+                },
+                verticalArrangement = Arrangement.Center
+            ){
+                Image(
+                    painter = painterResource(R.drawable.right_arrow),
+                    contentDescription = "Right Arrow",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable {
+                            currentIndex = (currentIndex + 1) % graphScreens.size
+                        }
+                )
+            }
         }
 
         Text(
@@ -680,7 +696,11 @@ fun MatchAnimationCard(analysisData: FullAnalysisData, playerName: Map<String, S
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            CourtBackground{ AnimatedPlayerScatterPlot(frames = analysisData.animation, playerNameMap = playerName) }
+            CourtBackground{
+                //AnimatedPlayerScatterPlot(frames = analysisData.animation, playerNameMap = playerName)
+
+                MatchAnimationWithBall(frames = analysisData.animation, ballTrajectory = analysisData.ball_trajectory, playerNameMap = playerName)
+            }
         }
     }
 }
@@ -1392,5 +1412,156 @@ fun PlayerRadarChart(radarData: RadarPerformance, targetPlayer: String) {
         drawPath(path, color = GreenLight.copy(alpha = 0.7f), style = Fill)
 
         drawPath(path, color = GreenDark, style = Stroke(width = 2.dp.toPx()))
+    }
+}
+
+@Composable
+fun AnimatedBallTrajectory(ballTrajectory: BallTrajectory) {
+    val points = ballTrajectory.x.zip(ballTrajectory.y)
+    if (points.isEmpty()) {
+        Text("No ball trajectory data", color = White)
+        return
+    }
+
+    var frameIndex by remember { mutableIntStateOf(0) }
+
+    // Animate frame index looping over points with delay
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60)
+            frameIndex = (frameIndex + 1) % points.size
+        }
+    }
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        val width = size.width
+        val height = size.height
+
+        val minX = points.minOf { it.first }
+        val maxX = points.maxOf { it.first }
+        val minY = points.minOf { it.second }
+        val maxY = points.maxOf { it.second }
+
+        val rangeX = maxX - minX
+        val rangeY = maxY - minY
+
+        fun mapX(x: Float) = ((x - minX) / rangeX) * width
+        fun mapY(y: Float) = height - ((y - minY) / rangeY) * height
+
+        // Draw moving ball circle at current frame position
+        val (currentX, currentY) = points[frameIndex]
+        drawCircle(
+            color = GreenLight,
+            radius = 3.dp.toPx(),
+            center = Offset(mapX(currentX), mapY(currentY))
+        )
+    }
+}
+
+@Composable
+fun MatchAnimationWithBall(frames: List<AnimationFrame>, ballTrajectory: BallTrajectory, playerNameMap: Map<String, String?>) {
+    if (frames.isEmpty() || ballTrajectory.x.isEmpty() || ballTrajectory.y.isEmpty()) {
+        Text("No animation data available", color = White)
+        return
+    }
+
+    // Animate frame indexes
+    var frameIndex by remember { mutableIntStateOf(0) }
+    var ballIndex by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60)
+            frameIndex = (frameIndex + 1) % frames.size
+            ballIndex = (ballIndex + 1) % ballTrajectory.x.size
+        }
+    }
+
+    // Fixed coordinate system for players (and ball)
+    val fixedXMin = -10f
+    val fixedXMax = 10f
+    val fixedYMin = -10f
+    val fixedYMax = 10f
+    val rangeX = fixedXMax - fixedXMin
+    val rangeY = fixedYMax - fixedYMin
+
+    // Normalize ball points to fixed coordinate system (-10..10)
+    val ballMinX = ballTrajectory.x.minOrNull() ?: fixedXMin
+    val ballMaxX = ballTrajectory.x.maxOrNull() ?: fixedXMax
+    val ballMinY = ballTrajectory.y.minOrNull() ?: fixedYMin
+    val ballMaxY = ballTrajectory.y.maxOrNull() ?: fixedYMax
+
+    fun normalize(value: Float, min: Float, max: Float): Float =
+        if (max - min == 0f) 0f else (value - min) / (max - min) * 20f - 10f
+
+    val normalizedBallPoints = ballTrajectory.x.zip(ballTrajectory.y).map { (x, y) ->
+        val normX = normalize(x, ballMinX, ballMaxX)
+        val normY = normalize(y, ballMinY, ballMaxY)
+        normX to normY
+    }
+
+    val currentFrame = frames[frameIndex]
+    val playerColors = listOf(GreenLight, GreenLight, BlueDark, BlueDark)
+    val playerKeys = listOf("player1", "player2", "player3", "player4")
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        rotate(degrees = 180f, pivot = Offset(size.width / 2, size.height / 2)) {
+            val width = size.width
+            val height = size.height
+
+            val positions = listOf(
+                currentFrame.player1,
+                currentFrame.player2,
+                currentFrame.player3,
+                currentFrame.player4
+            )
+
+            val labelPaint = Paint().apply {
+                color = android.graphics.Color.WHITE
+                textSize = 20f
+                textAlign = Paint.Align.CENTER
+                isFakeBoldText = true
+            }
+
+            // Draw players
+            positions.forEachIndexed { index, pos ->
+                val px = ((-pos.y - fixedXMin) / rangeX) * width
+                val py = ((-pos.x - fixedYMin) / rangeY) * height
+                val color = playerColors.getOrElse(index) { GreenLight }
+                val playerName = playerNameMap[playerKeys[index]] ?: playerKeys[index]
+
+                drawCircle(color, radius = 3.dp.toPx(), center = Offset(px, py))
+
+                drawContext.canvas.nativeCanvas.apply {
+                    withSave {
+                        rotate(-180f, px, py + 18f)
+                        drawText(playerName, px, py + 18f, labelPaint)
+                    }
+                }
+            }
+
+            // Draw moving ball
+            val (ballX, ballY) = normalizedBallPoints[ballIndex]
+            val ballPx = ((-ballY - fixedXMin) / rangeX) * width
+            val ballPy = ((-ballX - fixedYMin) / rangeY) * height
+
+            drawCircle(
+                color = White,
+                radius = 3.dp.toPx(),
+                center = Offset(ballPx, ballPy)
+            )
+        }
     }
 }

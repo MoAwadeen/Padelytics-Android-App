@@ -52,7 +52,7 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         TeamInfo(
             memberName = "Youssef Talaat",
             memberTitle = "iOS developer",
-            memberPhoto = "",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1747434349/lgqni7qrflksrx265k6f.jpg",
             memberLinkedIn = "https://www.linkedin.com/in/yousef-tal3at?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
@@ -61,19 +61,19 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         TeamInfo(
             memberName = "Mostafa Gamal",
             memberTitle = "Ai Engineer",
-            memberPhoto = "",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1747434340/eg6rn5crrki4knfi57li.png",
             memberLinkedIn = "https://www.linkedin.com/in/mostafa-gamal-mg?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Omar Gomaa",
             memberTitle = "Ai Engineer",
-            memberPhoto = "",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1747434344/tatfiwlytmmqfzi1nan8.jpg",
             memberLinkedIn = "https://www.linkedin.com/in/eng-omargomaa?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Dalia Ghazi",
             memberTitle = "Ai Engineer",
-            memberPhoto = "",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1747434361/evvp2dbaaz09lz5p1njv.jpg",
             memberLinkedIn = "https://www.linkedin.com/in/dalia-ghazy-b36538225?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
@@ -82,13 +82,13 @@ fun AboutUsScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         TeamInfo(
             memberName = "Mona Ahmed",
             memberTitle = "Front end developer",
-            memberPhoto = "",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1747434341/pyysyfw0frodylykwecz.jpg",
             memberLinkedIn = "https://www.linkedin.com/in/mona-el-qattan-ab751a2b9?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         ),
         TeamInfo(
             memberName = "Aya Mostafa",
             memberTitle = "Back end developer",
-            memberPhoto = "",
+            memberPhoto = "https://res.cloudinary.com/dqcgb73mf/image/upload/v1747434428/resbyfhnprdinohioqip.jpg",
             memberLinkedIn = "https://www.linkedin.com/in/aya-mostafa-771993283?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
         )
     )
