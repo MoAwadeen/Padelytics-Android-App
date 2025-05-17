@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.analysis.components.AnalysisAppbar
 import grad.project.padelytics.features.analysis.components.AnalysisWideGreenButton
+import grad.project.padelytics.features.analysis.components.AnimatedBallTrajectory
 import grad.project.padelytics.features.analysis.components.BallAnalysisBox
 import grad.project.padelytics.features.analysis.components.BallHitLocationsPlot
 import grad.project.padelytics.features.analysis.components.BallSpeedOverTimeLineChart
@@ -118,6 +119,13 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                                         ) {
                                             BallAnalysisBox(
                                                 graphScreens = listOf(
+                                                    "Ball Animation" to @Composable {
+                                                        CourtBackground {
+                                                            AnimatedBallTrajectory(
+                                                                ballTrajectory = analysisData!!.ball_trajectory
+                                                            )
+                                                        }
+                                                    },
                                                     "Ball Trajectory" to @Composable {
                                                         CourtBackground {
                                                             BallTrajectoryPlot(

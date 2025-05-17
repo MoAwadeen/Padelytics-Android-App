@@ -4,13 +4,10 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -31,8 +28,7 @@ import grad.project.padelytics.features.auth.components.CityDropdownMenu
 import grad.project.padelytics.features.auth.components.DateInputField
 import grad.project.padelytics.features.auth.components.IconLineRow
 import grad.project.padelytics.features.auth.components.SingleSelectionButtonsGrid
-import grad.project.padelytics.features.auth.components.SmallBlueButton
-import grad.project.padelytics.features.auth.components.SmallGreenButton
+import grad.project.padelytics.features.auth.components.WideGreenButton
 import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
@@ -106,7 +102,7 @@ fun SignUpSecondScreen(
             }
 
             item {
-                SmallGreenButton("Finish") {
+                WideGreenButton(label = "Finish") {
                         val allFieldsSelected = listOf(selectedGender, selectedLevel, selectedCity, selectedDate)
                             .all { it != null }
 
