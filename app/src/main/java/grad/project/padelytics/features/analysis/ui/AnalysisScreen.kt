@@ -2,6 +2,7 @@ package grad.project.padelytics.features.analysis.ui
 
 import android.content.Context
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -45,6 +46,7 @@ import grad.project.padelytics.features.analysis.components.PlayerAnalysisCard
 import grad.project.padelytics.features.analysis.components.PlayersView
 import grad.project.padelytics.features.analysis.components.RectangleBackground
 import grad.project.padelytics.features.analysis.components.TopStrongestHitsBarChart
+import grad.project.padelytics.features.analysis.data.PdfExporter
 import grad.project.padelytics.features.analysis.viewModel.AnalysisViewModel
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -98,75 +100,75 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                         FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
                     }
                 } else {
-                    AndroidView(
-                        factory = {
-                            ComposeView(it).apply {
-                                setContent {
-                                    Column(
-                                        modifier = Modifier.background(Color.White),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        AnalysisAppbar()
+                    Column(
+                        modifier = Modifier.background(Color.White),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AnalysisAppbar()
 
-                                        PlayersView(players = playerList)
+                        PlayersView(players = playerList)
 
-                                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                                        Column(
-                                            modifier = Modifier
-                                                .background(Color.White)
-                                                .padding(horizontal = 16.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            BallAnalysisBox(
-                                                graphScreens = listOf(
-                                                    "Ball Trajectory" to @Composable {
-                                                        CourtBackground {
-                                                            BallTrajectoryPlot(
-                                                                ballTrajectory = analysisData!!.ball_trajectory
-                                                            )
-                                                        }
-                                                    },
-                                                    "Ball Speed Timeline" to @Composable {
-                                                        RectangleBackground {
-                                                            BallSpeedOverTimeLineChart(
-                                                                data = analysisData!!.ball_speed_over_time
-                                                            )
-                                                        }
-                                                    },
-                                                    "Top Speeds" to @Composable {
-                                                        RectangleBackground {
-                                                            TopStrongestHitsBarChart(
-                                                                topHits = analysisData!!.top_3_strongest_hits,
-                                                                playerName = playerNames
-                                                            )
-                                                        }
-                                                    },
-                                                    "Number Of Ball Hits" to @Composable {
-                                                        RectangleBackground {
-                                                            HitCountBarChart(
-                                                                hitCount = analysisData!!.hit_count_per_player,
-                                                                playerDisplayNames = playerNames
-                                                            )
-                                                        }
-                                                    },
-                                                    "Ball Hits Locations" to @Composable {
-                                                        CourtBackground {
-                                                            BallHitLocationsPlot(ballHits = analysisData!!.ball_hit_locations)
-                                                        }
-                                                    }
-                                                )
+                        Column(
+                            modifier = Modifier
+                                .background(Color.White)
+                                .padding(horizontal = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            BallAnalysisBox(
+                                graphScreens = listOf(
+                                    "Ball Trajectory" to @Composable {
+                                        CourtBackground {
+                                            BallTrajectoryPlot(
+                                                ballTrajectory = analysisData!!.ball_trajectory
                                             )
-
-                                            Spacer(modifier = Modifier.height(20.dp))
-
-                                            MatchAnimationCard(
-                                                analysisData = analysisData!!,
+                                        }
+                                    },
+                                    "Ball Speed Timeline" to @Composable {
+                                        RectangleBackground {
+                                            BallSpeedOverTimeLineChart(
+                                                data = analysisData!!.ball_speed_over_time
+                                            )
+                                        }
+                                    },
+                                    "Top Speeds" to @Composable {
+                                        RectangleBackground {
+                                            TopStrongestHitsBarChart(
+                                                topHits = analysisData!!.top_3_strongest_hits,
                                                 playerName = playerNames
                                             )
+                                        }
+                                    },
+                                    "Number Of Ball Hits" to @Composable {
+                                        RectangleBackground {
+                                            HitCountBarChart(
+                                                hitCount = analysisData!!.hit_count_per_player,
+                                                playerDisplayNames = playerNames
+                                            )
+                                        }
+                                    },
+                                    "Ball Hits Locations" to @Composable {
+                                        CourtBackground {
+                                            BallHitLocationsPlot(ballHits = analysisData!!.ball_hit_locations)
+                                        }
+                                    }
+                                )
+                            )
 
-                                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(20.dp))
 
+                            MatchAnimationCard(
+                                analysisData = analysisData!!,
+                                playerName = playerNames
+                            )
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            AndroidView(
+                                factory = {
+                                    ComposeView(it).apply {
+                                        setContent {
                                             PlayerAnalysisCard(
                                                 analysisData = analysisData!!,
                                                 playerList = listOf("player1", "player2", "player3", "player4"),
@@ -175,12 +177,12 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                                                 playerLevels = playerLevels
                                             )
                                         }
+                                        composeViewRef.value = this
                                     }
                                 }
-                                composeViewRef.value = this
-                            }
+                            )
                         }
-                    )
+                    }
 
                     Column(
                         modifier = Modifier
@@ -189,9 +191,11 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AnalysisWideGreenButton(onClick = {
-                            composeViewRef.value?.let {
-                                val bitmap = viewModel.captureComposableToBitmap(it)
-                                viewModel.saveBitmapAsPdf(context, bitmap)
+                            composeViewRef.value?.let { view ->
+                                val bitmap = viewModel.captureViewAsBitmap(view)
+                                PdfExporter.exportBitmapAsPdf(context, bitmap, filename = "Match Analysis.pdf")
+                            } ?: run {
+                                Toast.makeText(context, "View not ready", Toast.LENGTH_SHORT).show()
                             }
                         })
                     }
