@@ -31,9 +31,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import grad.project.padelytics.appComponents.FetchingIndicator
+import grad.project.padelytics.features.analysis.components.AnalysisAppToolbar
 import grad.project.padelytics.features.analysis.components.AnalysisAppbar
 import grad.project.padelytics.features.analysis.components.AnalysisWideGreenButton
-import grad.project.padelytics.features.analysis.components.AnimatedBallTrajectory
 import grad.project.padelytics.features.analysis.components.BallAnalysisBox
 import grad.project.padelytics.features.analysis.components.BallHitLocationsPlot
 import grad.project.padelytics.features.analysis.components.BallSpeedOverTimeLineChart
@@ -79,6 +79,7 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
     }
 
     Scaffold(
+        topBar = { AnalysisAppToolbar(toolbarTitle = "") },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
         LazyColumn(
@@ -119,13 +120,6 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
                                         ) {
                                             BallAnalysisBox(
                                                 graphScreens = listOf(
-                                                    "Ball Animation" to @Composable {
-                                                        CourtBackground {
-                                                            AnimatedBallTrajectory(
-                                                                ballTrajectory = analysisData!!.ball_trajectory
-                                                            )
-                                                        }
-                                                    },
                                                     "Ball Trajectory" to @Composable {
                                                         CourtBackground {
                                                             BallTrajectoryPlot(

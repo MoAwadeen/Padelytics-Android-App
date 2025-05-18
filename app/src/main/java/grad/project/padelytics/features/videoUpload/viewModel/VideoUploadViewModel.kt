@@ -66,32 +66,68 @@ class VideoUploadViewModel: ViewModel() {
     fun addUserToFriends(currentUserId: String, friendDocId: String) {
         val usersRef = firestore.collection("users")
 
+        // Step 1: Fetch friend's data
         usersRef.document(friendDocId).get()
-            .addOnSuccessListener { doc ->
-                if (doc.exists()) {
-                    val username = doc.getString("userName") ?: return@addOnSuccessListener
-                    val firstName = doc.getString("firstName") ?: ""
-                    val lastName = doc.getString("lastName") ?: ""
-                    val photo = doc.getString("photo") ?: ""
+            .addOnSuccessListener { friendDoc ->
+                if (friendDoc.exists()) {
+                    val friendUsername = friendDoc.getString("userName") ?: return@addOnSuccessListener
+                    val friendFirstName = friendDoc.getString("firstName") ?: ""
+                    val friendLastName = friendDoc.getString("lastName") ?: ""
+                    val friendPhoto = friendDoc.getString("photo") ?: ""
 
                     val friendData = mapOf(
                         "uid" to friendDocId,
-                        "userName" to username,
-                        "firstName" to firstName,
-                        "lastName" to lastName,
-                        "photo" to photo
+                        "userName" to friendUsername,
+                        "firstName" to friendFirstName,
+                        "lastName" to friendLastName,
+                        "photo" to friendPhoto
                     )
 
+                    // Step 2: Add friend to current user's friends list
                     usersRef.document(currentUserId)
                         .collection("playerFriends")
                         .document(friendDocId)
                         .set(friendData)
                         .addOnSuccessListener {
-                            Log.d("FriendAdd", "Friend added successfully")
-                            fetchFriendsList() // Refresh friends list
+                            Log.d("FriendAdd", "Friend added to current user successfully")
+                            fetchFriendsList() // Refresh list
+
+                            // Step 3: Fetch current user's data to reciprocate
+                            usersRef.document(currentUserId).get()
+                                .addOnSuccessListener { currentUserDoc ->
+                                    if (currentUserDoc.exists()) {
+                                        val currentUsername = currentUserDoc.getString("userName") ?: ""
+                                        val currentFirstName = currentUserDoc.getString("firstName") ?: ""
+                                        val currentLastName = currentUserDoc.getString("lastName") ?: ""
+                                        val currentPhoto = currentUserDoc.getString("photo") ?: ""
+
+                                        val currentUserData = mapOf(
+                                            "uid" to currentUserId,
+                                            "userName" to currentUsername,
+                                            "firstName" to currentFirstName,
+                                            "lastName" to currentLastName,
+                                            "photo" to currentPhoto
+                                        )
+
+                                        // Step 4: Add current user to friend's friends list
+                                        usersRef.document(friendDocId)
+                                            .collection("playerFriends")
+                                            .document(currentUserId)
+                                            .set(currentUserData)
+                                            .addOnSuccessListener {
+                                                Log.d("FriendAdd", "Current user added to friend's list successfully")
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Log.e("FriendAdd", "Failed to add current user to friend's list", e)
+                                            }
+                                    }
+                                }
+                                .addOnFailureListener {
+                                    Log.e("CurrentUserFetch", "Could not fetch current user document", it)
+                                }
                         }
                         .addOnFailureListener { e ->
-                            Log.e("FriendAdd", "Failed to add friend", e)
+                            Log.e("FriendAdd", "Failed to add friend to current user", e)
                         }
                 }
             }

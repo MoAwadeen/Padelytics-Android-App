@@ -466,7 +466,7 @@ fun FriendsListDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Select a Friend",
+                text = "Select a Player",
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
@@ -540,7 +540,7 @@ fun FriendsListDialog(
                     if (selectedFriend != null) {
                         onDismiss()
                     } else {
-                        Toast.makeText(context, "Please select a friend", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Please select a player", Toast.LENGTH_SHORT).show()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -584,7 +584,7 @@ private fun SelectedFriendPreview(friend: FriendData, onRemove: () -> Unit) {
     ) {
         AsyncImage(
             model = friend.photo,
-            contentDescription = "Selected friend",
+            contentDescription = "Selected Player",
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape),
