@@ -111,7 +111,7 @@ fun PlayersView(players: List<PlayerInfo>) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Blue)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
             .height(100.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -1562,7 +1562,7 @@ fun MatchAnimationWithBall(frames: List<AnimationFrame>, ballTrajectory: BallTra
 @Composable
 fun AnalysisAppToolbar(toolbarTitle: String) {
     TopAppBar(
-        modifier = Modifier.fillMaxWidth().height(20.dp),
+        modifier = Modifier.fillMaxWidth().height(40.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Blue,
             titleContentColor = White,
