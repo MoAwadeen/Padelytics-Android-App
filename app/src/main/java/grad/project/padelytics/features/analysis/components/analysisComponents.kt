@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.analysis.components
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -56,6 +57,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -63,7 +65,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.withSave
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import grad.project.padelytics.R
 import grad.project.padelytics.features.analysis.data.AnimationFrame
 import grad.project.padelytics.features.analysis.data.BallSpeedOverTime
@@ -389,7 +393,7 @@ fun RectangleBackground(content: @Composable BoxScope.() -> Unit = {}) {
 @Composable
 fun BallTrajectoryPlot(ballTrajectory: BallTrajectory) {
     if (ballTrajectory.x.isEmpty() || ballTrajectory.y.isEmpty()) {
-        Text("No trajectory data", color = Color.White)
+        Text("No trajectory data", color = White)
         return
     }
 
@@ -421,7 +425,7 @@ fun BallTrajectoryPlot(ballTrajectory: BallTrajectory) {
             .width(230.dp)
             .height(100.dp)
             .padding(4.dp)
-            .background(Color.Transparent)
+            .background(Transparent)
     ) {
         rotate(degrees = 180f, pivot = Offset(size.width / 2, size.height / 2)) {
             val width = size.width
@@ -924,6 +928,14 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
     val playerAnimation = analysisData.animation
     val playerBallHits = analysisData.ball_hit_locations
 
+    val context = LocalContext.current
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .bitmapConfig(Bitmap.Config.ARGB_8888)
+            .allowHardware(false)
+            .build()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -931,8 +943,7 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
             .background(Blue)
             .padding(horizontal = 20.dp, vertical = 26.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -961,7 +972,12 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
                     ) {
                         if (photo.isNotBlank()) {
                             AsyncImage(
-                                model = photo,
+                                model = ImageRequest.Builder(context)
+                                    .data(photo)
+                                    .bitmapConfig(Bitmap.Config.ARGB_8888)
+                                    .allowHardware(false)
+                                    .build(),
+                                imageLoader = imageLoader,
                                 contentDescription = "Player Avatar",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -993,22 +1009,9 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Column(horizontalAlignment = Alignment.Start) {
-                        Text(
-                            text = name,
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = White
-                            )
-                        )
-                        Text(
-                            text = level,
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = GreenLight
-                            )
-                        )
+                        Text(text = name, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Medium, color = White))
+
+                        Text(text = level, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal, color = GreenLight))
                     }
                 }
 
@@ -1025,29 +1028,23 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier.padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    StatText(label = "Max Speed", value = "${"%.2f".format(maxSpeed)} m/s")
+                    StatText(label = "Max Speed", value = "%.2f m/s".format(maxSpeed))
 
-                    StatText(label = "Distance", value = "${"%.2f".format(distance)} m")
+                    StatText(label = "Distance", value = "%.2f m".format(distance))
 
-                    StatText(label = "Attack", value = "${"%.2f".format(attackPresence)} %")
+                    StatText(label = "Attack", value = "%.2f %%".format(attackPresence))
                 }
 
                 Spacer(modifier = Modifier.width(20.dp))
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    StatText(
-                        label = "Avg Acceleration",
-                        value = "${"%.2f".format(avgAcceleration)} m/s²"
-                    )
+                    StatText(label = "Avg Acceleration", value = "%.2f m/s²".format(avgAcceleration))
 
                     StatText(label = "Total Hits", value = "$totalHits")
 
-                    StatText(label = "Defense", value = "${"%.2f".format(defensePresence)} %")
+                    StatText(label = "Defense", value = "%.2f %%".format(defensePresence))
                 }
             }
 
@@ -1062,7 +1059,7 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
 
                 InsightText(title = "Shot Effectiveness", desc = "$shotEffectiveness% — $shotAdvice", color = OrangeLight)
 
-                InsightText(title = "Role Detection", desc = "$role :\n$roleAdvice", color = GreenLight)
+                InsightText(title = "Role Detection", desc = "$role:\n$roleAdvice", color = GreenLight)
 
                 InsightText(title = "Team Imbalance (Hit Share)", desc = "$hitShare% — $hitAdvice", color = OrangeLight)
 
@@ -1078,44 +1075,32 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
                 TextGraphHeader(title = "Player Trajectory")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    CourtBackground {
-                        playerTrajectory?.let {
-                            PlayerScatterPlot(analysisData.trajectories, playerKey)
-                        }
-                    }
+                CourtBackground {
+                    playerTrajectory?.let { PlayerScatterPlot(analysisData.trajectories, playerKey) }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextGraphHeader(title = "Positioning Heatmap")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    CourtBackground {
-                        playerHeatmap?.let {
-                            PlayerHeatmap(it, analysisData.heatmaps)
-                        }
-                    }
+                CourtBackground {
+                    playerHeatmap?.let { PlayerHeatmap(it, analysisData.heatmaps) }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextGraphHeader(title = "Hit Points")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    CourtBackground {
-                        PlayerBallHitLocationsPlot(playerBallHits, playerKey)
-                    }
+                CourtBackground {
+                    PlayerBallHitLocationsPlot(playerBallHits, playerKey)
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextGraphHeader(title = "Attack vs Defence")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    RectangleBackground {
-                        PlayerZoneScatterGraph(playerAnimation, playerKey)
-                    }
+                RectangleBackground {
+                    PlayerZoneScatterGraph(playerAnimation, playerKey)
                 }
             }
 
@@ -1126,17 +1111,19 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
             Spacer(modifier = Modifier.height(24.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth().background(Blue),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ){
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Blue),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
                     text = "Radar Performance",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.Medium,
-                        color = White)
+                        color = White
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
