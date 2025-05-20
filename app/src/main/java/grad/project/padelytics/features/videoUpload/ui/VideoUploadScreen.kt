@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.videoUpload.ui
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -39,6 +40,7 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.WideGreenButton
+import grad.project.padelytics.data.MatchNotificationHelper
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.videoUpload.components.CourtBackground
 import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
@@ -51,6 +53,7 @@ import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewMod
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 
+@SuppressLint("MissingPermission")
 @Composable
 fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostController, profileViewModel: ProfileViewModel = viewModel(), viewModel: VideoUploadViewModel = viewModel()) {
     //val selectedVideo by viewModel.selectedVideoUri.collectAsState()
@@ -110,7 +113,7 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
@@ -119,6 +122,8 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                 horizontalAlignment = Alignment.Start
             ) {
                 item {
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     VideoUploadCard(onVideoSelected = { viewModel.setSelectedVideo(it) })
 
                     Spacer(modifier = Modifier.height(22.dp))
@@ -132,7 +137,6 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                         val playerSize = 35.dp
                         val playerSizePx = with(density) { playerSize.toPx() }
 
-                        // Use BoxWithConstraints to get container size
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                             val courtWidth = constraints.maxWidth.toFloat()
                             val courtHeight = constraints.maxHeight.toFloat()
@@ -143,7 +147,6 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                             val v3 = courtWidth - x
                             val horizontalY = courtHeight / 2f
 
-                            // Center of each of the 4 zones
                             val q1X = (v1 + v2) / 2f
                             val q2X = (v2 + v3) / 2f
                             val q1Y = horizontalY / 2f
@@ -151,7 +154,9 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
 
                             fun px(x: Float): Dp = with(density) { x.toDp() }
 
-                            // Q1 (Top Left)
+                            val xShift = 8.dp
+                            val yShift = 8.dp
+
                             PlayerPlaceHolder(
                                 avatarImage = rememberAsyncImagePainter(model = selectedFriends.getOrNull(0)?.photo ?: R.drawable.plus_lg),
                                 borderColor = GreenLight,
@@ -161,12 +166,11 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                 },
                                 modifier = Modifier
                                     .absoluteOffset(
-                                        x = px(q1X - playerSizePx / 2),
-                                        y = px(q1Y - playerSizePx / 2)
+                                        x = px(q1X - playerSizePx / 2) - xShift,
+                                        y = px(q1Y - playerSizePx / 2) - yShift
                                     )
                             )
 
-                            // Q2 (Top Right)
                             PlayerPlaceHolder(
                                 avatarImage = rememberAsyncImagePainter(model = selectedFriends.getOrNull(3)?.photo ?: R.drawable.plus_db),
                                 borderColor = BlueDark,
@@ -176,12 +180,11 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                 },
                                 modifier = Modifier
                                     .absoluteOffset(
-                                        x = px(q2X - playerSizePx / 2),
-                                        y = px(q1Y - playerSizePx / 2)
+                                        x = px(q2X - playerSizePx / 2) - xShift,
+                                        y = px(q1Y - playerSizePx / 2) - yShift
                                     )
                             )
 
-                            // Q3 (Bottom Left)
                             PlayerPlaceHolder(
                                 avatarImage = rememberAsyncImagePainter(model = selectedFriends.getOrNull(1)?.photo ?: R.drawable.plus_lg),
                                 borderColor = GreenLight,
@@ -191,12 +194,11 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                 },
                                 modifier = Modifier
                                     .absoluteOffset(
-                                        x = px(q1X - playerSizePx / 2),
-                                        y = px(q3Y - playerSizePx / 2)
+                                        x = px(q1X - playerSizePx / 2) - xShift,
+                                        y = px(q3Y - playerSizePx / 2) - yShift
                                     )
                             )
 
-                            // Q4 (Bottom Right)
                             PlayerPlaceHolder(
                                 avatarImage = rememberAsyncImagePainter(model = selectedFriends.getOrNull(2)?.photo ?: R.drawable.plus_db),
                                 borderColor = BlueDark,
@@ -206,8 +208,8 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                 },
                                 modifier = Modifier
                                     .absoluteOffset(
-                                        x = px(q2X - playerSizePx / 2),
-                                        y = px(q3Y - playerSizePx / 2)
+                                        x = px(q2X - playerSizePx / 2) - xShift,
+                                        y = px(q3Y - playerSizePx / 2) - yShift
                                     )
                             )
                         }
@@ -227,12 +229,13 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                     WideGreenButton(label = "Analyze") {
                         val allFriendsSelected = selectedFriends.all { it != null }
                         if (!allFriendsSelected || selectedCourt.isNullOrEmpty()) {
-                            Toast.makeText(context, "Please select 3 friends and a court", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please select the players and a court", Toast.LENGTH_SHORT).show()
                         } else {
                             viewModel.saveMatchDetails(
                                 selectedCourt = selectedCourt!!,
-                                onSuccess = {
+                                onSuccess = { matchId ->
                                     Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
+                                    MatchNotificationHelper.sendMatchSavedNotification(context, matchId)
                                     navController.popBackStack()
                                 },
                                 onFailure = {
@@ -241,6 +244,8 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

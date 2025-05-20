@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.analysis.components
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -27,9 +28,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +57,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,7 +65,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.withSave
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import grad.project.padelytics.R
 import grad.project.padelytics.features.analysis.data.AnimationFrame
 import grad.project.padelytics.features.analysis.data.BallSpeedOverTime
@@ -108,7 +115,7 @@ fun PlayersView(players: List<PlayerInfo>) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Blue)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
             .height(100.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -239,29 +246,45 @@ fun BallAnalysisBox(graphScreens: List<Pair<String, @Composable () -> Unit>>) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(R.drawable.left_arrow),
-                contentDescription = "Left Arrow",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(20.dp)
+            Column(
+                modifier = Modifier.height(180.dp)
                     .clickable {
-                        currentIndex = if (currentIndex == 0) graphScreens.lastIndex else currentIndex - 1
-                    }
-            )
+                    currentIndex = if (currentIndex == 0) graphScreens.lastIndex else currentIndex - 1
+                },
+                verticalArrangement = Arrangement.Center
+            ){
+                Image(
+                    painter = painterResource(R.drawable.left_arrow),
+                    contentDescription = "Left Arrow",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable {
+                            currentIndex = if (currentIndex == 0) graphScreens.lastIndex else currentIndex - 1
+                        }
+                )
+            }
 
             currentCourtComposable()
 
-            Image(
-                painter = painterResource(R.drawable.right_arrow),
-                contentDescription = "Right Arrow",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(20.dp)
+            Column(
+                modifier = Modifier.height(180.dp)
                     .clickable {
-                        currentIndex = (currentIndex + 1) % graphScreens.size
-                    }
-            )
+                    currentIndex = (currentIndex + 1) % graphScreens.size
+                },
+                verticalArrangement = Arrangement.Center
+            ){
+                Image(
+                    painter = painterResource(R.drawable.right_arrow),
+                    contentDescription = "Right Arrow",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable {
+                            currentIndex = (currentIndex + 1) % graphScreens.size
+                        }
+                )
+            }
         }
 
         Text(
@@ -369,7 +392,33 @@ fun RectangleBackground(content: @Composable BoxScope.() -> Unit = {}) {
 
 @Composable
 fun BallTrajectoryPlot(ballTrajectory: BallTrajectory) {
-    val points = ballTrajectory.x.zip(ballTrajectory.y)
+    if (ballTrajectory.x.isEmpty() || ballTrajectory.y.isEmpty()) {
+        Text("No trajectory data", color = White)
+        return
+    }
+
+    // Fixed coordinate space: -10 to 10
+    val fixedXMin = -10f
+    val fixedXMax = 10f
+    val fixedYMin = -10f
+    val fixedYMax = 10f
+    val rangeX = fixedXMax - fixedXMin
+    val rangeY = fixedYMax - fixedYMin
+
+    // Normalize raw ball data to fixed -10 to 10 space
+    val ballMinX = ballTrajectory.x.minOrNull() ?: fixedXMin
+    val ballMaxX = ballTrajectory.x.maxOrNull() ?: fixedXMax
+    val ballMinY = ballTrajectory.y.minOrNull() ?: fixedYMin
+    val ballMaxY = ballTrajectory.y.maxOrNull() ?: fixedYMax
+
+    fun normalize(value: Float, min: Float, max: Float): Float =
+        if (max - min == 0f) 0f else (value - min) / (max - min) * 20f - 10f
+
+    val normalizedPoints = ballTrajectory.x.zip(ballTrajectory.y).map { (x, y) ->
+        val normX = normalize(x, ballMinX, ballMaxX)
+        val normY = normalize(y, ballMinY, ballMaxY)
+        normX to normY
+    }
 
     Canvas(
         modifier = Modifier
@@ -378,36 +427,27 @@ fun BallTrajectoryPlot(ballTrajectory: BallTrajectory) {
             .padding(4.dp)
             .background(Transparent)
     ) {
-        val width = size.width
-        val height = size.height
+        rotate(degrees = 180f, pivot = Offset(size.width / 2, size.height / 2)) {
+            val width = size.width
+            val height = size.height
 
-        // Determine the min and max values for X and Y axes
-        val minX = points.minOf { it.first }
-        val maxX = points.maxOf { it.first }
-        val minY = points.minOf { it.second }
-        val maxY = points.maxOf { it.second }
+            // Draw connected lines using mapped normalized coordinates
+            for (i in 0 until normalizedPoints.size - 1) {
+                val (startX, startY) = normalizedPoints[i]
+                val (endX, endY) = normalizedPoints[i + 1]
 
-        // Calculate ranges
-        val rangeX = maxX - minX
-        val rangeY = maxY - minY
+                val canvasStartX = ((-startY - fixedXMin) / rangeX) * width
+                val canvasStartY = ((-startX - fixedYMin) / rangeY) * height
+                val canvasEndX = ((-endY - fixedXMin) / rangeX) * width
+                val canvasEndY = ((-endX - fixedYMin) / rangeY) * height
 
-        // Function to map data points to the canvas dimensions
-        fun mapX(x: Float) = ((x - minX) / rangeX) * width
-        fun mapY(y: Float) = height - ((y - minY) / rangeY) * height
-
-        // Draw the line connecting the points
-        points.zipWithNext().forEach { (start, end) ->
-            val startX = mapX(start.first)
-            val startY = mapY(start.second)
-            val endX = mapX(end.first)
-            val endY = mapY(end.second)
-
-            drawLine(
-                color = GreenLight,
-                start = Offset(startX, startY),
-                end = Offset(endX, endY),
-                strokeWidth = 5f
-            )
+                drawLine(
+                    color = GreenLight,
+                    start = Offset(canvasStartX, canvasStartY),
+                    end = Offset(canvasEndX, canvasEndY),
+                    strokeWidth = 3f
+                )
+            }
         }
     }
 }
@@ -616,6 +656,32 @@ fun HitCountBarChart(hitCount: Map<String, Int>?, playerDisplayNames: Map<String
 fun BallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>) {
     val playerColors = listOf(GreenLight, GreenDark, White, Black)
 
+    // Fixed -10 to 10 coordinate space
+    val fixedXMin = -10f
+    val fixedXMax = 10f
+    val fixedYMin = -10f
+    val fixedYMax = 10f
+    val rangeX = fixedXMax - fixedXMin
+    val rangeY = fixedYMax - fixedYMin
+
+    // Get raw min/max values for normalization
+    val allPoints = ballHits.flatMap { it.value.x.zip(it.value.y) }
+    val rawMinX = allPoints.minOfOrNull { it.first } ?: fixedXMin
+    val rawMaxX = allPoints.maxOfOrNull { it.first } ?: fixedXMax
+    val rawMinY = allPoints.minOfOrNull { it.second } ?: fixedYMin
+    val rawMaxY = allPoints.maxOfOrNull { it.second } ?: fixedYMax
+
+    fun normalize(value: Float, min: Float, max: Float): Float =
+        if (max - min == 0f) 0f else (value - min) / (max - min) * 20f - 10f
+
+    val normalizedHits = ballHits.mapValues { (_, hits) ->
+        hits.x.zip(hits.y).map { (x, y) ->
+            val normX = normalize(x, rawMinX, rawMaxX)
+            val normY = normalize(y, rawMinY, rawMaxY)
+            normX to normY
+        }
+    }
+
     Canvas(
         modifier = Modifier
             .width(230.dp)
@@ -623,31 +689,24 @@ fun BallHitLocationsPlot(ballHits: Map<String, PlayerHitLocations>) {
             .padding(4.dp)
             .background(Transparent)
     ) {
-        val width = size.width
-        val height = size.height
+        rotate(degrees = 180f, pivot = Offset(size.width / 2, size.height / 2)) {
+            val width = size.width
+            val height = size.height
 
-        val allPoints = ballHits.flatMap { it.value.x.zip(it.value.y) }
+            normalizedHits.entries.forEachIndexed { index, (_, points) ->
+                val color = playerColors.getOrElse(index) { Color.Gray }
 
-        val minX = allPoints.minOf { it.first }
-        val maxX = allPoints.maxOf { it.first }
-        val minY = allPoints.minOf { it.second }
-        val maxY = allPoints.maxOf { it.second }
+                points.forEach { (x, y) ->
+                    // Flip X: subtract from width
+                    val px = width - ((-y - fixedXMin) / rangeX) * width
+                    val py = ((-x - fixedYMin) / rangeY) * height
 
-        val rangeX = (maxX - minX).takeIf { it != 0f } ?: 1f
-        val rangeY = (maxY - minY).takeIf { it != 0f } ?: 1f
-
-        ballHits.entries.forEachIndexed { index, (_, playerHits) ->
-            val color = playerColors.getOrElse(index) { Color.Gray }
-
-            playerHits.x.zip(playerHits.y).forEach { (x, y) ->
-                val px = ((x - minX) / rangeX) * width
-                val py = ((-y - (-maxY)) / rangeY) * height
-
-                drawCircle(
-                    color = color,
-                    radius = 3.dp.toPx(),
-                    center = Offset(px, py)
-                )
+                    drawCircle(
+                        color = color,
+                        radius = 3.dp.toPx(),
+                        center = Offset(px, py)
+                    )
+                }
             }
         }
     }
@@ -680,11 +739,16 @@ fun MatchAnimationCard(analysisData: FullAnalysisData, playerName: Map<String, S
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            CourtBackground{ AnimatedPlayerScatterPlot(frames = analysisData.animation, playerNameMap = playerName) }
+            CourtBackground{
+                //AnimatedPlayerScatterPlot(frames = analysisData.animation, playerNameMap = playerName)
+
+                MatchAnimationWithBall(frames = analysisData.animation, ballTrajectory = analysisData.ball_trajectory, playerNameMap = playerName)
+            }
         }
     }
 }
 
+/*
 @SuppressLint("UseKtx")
 @Composable
 fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<String, String?>) {
@@ -763,6 +827,7 @@ fun AnimatedPlayerScatterPlot(frames: List<AnimationFrame>, playerNameMap: Map<S
         }
     }
 }
+*/
 
 @Composable
 fun StatText(label: String, value: String) {
@@ -863,6 +928,14 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
     val playerAnimation = analysisData.animation
     val playerBallHits = analysisData.ball_hit_locations
 
+    val context = LocalContext.current
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .bitmapConfig(Bitmap.Config.ARGB_8888)
+            .allowHardware(false)
+            .build()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -870,8 +943,7 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
             .background(Blue)
             .padding(horizontal = 20.dp, vertical = 26.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -900,7 +972,12 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
                     ) {
                         if (photo.isNotBlank()) {
                             AsyncImage(
-                                model = photo,
+                                model = ImageRequest.Builder(context)
+                                    .data(photo)
+                                    .bitmapConfig(Bitmap.Config.ARGB_8888)
+                                    .allowHardware(false)
+                                    .build(),
+                                imageLoader = imageLoader,
                                 contentDescription = "Player Avatar",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -932,22 +1009,9 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Column(horizontalAlignment = Alignment.Start) {
-                        Text(
-                            text = name,
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = White
-                            )
-                        )
-                        Text(
-                            text = level,
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = GreenLight
-                            )
-                        )
+                        Text(text = name, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Medium, color = White))
+
+                        Text(text = level, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal, color = GreenLight))
                     }
                 }
 
@@ -964,29 +1028,23 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier.padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    StatText(label = "Max Speed", value = "${"%.2f".format(maxSpeed)} m/s")
+                    StatText(label = "Max Speed", value = "%.2f m/s".format(maxSpeed))
 
-                    StatText(label = "Distance", value = "${"%.2f".format(distance)} m")
+                    StatText(label = "Distance", value = "%.2f m".format(distance))
 
-                    StatText(label = "Attack", value = "${"%.2f".format(attackPresence)} %")
+                    StatText(label = "Attack", value = "%.2f %%".format(attackPresence))
                 }
 
                 Spacer(modifier = Modifier.width(20.dp))
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    StatText(
-                        label = "Avg Acceleration",
-                        value = "${"%.2f".format(avgAcceleration)} m/s²"
-                    )
+                    StatText(label = "Avg Acceleration", value = "%.2f m/s²".format(avgAcceleration))
 
                     StatText(label = "Total Hits", value = "$totalHits")
 
-                    StatText(label = "Defense", value = "${"%.2f".format(defensePresence)} %")
+                    StatText(label = "Defense", value = "%.2f %%".format(defensePresence))
                 }
             }
 
@@ -1001,7 +1059,7 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
 
                 InsightText(title = "Shot Effectiveness", desc = "$shotEffectiveness% — $shotAdvice", color = OrangeLight)
 
-                InsightText(title = "Role Detection", desc = "$role :\n$roleAdvice", color = GreenLight)
+                InsightText(title = "Role Detection", desc = "$role:\n$roleAdvice", color = GreenLight)
 
                 InsightText(title = "Team Imbalance (Hit Share)", desc = "$hitShare% — $hitAdvice", color = OrangeLight)
 
@@ -1017,44 +1075,32 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
                 TextGraphHeader(title = "Player Trajectory")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    CourtBackground {
-                        playerTrajectory?.let {
-                            PlayerScatterPlot(analysisData.trajectories, playerKey)
-                        }
-                    }
+                CourtBackground {
+                    playerTrajectory?.let { PlayerScatterPlot(analysisData.trajectories, playerKey) }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextGraphHeader(title = "Positioning Heatmap")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    CourtBackground {
-                        playerHeatmap?.let {
-                            PlayerHeatmap(it, analysisData.heatmaps)
-                        }
-                    }
+                CourtBackground {
+                    playerHeatmap?.let { PlayerHeatmap(it, analysisData.heatmaps) }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextGraphHeader(title = "Hit Points")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    CourtBackground {
-                        PlayerBallHitLocationsPlot(playerBallHits, playerKey)
-                    }
+                CourtBackground {
+                    PlayerBallHitLocationsPlot(playerBallHits, playerKey)
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextGraphHeader(title = "Attack vs Defence")
 
-                Row(modifier = Modifier.padding(start = 6.dp)) {
-                    RectangleBackground {
-                        PlayerZoneScatterGraph(playerAnimation, playerKey)
-                    }
+                RectangleBackground {
+                    PlayerZoneScatterGraph(playerAnimation, playerKey)
                 }
             }
 
@@ -1065,17 +1111,19 @@ fun PlayerAnalysisCard(analysisData: FullAnalysisData?, playerList: List<String>
             Spacer(modifier = Modifier.height(24.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth().background(Blue),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ){
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Blue),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
                     text = "Radar Performance",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.Medium,
-                        color = White)
+                        color = White
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -1393,4 +1441,129 @@ fun PlayerRadarChart(radarData: RadarPerformance, targetPlayer: String) {
 
         drawPath(path, color = GreenDark, style = Stroke(width = 2.dp.toPx()))
     }
+}
+
+@Composable
+fun MatchAnimationWithBall(frames: List<AnimationFrame>, ballTrajectory: BallTrajectory, playerNameMap: Map<String, String?>) {
+    if (frames.isEmpty() || ballTrajectory.x.isEmpty() || ballTrajectory.y.isEmpty()) {
+        Text("No animation data available", color = White)
+        return
+    }
+
+    // Animate frame indexes
+    var frameIndex by remember { mutableIntStateOf(0) }
+    var ballIndex by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60)
+            frameIndex = (frameIndex + 1) % frames.size
+            ballIndex = (ballIndex + 1) % ballTrajectory.x.size
+        }
+    }
+
+    // Fixed coordinate system for players (and ball)
+    val fixedXMin = -10f
+    val fixedXMax = 10f
+    val fixedYMin = -10f
+    val fixedYMax = 10f
+    val rangeX = fixedXMax - fixedXMin
+    val rangeY = fixedYMax - fixedYMin
+
+    // Normalize ball points to fixed coordinate system (-10..10)
+    val ballMinX = ballTrajectory.x.minOrNull() ?: fixedXMin
+    val ballMaxX = ballTrajectory.x.maxOrNull() ?: fixedXMax
+    val ballMinY = ballTrajectory.y.minOrNull() ?: fixedYMin
+    val ballMaxY = ballTrajectory.y.maxOrNull() ?: fixedYMax
+
+    fun normalize(value: Float, min: Float, max: Float): Float =
+        if (max - min == 0f) 0f else (value - min) / (max - min) * 20f - 10f
+
+    val normalizedBallPoints = ballTrajectory.x.zip(ballTrajectory.y).map { (x, y) ->
+        val normX = normalize(x, ballMinX, ballMaxX)
+        val normY = normalize(y, ballMinY, ballMaxY)
+        normX to normY
+    }
+
+    val currentFrame = frames[frameIndex]
+    val playerColors = listOf(GreenLight, GreenLight, BlueDark, BlueDark)
+    val playerKeys = listOf("player1", "player2", "player3", "player4")
+
+    Canvas(
+        modifier = Modifier
+            .width(230.dp)
+            .height(100.dp)
+            .padding(4.dp)
+            .background(Transparent)
+    ) {
+        rotate(degrees = 180f, pivot = Offset(size.width / 2, size.height / 2)) {
+            val width = size.width
+            val height = size.height
+
+            val positions = listOf(
+                currentFrame.player1,
+                currentFrame.player2,
+                currentFrame.player3,
+                currentFrame.player4
+            )
+
+            val labelPaint = Paint().apply {
+                color = android.graphics.Color.WHITE
+                textSize = 20f
+                textAlign = Paint.Align.CENTER
+                isFakeBoldText = true
+            }
+
+            // Draw players
+            positions.forEachIndexed { index, pos ->
+                val px = ((-pos.y - fixedXMin) / rangeX) * width
+                val py = ((-pos.x - fixedYMin) / rangeY) * height
+                val color = playerColors.getOrElse(index) { GreenLight }
+                val playerName = playerNameMap[playerKeys[index]] ?: playerKeys[index]
+
+                drawCircle(color, radius = 3.dp.toPx(), center = Offset(px, py))
+
+                drawContext.canvas.nativeCanvas.apply {
+                    withSave {
+                        rotate(-180f, px, py + 18f)
+                        drawText(playerName, px, py + 18f, labelPaint)
+                    }
+                }
+            }
+
+            // Draw moving ball
+            val (ballX, ballY) = normalizedBallPoints[ballIndex]
+            val ballPx = ((-ballY - fixedXMin) / rangeX) * width
+            val ballPy = ((-ballX - fixedYMin) / rangeY) * height
+
+            drawCircle(
+                color = White,
+                radius = 3.dp.toPx(),
+                center = Offset(ballPx, ballPy)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AnalysisAppToolbar(toolbarTitle: String) {
+    TopAppBar(
+        modifier = Modifier.fillMaxWidth().height(40.dp),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Blue,
+            titleContentColor = White,
+        ),
+        title = {
+            Text(
+                text = toolbarTitle,
+                modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
+                style = TextStyle(
+                    fontSize = 30.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = White)
+            )
+        }
+    )
 }

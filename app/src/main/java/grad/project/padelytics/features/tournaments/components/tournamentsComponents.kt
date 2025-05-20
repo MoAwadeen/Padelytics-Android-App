@@ -327,7 +327,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
         )
 
         Text(
-            text = "Prizes: EGP ${tournament.prize}",
+            text = "Prizes: ${tournament.prize}",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 15.dp, bottom = 15.dp),
@@ -340,7 +340,7 @@ fun TournamentDetails(tournament: Tournament, viewModel: TournamentsViewModel = 
         )
 
         Text(
-            text = "Registration Fees: EGP ${tournament.registrationFees}",
+            text = "Registration Fees: ${tournament.registrationFees}",
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle(
                 fontSize = 20.sp,
