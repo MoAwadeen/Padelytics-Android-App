@@ -1,20 +1,28 @@
 package grad.project.padelytics.features.videoUpload.viewModel
 
+import android.app.Application
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import grad.project.padelytics.features.videoUpload.data.FriendData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class VideoUploadViewModel: ViewModel() {
+class VideoUploadViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedVideoUri = MutableStateFlow<Uri?>(null)
     //val selectedVideoUri: StateFlow<Uri?> = _selectedVideoUri
+
+    val selectedVideoUri: StateFlow<Uri?> = _selectedVideoUri
 
     private val _searchResult = MutableStateFlow<Pair<String, String>?>(null)
     val searchResult: StateFlow<Pair<String, String>?> = _searchResult
@@ -33,11 +41,37 @@ class VideoUploadViewModel: ViewModel() {
     private val _selectedFriends = MutableStateFlow<List<FriendData?>>(listOf(null, null, null, null))
     val selectedFriends: StateFlow<List<FriendData?>> = _selectedFriends
 
+    private val _videoUri = MutableStateFlow<Uri?>(null)
+    val videoUri = _videoUri.asStateFlow()
+
+    private val _thumbnailBitmap = MutableStateFlow<Bitmap?>(null)
+    val thumbnailBitmap = _thumbnailBitmap.asStateFlow()
+
+    fun setVideo(uri: Uri) {
+        _videoUri.value = uri
+        extractThumbnail(uri)
+    }
+
     fun setSelectedVideo(uri: Uri) {
         _selectedVideoUri.value = uri
     }
 
-    fun searchUsername(username: String) {
+    fun extractThumbnail(uri: Uri) {
+        viewModelScope.launch {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(getApplication<Application>(), uri)
+                val frame = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                _thumbnailBitmap.value = frame
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                retriever.release()
+            }
+        }
+    }
+
+fun searchUsername(username: String) {
         _isLoading.value = true
         firestore.collection("users")
             .whereEqualTo("userName", username)

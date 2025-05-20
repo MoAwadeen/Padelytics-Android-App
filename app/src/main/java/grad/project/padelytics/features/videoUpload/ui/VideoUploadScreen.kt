@@ -124,7 +124,7 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    VideoUploadCard(onVideoSelected = { viewModel.setSelectedVideo(it) })
+                    VideoUploadCard()
 
                     Spacer(modifier = Modifier.height(22.dp))
 
