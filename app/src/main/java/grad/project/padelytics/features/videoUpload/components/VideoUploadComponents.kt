@@ -62,6 +62,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -92,18 +93,17 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 @Composable
 fun VideoUploadCard(
     modifier: Modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-    initialVideoUri: Uri? = null,
-    onVideoSelected: (Uri) -> Unit = {}
+    viewModel: VideoUploadViewModel = viewModel()
 ) {
-    var videoUri by remember { mutableStateOf(initialVideoUri) }
     val context = LocalContext.current
+    val videoUri by viewModel.videoUri.collectAsState()
+    val thumbnailBitmap by viewModel.thumbnailBitmap.collectAsState()
 
     val videoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
             uri?.let {
-                videoUri = it
-                onVideoSelected(it)
+                viewModel.setVideo(it)
             }
         }
     )
@@ -116,21 +116,27 @@ fun VideoUploadCard(
         contentAlignment = Alignment.Center
     ) {
         when {
-            videoUri != null -> {
+            thumbnailBitmap != null -> {
                 Box(contentAlignment = Alignment.Center) {
-                    VideoThumbnail(
-                        videoUri = videoUri!!,
-                        modifier = Modifier.fillMaxSize()
+                    Image(
+                        bitmap = thumbnailBitmap!!.asImageBitmap(),
+                        contentDescription = "Video thumbnail",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(5.dp, BlueDark, RoundedCornerShape(16.dp))
                     )
-
                     Icon(
                         imageVector = Icons.Default.PlayCircle,
                         contentDescription = "Play video",
                         modifier = Modifier.size(48.dp),
-                        tint = Color.White.copy(alpha = 0.8f)
+                        tint = GreenLight
                     )
                 }
             }
+
             else -> {
                 Image(
                     painter = painterResource(id = R.drawable.upload_video),
@@ -142,6 +148,7 @@ fun VideoUploadCard(
         }
     }
 }
+
 
 @Composable
 fun VideoThumbnail(
@@ -167,11 +174,6 @@ fun VideoThumbnail(
     )
 }
 
-@Preview(device = "id:pixel_4")
-@Composable
-fun VideoUploadPreview() {
-    VideoUploadCard(){}
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -314,7 +316,7 @@ fun PlayerPlaceHolder(
     Image(
         painter = avatarImage,
         contentDescription = "Player Image",
-        contentScale = ContentScale.Fit,
+        contentScale = ContentScale.Crop,
         modifier = modifier
             .size(50.dp)
             .border(3.dp, borderColor, CircleShape)
