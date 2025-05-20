@@ -230,7 +230,7 @@ class VideoUploadViewModel: ViewModel() {
         }
     }
 
-    fun saveMatchDetails(selectedCourt: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun saveMatchDetails(selectedCourt: String, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val selected = _selectedFriends.value
         val formattedDate = SimpleDateFormat("EEEE, dd MMMM yyyy - HH:mm", Locale.getDefault()).format(Date())
@@ -263,7 +263,7 @@ class VideoUploadViewModel: ViewModel() {
         }
 
         batch.commit()
-            .addOnSuccessListener { onSuccess() }
+            .addOnSuccessListener { onSuccess(matchId) }
             .addOnFailureListener { onFailure(it) }
     }
 }

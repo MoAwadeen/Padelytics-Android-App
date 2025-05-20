@@ -1,5 +1,6 @@
 package grad.project.padelytics.features.videoUpload.ui
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -39,6 +40,7 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.WideGreenButton
+import grad.project.padelytics.data.MatchNotificationHelper
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.videoUpload.components.CourtBackground
 import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
@@ -51,6 +53,7 @@ import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewMod
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 
+@SuppressLint("MissingPermission")
 @Composable
 fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostController, profileViewModel: ProfileViewModel = viewModel(), viewModel: VideoUploadViewModel = viewModel()) {
     //val selectedVideo by viewModel.selectedVideoUri.collectAsState()
@@ -226,12 +229,13 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                     WideGreenButton(label = "Analyze") {
                         val allFriendsSelected = selectedFriends.all { it != null }
                         if (!allFriendsSelected || selectedCourt.isNullOrEmpty()) {
-                            Toast.makeText(context, "Please select 3 friends and a court", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please select the players and a court", Toast.LENGTH_SHORT).show()
                         } else {
                             viewModel.saveMatchDetails(
                                 selectedCourt = selectedCourt!!,
-                                onSuccess = {
+                                onSuccess = { matchId ->
                                     Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
+                                    MatchNotificationHelper.sendMatchSavedNotification(context, matchId)
                                     navController.popBackStack()
                                 },
                                 onFailure = {

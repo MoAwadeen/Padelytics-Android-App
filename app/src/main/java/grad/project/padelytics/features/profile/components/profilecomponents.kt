@@ -1,16 +1,31 @@
 package grad.project.padelytics.features.profile.components
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,33 +43,49 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.SimiMidDarkHeadline
+import grad.project.padelytics.data.NotificationPreferencesManager
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenDark
 import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
+import kotlin.math.roundToInt
 
 @Composable
 fun ProfileHeader(
@@ -357,4 +388,212 @@ fun LogoutConfirmationDialog(
             }
         }
     )
+}
+
+@Composable
+fun NotificationRow(context: Context = LocalContext.current) {
+    val state by NotificationPreferencesManager.notificationState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        NotificationPreferencesManager.loadState(context)
+    }
+
+    val iconPainter = if (state) painterResource(id = R.drawable.notifications)
+    else painterResource(id = R.drawable.mute)
+
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
+    if (showPermissionDialog) {
+        AlertDialog(
+            containerColor = Blue,
+            titleContentColor = BlueDark,
+            textContentColor = GreenLight,
+            onDismissRequest = { showPermissionDialog = false },
+            confirmButton = {
+                TextButton(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenLight,
+                        contentColor = BlueDark
+                    ),
+                    onClick = {
+                    showPermissionDialog = false
+                    openAppNotificationSettings(context)
+                }
+                ) {
+                    Text(
+                        text = "Open Settings",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            color = BlueDark
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenDark,
+                        contentColor = GreenLight),
+                    onClick = {
+                    showPermissionDialog = false
+                }
+                ) {
+                    Text(
+                        text = "Cancel",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            color = GreenLight
+                        )
+                    )
+                }
+            },
+            title = {Text(
+                    text = "Allow Notifications",
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = WhiteGray
+                    )
+                )},
+            text = {Text(
+                text = "To enable notifications, please allow the permission from app settings.",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    color = BlueDark
+                )
+            )}
+        )
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Image(
+            painter = iconPainter,
+            contentDescription = "Notification Icon",
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+        SimiMidDarkHeadline(text = "Notifications", size = 16)
+        Spacer(modifier = Modifier.weight(1f))
+
+        SwipeToggleSwitch(
+            selectedValue = if (state) "On" else "Off",
+            onValueChange = { newValue ->
+                val willEnable = newValue == "On"
+
+                if (willEnable) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.POST_NOTIFICATIONS
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        val activity = context as? Activity
+
+                        val shouldShowRationale = activity?.let {
+                            ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.POST_NOTIFICATIONS)
+                        } ?: false
+
+                        if (shouldShowRationale) {
+                            // Re-ask for permission
+                            ActivityCompat.requestPermissions(
+                                activity!!,
+                                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                                999
+                            )
+                        } else {
+                            // ❗ User checked "Don't ask again" or denied initially: show dialog
+                            showPermissionDialog = true
+                        }
+
+                        return@SwipeToggleSwitch
+                    }
+                }
+
+                NotificationPreferencesManager.setNotificationState(context, willEnable)
+            }
+        )
+    }
+}
+
+@Composable
+fun SwipeToggleSwitch(selectedValue: String, onValueChange: (String) -> Unit) {
+    val toggleWidth = 50.dp
+    val toggleHeight = 24.dp
+    val thumbWidth = toggleWidth / 2
+
+    val density = LocalDensity.current
+    val maxOffsetPx = with(density) { thumbWidth.toPx() }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(selectedValue) {
+        offsetX = if (selectedValue == "On") maxOffsetPx else 0f
+    }
+
+    val backgroundColor = if (selectedValue == "Off") {
+        LightGray
+    } else {
+        GreenLight
+    }
+
+    val animatedOffset by animateFloatAsState(
+        targetValue = offsetX,
+        animationSpec = tween(250),
+        label = "SwipeToggleOffset"
+    )
+
+    Box(
+        modifier = Modifier
+            .width(toggleWidth)
+            .height(toggleHeight)
+            .clip(RoundedCornerShape(30.dp))
+            .background(backgroundColor)
+            .border(3.dp, backgroundColor, RoundedCornerShape(30.dp))
+            .pointerInput(Unit) {
+                detectTapGestures { tapOffset ->
+                    val newValue = if (tapOffset.x < size.width / 2f) "Off" else "On"
+                    offsetX = if (newValue == "Off") 0f else maxOffsetPx
+                    onValueChange(newValue)
+                }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .offset { IntOffset(animatedOffset.roundToInt(), 0) }
+                .width(thumbWidth)
+                .fillMaxHeight()
+                .clip(CircleShape)
+                .background(White)
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        offsetX = (offsetX + delta).coerceIn(0f, maxOffsetPx)
+                    },
+                    onDragStopped = {
+                        val newValue = if (offsetX < maxOffsetPx / 2) "Off" else "On"
+                        offsetX = if (newValue == "Off") 0f else maxOffsetPx
+                        onValueChange(newValue)
+                    }
+                )
+        )
+    }
+}
+
+fun openAppNotificationSettings(context: Context) {
+    val intent = Intent().apply {
+        action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        data = Uri.fromParts("package", context.packageName, null)
+    }
+    context.startActivity(intent)
 }

@@ -45,6 +45,7 @@ import grad.project.padelytics.features.auth.viewModel.AuthViewModel
 import grad.project.padelytics.features.profile.components.InfoRow
 import grad.project.padelytics.features.profile.components.LogoutButton
 import grad.project.padelytics.features.profile.components.LogoutConfirmationDialog
+import grad.project.padelytics.features.profile.components.NotificationRow
 import grad.project.padelytics.features.profile.components.NumberLabelChip
 import grad.project.padelytics.features.profile.components.ProfileHeader
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
@@ -55,12 +56,7 @@ import grad.project.padelytics.ui.theme.GreenLight
 import grad.project.padelytics.ui.theme.WhiteGray
 
 @Composable
-fun ProfileScreen(
-    modifier: Modifier = Modifier.background(Color.White).fillMaxSize(),
-    navController: NavHostController,
-    authViewModel: AuthViewModel = viewModel(),
-    profileViewModel: ProfileViewModel = viewModel(),
-) {
+fun ProfileScreen(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: AuthViewModel = viewModel(), profileViewModel: ProfileViewModel = viewModel(), ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
@@ -196,10 +192,7 @@ fun ProfileScreen(
                         value = "English"
                     )
 
-                    InfoRow(
-                        icon = painterResource(id = R.drawable.notifications),
-                        label = "Notifications",
-                    )
+                    NotificationRow()
 
                     InfoRow(
                         icon = painterResource(id = R.drawable.add_user),
