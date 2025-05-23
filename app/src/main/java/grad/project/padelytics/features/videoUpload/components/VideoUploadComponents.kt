@@ -126,7 +126,7 @@ fun VideoUploadCard(
                             .fillMaxWidth()
                             .height(160.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .border(5.dp, BlueDark, RoundedCornerShape(16.dp))
+                            .border(5.dp, GreenDark, RoundedCornerShape(16.dp))
                     )
                     Icon(
                         imageVector = Icons.Default.PlayCircle,
@@ -813,4 +813,31 @@ fun CourtBackground(content: @Composable BoxScope.() -> Unit = {}) {
         }
         content()
     }
+}
+
+@Composable
+fun AnalysisResultDialog(
+    resultUrl: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Analysis Complete") },
+        text = {
+            Column {
+                Text("Your video analysis is ready!")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Download link:", fontWeight = FontWeight.Bold)
+                Text(resultUrl)
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = GreenLight)
+            ) {
+                Text("OK")
+            }
+        }
+    )
 }

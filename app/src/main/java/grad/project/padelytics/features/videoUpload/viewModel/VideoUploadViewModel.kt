@@ -1,27 +1,36 @@
 package grad.project.padelytics.features.videoUpload.viewModel
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import grad.project.padelytics.features.videoUpload.data.FriendData
+import grad.project.padelytics.features.videoUpload.data.VideoProcessingRequest
+import grad.project.padelytics.features.videoUpload.domain.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+
 class VideoUploadViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedVideoUri = MutableStateFlow<Uri?>(null)
-    //val selectedVideoUri: StateFlow<Uri?> = _selectedVideoUri
-
     val selectedVideoUri: StateFlow<Uri?> = _selectedVideoUri
 
     private val _searchResult = MutableStateFlow<Pair<String, String>?>(null)
@@ -43,6 +52,14 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
 
     private val _videoUri = MutableStateFlow<Uri?>(null)
     val videoUri = _videoUri.asStateFlow()
+
+    private var cloudinaryInitialized = false
+
+    private val _resultUrl = MutableStateFlow("")
+    val resultUrl: StateFlow<String> = _resultUrl.asStateFlow()
+
+    private val _showResultDialog = MutableStateFlow(false)
+    val showResultDialog: StateFlow<Boolean> = _showResultDialog.asStateFlow()
 
     private val _thumbnailBitmap = MutableStateFlow<Bitmap?>(null)
     val thumbnailBitmap = _thumbnailBitmap.asStateFlow()
@@ -71,7 +88,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-fun searchUsername(username: String) {
+   fun searchUsername(username: String) {
         _isLoading.value = true
         firestore.collection("users")
             .whereEqualTo("userName", username)
@@ -91,7 +108,7 @@ fun searchUsername(username: String) {
                 _isLoading.value = false
                 _searchResult.value = null
             }
-    }
+   }
 
     fun clearResult() {
         _searchResult.value = null
@@ -300,4 +317,157 @@ fun searchUsername(username: String) {
             .addOnSuccessListener { onSuccess(matchId) }
             .addOnFailureListener { onFailure(it) }
     }
+
+
+        private fun uriToFile(context: Context, uri: Uri): File {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val file = File.createTempFile("upload_", ".mp4", context.cacheDir)
+            inputStream.use { input ->
+                file.outputStream().use { output ->
+                    input?.copyTo(output)
+                }
+            }
+            return file
+        }
+
+
+    fun uploadVideoToCloudinary(context: Context, onResult: (String) -> Unit) {
+        val uri = _videoUri.value
+        if (uri == null) {
+            Log.e("CloudinaryUpload", "No video selected")
+            onResult("Error: No video selected")
+            return
+        }
+
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                if (!cloudinaryInitialized) {
+                    val config = hashMapOf(
+                        "cloud_name" to "dqcgb73mf",
+                        "api_key" to "711966464192934",
+                        "api_secret" to "_6CYk7HyN4lF9ZG2NDjWrwAvDAw",
+                        "secure" to "true"
+                    )
+                    MediaManager.init(context.applicationContext, config)
+                    cloudinaryInitialized = true
+                }
+
+                MediaManager.get().upload(uri)
+                    .option("resource_type", "video")
+                    .option("folder", "videos")
+                    .callback(object : UploadCallback {
+                        override fun onStart(requestId: String) {}
+                        override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                        override fun onSuccess(requestId: String, resultData: MutableMap<Any?, Any?>) {
+                            val secureUrl = resultData["secure_url"] as? String
+                            Log.d("CloudinaryUpload", "Upload successful: $secureUrl")
+                            onResult("Success: $secureUrl")
+                            _isLoading.value = false
+                        }
+
+                        override fun onError(requestId: String, error: ErrorInfo) {
+                            Log.e("CloudinaryUpload", "Upload failed: ${error.description}")
+                            onResult("Error: ${error.description}")
+                            _isLoading.value = false
+                        }
+
+                        override fun onReschedule(requestId: String, error: ErrorInfo) {
+                            Log.e("CloudinaryUpload", "Upload rescheduled: ${error.description}")
+                            onResult("Rescheduled: ${error.description}")
+                            _isLoading.value = false
+                        }
+                    })
+                    .dispatch()
+            } catch (e: Exception) {
+                Log.e("CloudinaryUpload", "Exception: ${e.message}", e)
+                onResult("Exception: ${e.message}")
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun uploadAndProcessVideo(context: Context, onResult: (String) -> Unit) {
+        val uri = _videoUri.value ?: run {
+            Log.e("UploadError", "No video selected")
+            onResult("Error: No video selected")
+            return
+        }
+
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                if (!cloudinaryInitialized) {
+                    MediaManager.init(context.applicationContext, mapOf(
+                        "cloud_name" to "dqcgb73mf",
+                        "api_key" to "711966464192934",
+                        "api_secret" to "_6CYk7HyN4lF9ZG2NDjWrwAvDAw",
+                        "secure" to "true"
+                    ))
+                    cloudinaryInitialized = true
+                }
+
+                MediaManager.get().upload(uri)
+                    .option("resource_type", "video")
+                    .option("folder", "videos")
+                    .callback(object : UploadCallback {
+                        override fun onSuccess(requestId: String, resultData: MutableMap<Any?, Any?>) {
+                            val secureUrl = resultData["secure_url"] as? String ?: run {
+                                Log.e("UploadError", "No URL returned")
+                                onResult("Error: No URL returned")
+                                _isLoading.value = false
+                                return
+                            }
+
+                            viewModelScope.launch {
+                                try {
+                                    val response = RetrofitInstance.cloudApi.processVideo(
+                                        VideoProcessingRequest(video_url = secureUrl)
+                                    )
+
+                                    if (response.isSuccessful) {
+                                        _resultUrl.value = response.body()?.filepath ?: "Analysis completed"
+                                        _showResultDialog.value = true
+                                    } else {
+                                        _resultUrl.value = "Error: ${response.code()}"
+                                        _showResultDialog.value = true
+                                    }
+                                } catch (e: Exception) {
+                                    _resultUrl.value = "Error: ${e.message}"
+                                    _showResultDialog.value = true
+                                } finally {
+                                    _isLoading.value = false
+                                }
+                            }
+                        }
+
+                        override fun onError(requestId: String, error: ErrorInfo) {
+                            Log.e("UploadError", "Failed: ${error.description}")
+                            onResult("Error: ${error.description}")
+                            _isLoading.value = false
+                        }
+
+                        override fun onStart(requestId: String) {}
+                        override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                        override fun onReschedule(requestId: String, error: ErrorInfo) {
+                            Log.e("UploadError", "Rescheduled: ${error.description}")
+                            onResult("Rescheduled: ${error.description}")
+                            _isLoading.value = false
+                        }
+                    })
+                    .dispatch()
+            } catch (e: Exception) {
+                Log.e("UploadError", "Exception: ${e.message}")
+                onResult("Error: ${e.message}")
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun dismissDialog() {
+        _showResultDialog.value = false
+    }
+
 }

@@ -2,6 +2,7 @@
 agp = "8.9.0"
 cloudinaryAndroid = "2.3.1"
 cloudinaryKotlin = "1.0.2"
+coreSplashscreen = "1.0.1"
 firebaseBom = "33.11.0"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
@@ -21,6 +22,7 @@ composeTesting = "1.0.0-alpha04"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 cloudinary-android = { module = "com.cloudinary:cloudinary-android", version.ref = "cloudinaryAndroid" }
 cloudinary-kotlin = { module = "com.cloudinary:cloudinary-kotlin", version.ref = "cloudinaryKotlin" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }

@@ -8,6 +8,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,8 +44,8 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.WideGreenButton
-import grad.project.padelytics.data.MatchNotificationHelper
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
+import grad.project.padelytics.features.videoUpload.components.AnalysisResultDialog
 import grad.project.padelytics.features.videoUpload.components.CourtBackground
 import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
 import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
@@ -55,26 +59,36 @@ import grad.project.padelytics.ui.theme.GreenLight
 
 @SuppressLint("MissingPermission")
 @Composable
-fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostController, profileViewModel: ProfileViewModel = viewModel(), viewModel: VideoUploadViewModel = viewModel()) {
-    //val selectedVideo by viewModel.selectedVideoUri.collectAsState()
-
+fun VideoUploadScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    profileViewModel: ProfileViewModel = viewModel(),
+    viewModel: VideoUploadViewModel = viewModel()
+) {
     val isBottomBarVisible by remember { mutableStateOf(true) }
     var selectedCourt by remember { mutableStateOf<String?>(null) }
-
     var showAddDialog by remember { mutableStateOf(false) }
     var showFriendsDialog by remember { mutableStateOf(false) }
-
     val selectedFriends by viewModel.selectedFriends.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     var showFriendDialogIndex by remember { mutableIntStateOf(-1) }
     val selectedDialogIndex by remember { mutableIntStateOf(-1) }
-
     val context = LocalContext.current
+    val showDialog by viewModel.showResultDialog.collectAsState()
+    val resultUrl by viewModel.resultUrl.collectAsState()
 
     LaunchedEffect(Unit) {
         profileViewModel.fetchUserProfile()
     }
 
     BackHandler { navController.popBackStack() }
+
+    if (showDialog) {
+        AnalysisResultDialog(
+            resultUrl = resultUrl,
+            onDismiss = { viewModel.dismissDialog() }
+        )
+    }
 
     if (showAddDialog) {
         SearchFriendDialog(
@@ -226,34 +240,39 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                 }
 
                 item {
-                    WideGreenButton(label = "Analyze") {
-                        val allFriendsSelected = selectedFriends.all { it != null }
-                        if (!allFriendsSelected || selectedCourt.isNullOrEmpty()) {
-                            Toast.makeText(context, "Please select the players and a court", Toast.LENGTH_SHORT).show()
-                        } else {
-                            viewModel.saveMatchDetails(
-                                selectedCourt = selectedCourt!!,
-                                onSuccess = { matchId ->
-                                    Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
-                                    MatchNotificationHelper.sendMatchSavedNotification(context, matchId)
-                                    navController.popBackStack()
-                                },
-                                onFailure = {
-                                    Toast.makeText(context, "Failed to save match: ${it.message}", Toast.LENGTH_LONG).show()
-                                }
+                    Box {
+                        WideGreenButton(
+                            label = "Analyze",
+                        ) {
+                            viewModel.uploadAndProcessVideo(context) { result ->
+                                Toast.makeText(context, result, Toast.LENGTH_LONG).show()
+                            }
+
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.3f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = Red.copy(alpha = 0.9f)
                             )
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
-            }
         }
     }
+  }
 }
 
 @Preview
 @Composable
-fun VideoUploadScreenPreview(){
+fun VideoUploadScreenPreview() {
     VideoUploadScreen(navController = NavHostController(LocalContext.current))
 }
