@@ -46,7 +46,8 @@ class ResultsViewModel: ViewModel() {
                     if (playerIds == null || playerIds.size != 4) {
                         processedCount++
                         if (processedCount == documents.size()) {
-                            _matchData.value = allMatches
+                            val sortedMatches = allMatches.sortedByDescending { it.timestamp.toLong() }
+                            _matchData.value = sortedMatches
                             _isFetching.value = false
                         }
                         continue
@@ -78,7 +79,8 @@ class ResultsViewModel: ViewModel() {
                                     )
                                     processedCount++
                                     if (processedCount == documents.size()) {
-                                        _matchData.value = allMatches
+                                        val sortedMatches = allMatches.sortedByDescending { it.timestamp.toLong() }
+                                        _matchData.value = sortedMatches
                                         _isFetching.value = false
                                     }
                                 }
@@ -87,7 +89,8 @@ class ResultsViewModel: ViewModel() {
                                 fetchedPlayers++
                                 processedCount++
                                 if (processedCount == documents.size()) {
-                                    _matchData.value = allMatches
+                                    val sortedMatches = allMatches.sortedByDescending { it.timestamp.toLong() }
+                                    _matchData.value = sortedMatches
                                     _isFetching.value = false
                                 }
                             }
