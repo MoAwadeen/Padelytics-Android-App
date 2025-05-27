@@ -9,25 +9,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,15 +30,9 @@ import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.AppToolbar
 import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.WideGreenButton
+import grad.project.padelytics.data.MatchNotificationHelper
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
-import grad.project.padelytics.features.videoUpload.components.AnalysisResultDialog
-import grad.project.padelytics.features.videoUpload.components.CourtBackground
-import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
-import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
-import grad.project.padelytics.features.videoUpload.components.PlayerPlaceHolder
-import grad.project.padelytics.features.videoUpload.components.PlayersTitleRow
-import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
-import grad.project.padelytics.features.videoUpload.components.VideoUploadCard
+import grad.project.padelytics.features.videoUpload.components.*
 import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
@@ -137,13 +117,9 @@ fun VideoUploadScreen(
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-
                     VideoUploadCard()
-
                     Spacer(modifier = Modifier.height(22.dp))
-
                     PlayersTitleRow()
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     CourtBackground {
@@ -154,13 +130,11 @@ fun VideoUploadScreen(
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                             val courtWidth = constraints.maxWidth.toFloat()
                             val courtHeight = constraints.maxHeight.toFloat()
-
                             val x = courtWidth / 8f
                             val v1 = x
                             val v2 = courtWidth / 2f
                             val v3 = courtWidth - x
                             val horizontalY = courtHeight / 2f
-
                             val q1X = (v1 + v2) / 2f
                             val q2X = (v2 + v3) / 2f
                             val q1Y = horizontalY / 2f
@@ -178,11 +152,10 @@ fun VideoUploadScreen(
                                     showFriendDialogIndex = 0
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q1X - playerSizePx / 2) - xShift,
-                                        y = px(q1Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q1X - playerSizePx / 2) - xShift,
+                                    y = px(q1Y - playerSizePx / 2) - yShift
+                                )
                             )
 
                             PlayerPlaceHolder(
@@ -192,11 +165,10 @@ fun VideoUploadScreen(
                                     showFriendDialogIndex = 3
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q2X - playerSizePx / 2) - xShift,
-                                        y = px(q1Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q2X - playerSizePx / 2) - xShift,
+                                    y = px(q1Y - playerSizePx / 2) - yShift
+                                )
                             )
 
                             PlayerPlaceHolder(
@@ -206,11 +178,10 @@ fun VideoUploadScreen(
                                     showFriendDialogIndex = 1
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q1X - playerSizePx / 2) - xShift,
-                                        y = px(q3Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q1X - playerSizePx / 2) - xShift,
+                                    y = px(q3Y - playerSizePx / 2) - yShift
+                                )
                             )
 
                             PlayerPlaceHolder(
@@ -220,11 +191,10 @@ fun VideoUploadScreen(
                                     showFriendDialogIndex = 2
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q2X - playerSizePx / 2) - xShift,
-                                        y = px(q3Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q2X - playerSizePx / 2) - xShift,
+                                    y = px(q3Y - playerSizePx / 2) - yShift
+                                )
                             )
                         }
                     }
@@ -242,33 +212,55 @@ fun VideoUploadScreen(
                 item {
                     Box {
                         WideGreenButton(
-                            label = "Analyze",
+                            label = "Analyze"
                         ) {
                             viewModel.uploadAndProcessVideo(context) { result ->
                                 Toast.makeText(context, result, Toast.LENGTH_LONG).show()
-                            }
 
+                                viewModel.saveMatchDetails(
+                                    matchUri = viewModel.resultUrl.value, // ensure you get the updated value
+                                    selectedCourt = selectedCourt!!,
+                                    onSuccess = { matchId ->
+                                        Toast.makeText(
+                                            context,
+                                            "Match saved successfully",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        MatchNotificationHelper.sendMatchSavedNotification(
+                                            context,
+                                            matchId
+                                        )
+                                        navController.popBackStack()
+                                    },
+                                    onFailure = { exception ->
+                                        Toast.makeText(
+                                            context,
+                                            "Failed to save match: ${exception.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.3f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                color = Red.copy(alpha = 0.9f)
-                            )
-                        }
 
+                }
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Red.copy(alpha = 0.9f))
                     }
                 }
+            }
         }
+
     }
-  }
 }
 
 @Preview
