@@ -247,19 +247,19 @@ fun VideoUploadScreen(
                     }
 
                 }
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Red.copy(alpha = 0.9f))
-                    }
-                }
+
             }
         }
-
+        if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Red.copy(alpha = 0.9f))
+        }
+    }
     }
 }
 
