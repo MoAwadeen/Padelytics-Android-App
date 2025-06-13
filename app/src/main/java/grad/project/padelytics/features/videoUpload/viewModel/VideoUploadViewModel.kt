@@ -16,20 +16,18 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import grad.project.padelytics.features.videoUpload.data.FriendData
 import grad.project.padelytics.features.videoUpload.data.VideoProcessingRequest
+import grad.project.padelytics.features.videoUpload.data.ResultResponse
 import grad.project.padelytics.features.videoUpload.domain.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 
 class VideoUploadViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedVideoUri = MutableStateFlow<Uri?>(null)
@@ -90,7 +88,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-   fun searchUsername(username: String) {
+    fun searchUsername(username: String) {
         _isLoading.value = true
         firestore.collection("users")
             .whereEqualTo("userName", username)
@@ -110,7 +108,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                 _isLoading.value = false
                 _searchResult.value = null
             }
-   }
+    }
 
     fun clearResult() {
         _searchResult.value = null
@@ -118,8 +116,6 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
 
     fun addUserToFriends(currentUserId: String, friendDocId: String) {
         val usersRef = firestore.collection("users")
-
-        // Step 1: Fetch friend's data
         usersRef.document(friendDocId).get()
             .addOnSuccessListener { friendDoc ->
                 if (friendDoc.exists()) {
@@ -136,16 +132,13 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                         "photo" to friendPhoto
                     )
 
-                    // Step 2: Add friend to current user's friends list
                     usersRef.document(currentUserId)
                         .collection("playerFriends")
                         .document(friendDocId)
                         .set(friendData)
                         .addOnSuccessListener {
                             Log.d("FriendAdd", "Friend added to current user successfully")
-                            fetchFriendsList() // Refresh list
-
-                            // Step 3: Fetch current user's data to reciprocate
+                            fetchFriendsList()
                             usersRef.document(currentUserId).get()
                                 .addOnSuccessListener { currentUserDoc ->
                                     if (currentUserDoc.exists()) {
@@ -162,7 +155,6 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                                             "photo" to currentPhoto
                                         )
 
-                                        // Step 4: Add current user to friend's friends list
                                         usersRef.document(friendDocId)
                                             .collection("playerFriends")
                                             .document(currentUserId)
@@ -191,9 +183,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
 
     fun fetchFriendsList() {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
         _isLoadingFriends.value = true
-
         val allFriends = mutableListOf<FriendData>()
 
         firestore.collection("users").document(currentUserId).get()
@@ -215,7 +205,6 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                     .get()
                     .addOnSuccessListener { documents ->
                         val friendIds = documents.map { it.id }
-
                         if (friendIds.isEmpty()) {
                             _friendsList.value = allFriends
                             _isLoadingFriends.value = false
@@ -287,16 +276,13 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
         val currentUser = FirebaseAuth.getInstance().currentUser
         val selected = _selectedFriends.value
         val formattedDate = SimpleDateFormat("EEEE, dd MMMM yyyy - HH:mm", Locale.getDefault()).format(Date())
-        //val matchUrl = "https://res.cloudinary.com/dqcgb73mf/raw/upload/v1746590030/mrfmsyyqaofg1ntdqvdm.json"
 
         if (currentUser == null || selected.any { it == null }) {
             onFailure(Exception("Invalid data: Check authentication or friend selection."))
             return
         }
 
-        // Ensure consistent order: 4 selected friends
         val orderedPlayerIds = selected.mapNotNull { it?.uid }
-
         val matchData = hashMapOf(
             "players" to orderedPlayerIds,
             "court" to selectedCourt,
@@ -320,18 +306,16 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
             .addOnFailureListener { onFailure(it) }
     }
 
-
-        private fun uriToFile(context: Context, uri: Uri): File {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val file = File.createTempFile("upload_", ".mp4", context.cacheDir)
-            inputStream.use { input ->
-                file.outputStream().use { output ->
-                    input?.copyTo(output)
-                }
+    private fun uriToFile(context: Context, uri: Uri): File {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val file = File.createTempFile("upload_", ".mp4", context.cacheDir)
+        inputStream.use { input ->
+            file.outputStream().use { output ->
+                input?.copyTo(output)
             }
-            return file
         }
-
+        return file
+    }
 
     fun uploadVideoToCloudinary(context: Context, onResult: (String) -> Unit) {
         val uri = _videoUri.value
@@ -404,16 +388,19 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
 
         viewModelScope.launch {
             try {
-                if (!cloudinaryInitialized) {
+                // Initialize Cloudinary
+                try {
                     MediaManager.init(context.applicationContext, mapOf(
                         "cloud_name" to "dqcgb73mf",
                         "api_key" to "711966464192934",
                         "api_secret" to "_6CYk7HyN4lF9ZG2NDjWrwAvDAw",
                         "secure" to "true"
                     ))
-                    cloudinaryInitialized = true
+                } catch (e: IllegalStateException) {
+                    Log.w("CloudinaryInit", "Already initialized")
                 }
 
+                // Upload to Cloudinary
                 MediaManager.get().upload(uri)
                     .option("resource_type", "video")
                     .option("folder", "videos")
@@ -429,6 +416,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                                 return
                             }
 
+                            // Send video URL to /input-video/ to get processing ID
                             viewModelScope.launch {
                                 try {
                                     val response = RetrofitInstance.cloudApi.processVideo(
@@ -436,20 +424,31 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                                     )
 
                                     if (response.isSuccessful) {
-                                        _resultUrl.value = response.body()?.filepath ?: "Analysis completed"
-                                        _showResultDialog.value = true
+                                        val videoId = response.body()?.video_id
+                                        if (!videoId.isNullOrBlank()) {
+                                            Log.d("CloudAPI", "Processing ID: $videoId")
+                                            // Start polling with the video_id
+                                            startPollingForResult(context, videoId, onResult)
+                                        } else {
+                                            Log.e("CloudAPI", "Processing ID is missing")
+                                            _resultUrl.value = "Error: Processing ID missing"
+                                            _showResultDialog.value = true
+                                            onResult("Error: Processing ID missing")
+                                            _isLoading.value = false
+                                        }
                                     } else {
+                                        val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                                        Log.e("CloudAPI", "Error: $errorBody")
                                         _resultUrl.value = "Error: ${response.code()}"
                                         _showResultDialog.value = true
+                                        onResult("Error: ${response.code()}")
+                                        _isLoading.value = false
                                     }
                                 } catch (e: Exception) {
-                                    Log.e("UploadError", "Processing error: ${e.message}")
-                                    viewModelScope.launch(Dispatchers.Main) {
-                                        Toast.makeText(context, "Processing error: ${e.message}", Toast.LENGTH_SHORT).show()
-                                    }
-                                    _resultUrl.value = "Error: ${e.message}"
+                                    Log.e("CloudAPI", "Exception: ${e.message}", e)
+                                    _resultUrl.value = "Exception: ${e.message}"
                                     _showResultDialog.value = true
-                                } finally {
+                                    onResult("Exception: ${e.message}")
                                     _isLoading.value = false
                                 }
                             }
@@ -464,7 +463,12 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                             _isLoading.value = false
                         }
 
-                        override fun onStart(requestId: String) {}
+                        override fun onStart(requestId: String) {
+                            viewModelScope.launch(Dispatchers.Main) {
+                                Toast.makeText(context, "Uploading video...", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
                         override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
                         override fun onReschedule(requestId: String, error: ErrorInfo) {
                             Log.e("UploadError", "Rescheduled: ${error.description}")
@@ -487,130 +491,43 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    fun dismissDialog() {
-        _showResultDialog.value = false
-    }
-
-
-    fun processAndSaveMatch(
-        context: Context,
-        selectedCourt: String,
-        onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        val uri = _videoUri.value ?: run {
-            onFailure("Error: No video selected")
-            return
-        }
-
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val selected = _selectedFriends.value
-
-        if (currentUser == null || selected.any { it == null }) {
-            onFailure("Error: Invalid authentication or missing players.")
-            return
-        }
-
-        _isLoading.value = true
-
+    fun startPollingForResult(context: Context, processingId: String, onResult: (String) -> Unit) {
         viewModelScope.launch {
-            try {
-                if (!cloudinaryInitialized) {
-                    MediaManager.init(context.applicationContext, mapOf(
-                        "cloud_name" to "dqcgb73mf",
-                        "api_key" to "711966464192934",
-                        "api_secret" to "_6CYk7HyN4lF9ZG2NDjWrwAvDAw",
-                        "secure" to "true"
-                    ))
-                    cloudinaryInitialized = true
+            while (true) {
+                try {
+                    val response = RetrofitInstance.cloudApi.getResult(processingId)
+                    if (response.isSuccessful) {
+                        val result = response.body()
+                        if (result?.status == "done" && !result.url.isNullOrBlank()) {
+                            Log.d("Polling", "Processing complete: ${result.url}")
+                            _resultUrl.value = result.url
+                            _showResultDialog.value = true
+                            onResult("Success: ${result.url}")
+                            break // Exit polling loop
+                        } else {
+                            Log.d("Polling", "Status: ${result?.status ?: "unknown"}")
+                            viewModelScope.launch(Dispatchers.Main) {
+                                Toast.makeText(context, "Processing video...", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Log.e("Polling", "Error: ${response.code()}")
+                        viewModelScope.launch(Dispatchers.Main) {
+                            Toast.makeText(context, "Error checking status: ${response.code()}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("Polling", "Exception: ${e.message}", e)
+                    viewModelScope.launch(Dispatchers.Main) {
+                        Toast.makeText(context, "Exception: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
-
-                MediaManager.get().upload(uri)
-                    .option("resource_type", "video")
-                    .option("folder", "videos")
-                    .callback(object : UploadCallback {
-                        override fun onSuccess(requestId: String, resultData: MutableMap<Any?, Any?>) {
-                            val secureUrl = resultData["secure_url"] as? String ?: run {
-                                _isLoading.value = false
-                                onFailure("Upload failed: No URL returned.")
-                                return
-                            }
-
-                            // Process Video API
-                            viewModelScope.launch {
-                                try {
-                                    val response = RetrofitInstance.cloudApi.processVideo(
-                                        VideoProcessingRequest(video_url = secureUrl)
-                                    )
-
-                                    if (response.isSuccessful) {
-                                        val matchUrl = response.body()?.filepath
-                                            ?: return@launch onFailure("Error: No filepath in response")
-
-                                        // Firestore Save
-                                        val orderedPlayerIds = selected.mapNotNull { it?.uid }
-                                        val formattedDate = SimpleDateFormat("EEEE, dd MMMM yyyy - HH:mm", Locale.getDefault()).format(Date())
-                                        val matchId = FirebaseFirestore.getInstance().collection("temp").document().id
-
-                                        val matchData = hashMapOf(
-                                            "players" to orderedPlayerIds,
-                                            "court" to selectedCourt,
-                                            "timestamp" to System.currentTimeMillis(),
-                                            "formattedTime" to formattedDate,
-                                            "matchUrl" to matchUrl
-                                        )
-
-                                        val batch = FirebaseFirestore.getInstance().batch()
-                                        orderedPlayerIds.forEach { uid ->
-                                            val docRef = FirebaseFirestore.getInstance()
-                                                .collection("users").document(uid)
-                                                .collection("uploadedMatches").document(matchId)
-                                            batch.set(docRef, matchData + mapOf("matchId" to matchId))
-                                        }
-
-                                        batch.commit()
-                                            .addOnSuccessListener {
-                                                _isLoading.value = false
-                                                _resultUrl.value = matchUrl
-                                                _showResultDialog.value = true
-                                                onSuccess(matchId)
-                                            }
-                                            .addOnFailureListener {
-                                                _isLoading.value = false
-                                                onFailure("Saving match failed: ${it.message}")
-                                            }
-                                    } else {
-                                        _isLoading.value = false
-                                        onFailure("Processing failed: ${response.code()}")
-                                    }
-                                } catch (e: Exception) {
-                                    _isLoading.value = false
-                                    onFailure("Processing exception: ${e.message}")
-                                }
-                            }
-                        }
-
-                        override fun onError(requestId: String, error: ErrorInfo) {
-                            _isLoading.value = false
-                            onFailure("Upload error: ${error.description}")
-                        }
-
-                        override fun onStart(requestId: String) {}
-                        override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
-                        override fun onReschedule(requestId: String, error: ErrorInfo) {
-                            _isLoading.value = false
-                            onFailure("Upload rescheduled: ${error.description}")
-                        }
-                    })
-                    .dispatch()
-
-            } catch (e: Exception) {
-                _isLoading.value = false
-                onFailure("Exception: ${e.message}")
+                delay(60_000) // Wait 1 minute before next poll
             }
         }
     }
 
-
-
+    fun dismissDialog() {
+        _showResultDialog.value = false
+    }
 }

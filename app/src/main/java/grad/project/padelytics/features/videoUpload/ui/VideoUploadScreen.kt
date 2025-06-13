@@ -66,7 +66,30 @@ fun VideoUploadScreen(
     if (showDialog) {
         AnalysisResultDialog(
             resultUrl = resultUrl,
-            onDismiss = { viewModel.dismissDialog() }
+            onDismiss = { viewModel.dismissDialog()
+                viewModel.saveMatchDetails(
+                    matchUri = viewModel.resultUrl.value, // ensure you get the updated value
+                    selectedCourt = selectedCourt!!,
+                    onSuccess = { matchId ->
+                        Toast.makeText(
+                            context,
+                            "Match saved successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        MatchNotificationHelper.sendMatchSavedNotification(
+                            context,
+                            matchId
+                        )
+                        navController.popBackStack()
+                    },
+                    onFailure = { exception ->
+                        Toast.makeText(
+                            context,
+                            "Failed to save match: ${exception.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )}
         )
     }
 
@@ -216,30 +239,6 @@ fun VideoUploadScreen(
                         ) {
                             viewModel.uploadAndProcessVideo(context) { result ->
                                 Toast.makeText(context, result, Toast.LENGTH_LONG).show()
-
-                                viewModel.saveMatchDetails(
-                                    matchUri = viewModel.resultUrl.value, // ensure you get the updated value
-                                    selectedCourt = selectedCourt!!,
-                                    onSuccess = { matchId ->
-                                        Toast.makeText(
-                                            context,
-                                            "Match saved successfully",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        MatchNotificationHelper.sendMatchSavedNotification(
-                                            context,
-                                            matchId
-                                        )
-                                        navController.popBackStack()
-                                    },
-                                    onFailure = { exception ->
-                                        Toast.makeText(
-                                            context,
-                                            "Failed to save match: ${exception.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                )
                             }
                         }
 
