@@ -437,3 +437,131 @@ fun InfoScrollerPreview(){
             memberLinkedIn = ""
         )))
 }
+
+@Composable
+fun AboutAppScroller(pages: List<InfoPage>, onFinished: () -> Unit) {
+    val pagerState = rememberPagerState(initialPage = 0) { pages.size }
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Blue),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            userScrollEnabled = false,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            val info = pages[page]
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AsyncImage(
+                    model = info.image,
+                    contentDescription = "Page $page image",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(pages.size) { index ->
+                        val isSelected = pagerState.currentPage == index
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) GreenLight else Blue)
+                                .border(width = 1.dp, color = BlueDark, shape = CircleShape)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(
+                    text = info.description,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = White
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(horizontal = 30.dp),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (page == pages.lastIndex) {
+                        SmallGreenButton(
+                            label = "Back",
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(page= page - 1)
+                                }
+                            }
+                        )
+                        SmallGreenButton(
+                            label = "Finish",
+                            onClick = { onFinished() }
+                        )
+                    } else {
+                        if (page == 0) {
+                            SmallGreenButton(
+                                label = "Skip",
+                                onClick = { onFinished() }
+                            )
+                            SmallGreenButton(
+                                label = "Next",
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(page= 1)
+                                    }
+                                }
+                            )
+                        }
+
+                        if (page > 0) {
+                            SmallGreenButton(
+                                label = "Back",
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(page= page - 1)
+                                    }
+                                }
+                            )
+                            SmallGreenButton(
+                                label = "Next",
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(page = page + 1)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+            }
+        }
+    }
+}

@@ -1,7 +1,10 @@
 package grad.project.padelytics.features.auth.ui
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -38,8 +41,8 @@ import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.Blue
 import grad.project.padelytics.ui.theme.WhiteGray
 import grad.project.padelytics.ui.theme.lexendFontFamily
-import androidx.activity.compose.BackHandler
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun AuthScreen(
     modifier: Modifier = Modifier.fillMaxSize(),
@@ -57,6 +60,11 @@ fun AuthScreen(
         }
     }
     val context = LocalContext.current
+
+    val activity = (LocalContext.current as? Activity)
+    BackHandler(enabled = true) {
+        activity?.finish()
+    }
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()

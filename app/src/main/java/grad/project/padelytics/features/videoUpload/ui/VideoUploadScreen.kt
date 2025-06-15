@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.videoUpload.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -8,6 +9,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -33,6 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -42,6 +46,8 @@ import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.data.MatchNotificationHelper
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
+import grad.project.padelytics.features.videoUpload.components.AnalysisIndicator
+import grad.project.padelytics.features.videoUpload.components.AnalysisResultDialog
 import grad.project.padelytics.features.videoUpload.components.CourtBackground
 import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
 import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
@@ -50,31 +56,44 @@ import grad.project.padelytics.features.videoUpload.components.PlayersTitleRow
 import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
 import grad.project.padelytics.features.videoUpload.components.VideoUploadCard
 import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
+import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 
 @SuppressLint("MissingPermission")
 @Composable
-fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostController, profileViewModel: ProfileViewModel = viewModel(), viewModel: VideoUploadViewModel = viewModel()) {
-    //val selectedVideo by viewModel.selectedVideoUri.collectAsState()
-
+fun VideoUploadScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    profileViewModel: ProfileViewModel = viewModel(),
+    viewModel: VideoUploadViewModel = viewModel()
+) {
     val isBottomBarVisible by remember { mutableStateOf(true) }
     var selectedCourt by remember { mutableStateOf<String?>(null) }
-
     var showAddDialog by remember { mutableStateOf(false) }
     var showFriendsDialog by remember { mutableStateOf(false) }
-
     val selectedFriends by viewModel.selectedFriends.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     var showFriendDialogIndex by remember { mutableIntStateOf(-1) }
     val selectedDialogIndex by remember { mutableIntStateOf(-1) }
-
     val context = LocalContext.current
+    val showDialog by viewModel.showResultDialog.collectAsState()
+    val resultUrl by viewModel.resultUrl.collectAsState()
 
     LaunchedEffect(Unit) {
         profileViewModel.fetchUserProfile()
     }
 
     BackHandler { navController.popBackStack() }
+
+    if (showDialog) {
+        AnalysisResultDialog(
+            resultUrl = resultUrl,
+            onDismiss = {
+                viewModel.dismissDialog()
+            }
+        )
+    }
 
     if (showAddDialog) {
         SearchFriendDialog(
@@ -123,13 +142,9 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    VideoUploadCard(onVideoSelected = { viewModel.setSelectedVideo(it) })
-
+                    VideoUploadCard()
                     Spacer(modifier = Modifier.height(22.dp))
-
                     PlayersTitleRow()
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     CourtBackground {
@@ -140,13 +155,11 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                             val courtWidth = constraints.maxWidth.toFloat()
                             val courtHeight = constraints.maxHeight.toFloat()
-
                             val x = courtWidth / 8f
                             val v1 = x
                             val v2 = courtWidth / 2f
                             val v3 = courtWidth - x
                             val horizontalY = courtHeight / 2f
-
                             val q1X = (v1 + v2) / 2f
                             val q2X = (v2 + v3) / 2f
                             val q1Y = horizontalY / 2f
@@ -164,11 +177,10 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                     showFriendDialogIndex = 0
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q1X - playerSizePx / 2) - xShift,
-                                        y = px(q1Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q1X - playerSizePx / 2) - xShift,
+                                    y = px(q1Y - playerSizePx / 2) - yShift
+                                )
                             )
 
                             PlayerPlaceHolder(
@@ -178,11 +190,10 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                     showFriendDialogIndex = 3
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q2X - playerSizePx / 2) - xShift,
-                                        y = px(q1Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q2X - playerSizePx / 2) - xShift,
+                                    y = px(q1Y - playerSizePx / 2) - yShift
+                                )
                             )
 
                             PlayerPlaceHolder(
@@ -192,11 +203,10 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                     showFriendDialogIndex = 1
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q1X - playerSizePx / 2) - xShift,
-                                        y = px(q3Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q1X - playerSizePx / 2) - xShift,
+                                    y = px(q3Y - playerSizePx / 2) - yShift
+                                )
                             )
 
                             PlayerPlaceHolder(
@@ -206,11 +216,10 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                                     showFriendDialogIndex = 2
                                     showFriendsDialog = true
                                 },
-                                modifier = Modifier
-                                    .absoluteOffset(
-                                        x = px(q2X - playerSizePx / 2) - xShift,
-                                        y = px(q3Y - playerSizePx / 2) - yShift
-                                    )
+                                modifier = Modifier.absoluteOffset(
+                                    x = px(q2X - playerSizePx / 2) - xShift,
+                                    y = px(q3Y - playerSizePx / 2) - yShift
+                                )
                             )
                         }
                     }
@@ -226,34 +235,58 @@ fun VideoUploadScreen(modifier: Modifier = Modifier, navController: NavHostContr
                 }
 
                 item {
-                    WideGreenButton(label = "Analyze") {
-                        val allFriendsSelected = selectedFriends.all { it != null }
-                        if (!allFriendsSelected || selectedCourt.isNullOrEmpty()) {
-                            Toast.makeText(context, "Please select the players and a court", Toast.LENGTH_SHORT).show()
-                        } else {
-                            viewModel.saveMatchDetails(
-                                selectedCourt = selectedCourt!!,
-                                onSuccess = { matchId ->
-                                    Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
-                                    MatchNotificationHelper.sendMatchSavedNotification(context, matchId)
-                                    navController.popBackStack()
+                    Box {
+                        WideGreenButton(label = "Analyze") {
+                            viewModel.uploadAndProcessVideo(
+                                context,
+                                onResult = { result ->
+                                    Toast.makeText(context, result, Toast.LENGTH_LONG).show()
                                 },
-                                onFailure = {
-                                    Toast.makeText(context, "Failed to save match: ${it.message}", Toast.LENGTH_LONG).show()
+                                onResultReady = { resultUrl ->
+                                    viewModel.dismissDialog()
+                                    viewModel.saveMatchDetails(
+                                        matchUri = resultUrl,
+                                        selectedCourt = selectedCourt!!,
+                                        onSuccess = { matchId ->
+                                            Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
+                                            MatchNotificationHelper.sendMatchSavedNotification(context, matchId)
+                                            val sharedPrefs = context.getSharedPreferences("match_prefs", Context.MODE_PRIVATE)
+                                            sharedPrefs.edit { putString("match_id", matchId) }
+                                            navController.navigate(Routes.ANALYSIS)
+                                        },
+                                        onFailure = { exception ->
+                                            Toast.makeText(context, "Failed to save match: ${exception.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    )
                                 }
                             )
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
+        }
+    }
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    enabled = true,
+                    onClick = {},
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            AnalysisIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
         }
     }
 }
 
 @Preview
 @Composable
-fun VideoUploadScreenPreview(){
+fun VideoUploadScreenPreview() {
     VideoUploadScreen(navController = NavHostController(LocalContext.current))
 }

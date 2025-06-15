@@ -1,5 +1,7 @@
 package grad.project.padelytics.features.home.ui
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -28,6 +30,7 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -50,6 +53,7 @@ import grad.project.padelytics.features.shop.viewModel.ShopViewModel
 import grad.project.padelytics.features.tournaments.viewModel.TournamentsViewModel
 import grad.project.padelytics.navigation.Routes
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, viewModel: HomeViewModel = viewModel()) {
     var userName by remember { mutableStateOf("User") }
@@ -62,8 +66,11 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController, 
     val courtBookingViewModel: CourtBookingViewModel = viewModel()
     val shopViewModel: ShopViewModel = viewModel()
     val resultsViewModel: ResultsViewModel = viewModel()
+    val activity = (LocalContext.current as? Activity)
 
-    BackHandler(enabled = true) { }
+    BackHandler(enabled = true) {
+        activity?.finish()
+    }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {

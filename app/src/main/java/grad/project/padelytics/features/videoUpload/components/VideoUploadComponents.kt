@@ -62,12 +62,14 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,6 +78,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.firebase.auth.FirebaseAuth
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidDarkHeadline
@@ -92,18 +99,17 @@ import grad.project.padelytics.ui.theme.lexendFontFamily
 @Composable
 fun VideoUploadCard(
     modifier: Modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-    initialVideoUri: Uri? = null,
-    onVideoSelected: (Uri) -> Unit = {}
+    viewModel: VideoUploadViewModel = viewModel()
 ) {
-    var videoUri by remember { mutableStateOf(initialVideoUri) }
     val context = LocalContext.current
+    val videoUri by viewModel.videoUri.collectAsState()
+    val thumbnailBitmap by viewModel.thumbnailBitmap.collectAsState()
 
     val videoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
             uri?.let {
-                videoUri = it
-                onVideoSelected(it)
+                viewModel.setVideo(it)
             }
         }
     )
@@ -116,21 +122,27 @@ fun VideoUploadCard(
         contentAlignment = Alignment.Center
     ) {
         when {
-            videoUri != null -> {
+            thumbnailBitmap != null -> {
                 Box(contentAlignment = Alignment.Center) {
-                    VideoThumbnail(
-                        videoUri = videoUri!!,
-                        modifier = Modifier.fillMaxSize()
+                    Image(
+                        bitmap = thumbnailBitmap!!.asImageBitmap(),
+                        contentDescription = "Video thumbnail",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(5.dp, GreenDark, RoundedCornerShape(16.dp))
                     )
-
                     Icon(
                         imageVector = Icons.Default.PlayCircle,
                         contentDescription = "Play video",
                         modifier = Modifier.size(48.dp),
-                        tint = Color.White.copy(alpha = 0.8f)
+                        tint = GreenLight
                     )
                 }
             }
+
             else -> {
                 Image(
                     painter = painterResource(id = R.drawable.upload_video),
@@ -142,6 +154,7 @@ fun VideoUploadCard(
         }
     }
 }
+
 
 @Composable
 fun VideoThumbnail(
@@ -167,11 +180,6 @@ fun VideoThumbnail(
     )
 }
 
-@Preview(device = "id:pixel_4")
-@Composable
-fun VideoUploadPreview() {
-    VideoUploadCard(){}
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -314,7 +322,7 @@ fun PlayerPlaceHolder(
     Image(
         painter = avatarImage,
         contentDescription = "Player Image",
-        contentScale = ContentScale.Fit,
+        contentScale = ContentScale.Crop,
         modifier = modifier
             .size(50.dp)
             .border(3.dp, borderColor, CircleShape)
@@ -811,4 +819,92 @@ fun CourtBackground(content: @Composable BoxScope.() -> Unit = {}) {
         }
         content()
     }
+}
+
+@Composable
+fun AnalysisResultDialog(
+    resultUrl: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Analysis Complete") },
+        text = {
+            Column {
+                Text("Your video analysis is ready!")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Download link:", fontWeight = FontWeight.Bold)
+                Text(resultUrl)
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = GreenLight)
+            ) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+@Composable
+fun AnalysisIndicator(
+    modifier: Modifier = Modifier,
+    isFetching: Boolean
+) {
+    if (isFetching) {
+        val composition by rememberLottieComposition(
+            LottieCompositionSpec.Asset("analysis.json")
+        )
+
+        val progress by animateLottieCompositionAsState(
+            composition,
+            iterations = LottieConstants.IterateForever
+        )
+
+        Box(
+            modifier = modifier.fillMaxSize().background(Blue).padding(top = 24.dp, bottom = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.analysis_bg),
+                    contentDescription = "Analysis Background",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Column(
+                    modifier = Modifier.matchParentSize().align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier
+                            .size(200.dp)
+                    )
+
+                    Text(text = "Analysing...",
+                        textAlign = TextAlign.Center,
+                        color = WhiteGray,
+                        fontFamily = lexendFontFamily,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun AnalysisIndicatorPreview(){
+    AnalysisIndicator(isFetching = true)
 }
