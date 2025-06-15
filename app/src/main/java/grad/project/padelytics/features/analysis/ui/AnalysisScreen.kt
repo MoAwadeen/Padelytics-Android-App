@@ -48,6 +48,7 @@ import grad.project.padelytics.features.analysis.components.RectangleBackground
 import grad.project.padelytics.features.analysis.components.TopStrongestHitsBarChart
 import grad.project.padelytics.features.analysis.data.PdfExporter
 import grad.project.padelytics.features.analysis.viewModel.AnalysisViewModel
+import grad.project.padelytics.navigation.Routes
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -77,7 +78,15 @@ fun AnalysisScreen(modifier: Modifier = Modifier, navController: NavHostControll
     }
 
     BackHandler {
-        navController.popBackStack()
+        val previousRoute = navController.previousBackStackEntry?.destination?.route
+        if (previousRoute == Routes.RESULTS) {
+            navController.popBackStack()
+        } else {
+            navController.navigate(Routes.HOME) {
+                popUpTo(Routes.ANALYSIS) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
     }
 
     Scaffold(

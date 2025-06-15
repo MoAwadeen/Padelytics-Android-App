@@ -51,7 +51,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
         Log.d("AppNavigation", "Launch match_id = $matchId")
 
-        startDestination.value = if (!matchId.isNullOrEmpty()) Routes.ANALYSIS else Routes.AUTH
+        startDestination.value = if (!matchId.isNullOrEmpty()) Routes.ANALYSIS else Routes.ABOUT_APP
     }
 
     if (startDestination.value != null) {

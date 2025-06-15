@@ -16,7 +16,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import grad.project.padelytics.features.videoUpload.data.FriendData
 import grad.project.padelytics.features.videoUpload.data.VideoProcessingRequest
-import grad.project.padelytics.features.videoUpload.data.ResultResponse
 import grad.project.padelytics.features.videoUpload.domain.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -374,7 +373,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    fun uploadAndProcessVideo(context: Context, onResult: (String) -> Unit) {
+    fun uploadAndProcessVideo(context: Context, onResult: (String) -> Unit, onResultReady: (String) -> Unit) {
         val uri = _videoUri.value ?: run {
             Log.e("UploadError", "No video selected")
             viewModelScope.launch(Dispatchers.Main) {
@@ -428,7 +427,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                                         if (!videoId.isNullOrBlank()) {
                                             Log.d("CloudAPI", "Processing ID: $videoId")
                                             // Start polling with the video_id
-                                            startPollingForResult(context, videoId, onResult)
+                                            startPollingForResult(context, videoId, onResult, onResultReady)
                                         } else {
                                             Log.e("CloudAPI", "Processing ID is missing")
                                             _resultUrl.value = "Error: Processing ID missing"
@@ -491,7 +490,7 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    fun startPollingForResult(context: Context, processingId: String, onResult: (String) -> Unit) {
+    fun startPollingForResult(context: Context, processingId: String, onResult: (String) -> Unit, onResultReady: (resultUrl: String) -> Unit) {
         viewModelScope.launch {
             while (true) {
                 try {
@@ -503,6 +502,10 @@ class VideoUploadViewModel(application: Application) : AndroidViewModel(applicat
                             _resultUrl.value = result.url
                             _showResultDialog.value = true
                             onResult("Success: ${result.url}")
+
+                            // Defer save logic to UI
+                            onResultReady(result.url)
+
                             break // Exit polling loop
                         } else {
                             Log.d("Polling", "Status: ${result?.status ?: "unknown"}")

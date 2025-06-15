@@ -69,6 +69,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,6 +78,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.firebase.auth.FirebaseAuth
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidDarkHeadline
@@ -840,4 +846,65 @@ fun AnalysisResultDialog(
             }
         }
     )
+}
+
+@Composable
+fun AnalysisIndicator(
+    modifier: Modifier = Modifier,
+    isFetching: Boolean
+) {
+    if (isFetching) {
+        val composition by rememberLottieComposition(
+            LottieCompositionSpec.Asset("analysis.json")
+        )
+
+        val progress by animateLottieCompositionAsState(
+            composition,
+            iterations = LottieConstants.IterateForever
+        )
+
+        Box(
+            modifier = modifier.fillMaxSize().background(Blue).padding(top = 24.dp, bottom = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.analysis_bg),
+                    contentDescription = "Analysis Background",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Column(
+                    modifier = Modifier.matchParentSize().align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier
+                            .size(200.dp)
+                    )
+
+                    Text(text = "Analysing...",
+                        textAlign = TextAlign.Center,
+                        color = WhiteGray,
+                        fontFamily = lexendFontFamily,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun AnalysisIndicatorPreview(){
+    AnalysisIndicator(isFetching = true)
 }
