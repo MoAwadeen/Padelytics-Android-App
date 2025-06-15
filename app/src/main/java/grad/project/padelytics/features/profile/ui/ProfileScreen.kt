@@ -9,12 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -26,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
@@ -46,14 +43,10 @@ import grad.project.padelytics.features.profile.components.InfoRow
 import grad.project.padelytics.features.profile.components.LogoutButton
 import grad.project.padelytics.features.profile.components.LogoutConfirmationDialog
 import grad.project.padelytics.features.profile.components.NotificationRow
-import grad.project.padelytics.features.profile.components.NumberLabelChip
 import grad.project.padelytics.features.profile.components.ProfileHeader
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
 import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
 import grad.project.padelytics.navigation.Routes
-import grad.project.padelytics.ui.theme.BlueDark
-import grad.project.padelytics.ui.theme.GreenLight
-import grad.project.padelytics.ui.theme.WhiteGray
 
 @Composable
 fun ProfileScreen(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: AuthViewModel = viewModel(), profileViewModel: ProfileViewModel = viewModel(), ) {
@@ -136,7 +129,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                 Spacer(modifier = Modifier.height(50.dp))
                 MidDarkHeadline(text = fullname, size = 20)
                 MidBlueHeadline(text = "@$userName", size = 12)
-
+/*
                 Row(
                     modifier = Modifier.wrapContentSize(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -167,6 +160,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                         textColor = WhiteGray
                     )
                 }
+ */
             }
 
             item {

@@ -1,6 +1,7 @@
 package grad.project.padelytics.features.videoUpload.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -8,21 +9,32 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -32,8 +44,17 @@ import grad.project.padelytics.appComponents.BottomAppBar
 import grad.project.padelytics.appComponents.WideGreenButton
 import grad.project.padelytics.data.MatchNotificationHelper
 import grad.project.padelytics.features.profile.viewModel.ProfileViewModel
-import grad.project.padelytics.features.videoUpload.components.*
+import grad.project.padelytics.features.videoUpload.components.AnalysisIndicator
+import grad.project.padelytics.features.videoUpload.components.AnalysisResultDialog
+import grad.project.padelytics.features.videoUpload.components.CourtBackground
+import grad.project.padelytics.features.videoUpload.components.CourtDropdownMenu
+import grad.project.padelytics.features.videoUpload.components.FriendsListDialog
+import grad.project.padelytics.features.videoUpload.components.PlayerPlaceHolder
+import grad.project.padelytics.features.videoUpload.components.PlayersTitleRow
+import grad.project.padelytics.features.videoUpload.components.SearchFriendDialog
+import grad.project.padelytics.features.videoUpload.components.VideoUploadCard
 import grad.project.padelytics.features.videoUpload.viewModel.VideoUploadViewModel
+import grad.project.padelytics.navigation.Routes
 import grad.project.padelytics.ui.theme.BlueDark
 import grad.project.padelytics.ui.theme.GreenLight
 
@@ -66,30 +87,9 @@ fun VideoUploadScreen(
     if (showDialog) {
         AnalysisResultDialog(
             resultUrl = resultUrl,
-            onDismiss = { viewModel.dismissDialog()
-                viewModel.saveMatchDetails(
-                    matchUri = viewModel.resultUrl.value, // ensure you get the updated value
-                    selectedCourt = selectedCourt!!,
-                    onSuccess = { matchId ->
-                        Toast.makeText(
-                            context,
-                            "Match saved successfully",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        MatchNotificationHelper.sendMatchSavedNotification(
-                            context,
-                            matchId
-                        )
-                        navController.popBackStack()
-                    },
-                    onFailure = { exception ->
-                        Toast.makeText(
-                            context,
-                            "Failed to save match: ${exception.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                )}
+            onDismiss = {
+                viewModel.dismissDialog()
+            }
         )
     }
 
@@ -234,31 +234,45 @@ fun VideoUploadScreen(
 
                 item {
                     Box {
-                        WideGreenButton(
-                            label = "Analyze"
-                        ) {
-                            viewModel.uploadAndProcessVideo(context) { result ->
-                                Toast.makeText(context, result, Toast.LENGTH_LONG).show()
-                            }
+                        WideGreenButton(label = "Analyze") {
+                            viewModel.uploadAndProcessVideo(
+                                context,
+                                onResult = { result ->
+                                    Toast.makeText(context, result, Toast.LENGTH_LONG).show()
+                                },
+                                onResultReady = { resultUrl ->
+                                    viewModel.dismissDialog()
+                                    viewModel.saveMatchDetails(
+                                        matchUri = resultUrl,
+                                        selectedCourt = selectedCourt!!,
+                                        onSuccess = { matchId ->
+                                            Toast.makeText(context, "Match saved successfully", Toast.LENGTH_SHORT).show()
+                                            MatchNotificationHelper.sendMatchSavedNotification(context, matchId)
+                                            val sharedPrefs = context.getSharedPreferences("match_prefs", Context.MODE_PRIVATE)
+                                            sharedPrefs.edit { putString("match_id", matchId) }
+                                            navController.navigate(Routes.ANALYSIS)
+                                        },
+                                        onFailure = { exception ->
+                                            Toast.makeText(context, "Failed to save match: ${exception.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    )
+                                }
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-
                 }
-
             }
         }
-        if (isLoading) {
+    }
+    if (isLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = Red.copy(alpha = 0.9f))
+            AnalysisIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
         }
-    }
     }
 }
 
