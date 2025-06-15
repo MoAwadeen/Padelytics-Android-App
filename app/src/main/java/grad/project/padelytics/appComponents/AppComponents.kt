@@ -128,7 +128,7 @@ fun AppToolbarPreview(){
 @Composable
 fun BottomAppBar(navController: NavController, currentRoute: String?) {
     androidx.compose.material3.BottomAppBar(
-        modifier = Modifier.fillMaxWidth().height(70.dp),
+        modifier = Modifier.fillMaxWidth().height(80.dp),
         containerColor = Blue,
         contentColor = White,
         tonalElevation = 16.dp,

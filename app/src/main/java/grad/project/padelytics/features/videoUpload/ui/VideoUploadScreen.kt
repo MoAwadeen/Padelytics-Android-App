@@ -9,6 +9,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -268,7 +270,14 @@ fun VideoUploadScreen(
     }
     if (isLoading) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    enabled = true,
+                    onClick = {},
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ),
             contentAlignment = Alignment.Center
         ) {
             AnalysisIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)

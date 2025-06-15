@@ -63,6 +63,11 @@ import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.FetchingIndicator
 import grad.project.padelytics.features.courtBooking.data.Court
@@ -847,22 +852,35 @@ fun SpotPreview() {
 fun ResultsList(resultsViewModel: ResultsViewModel = viewModel(), navController: NavController) {
     val matches by resultsViewModel.matchData.collectAsState()
     val isFetching by resultsViewModel.isFetching.collectAsState()
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.Asset("nomatches.json")
+    )
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
 
     if (isFetching) {
         FetchingIndicator(modifier = Modifier.fillMaxSize(), isFetching = true)
     } else {
         if (matches.isEmpty()) {
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
             ) {
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier
+                        .size(120.dp)
+                )
                 Text(
                     text = "No Uploaded Matches",
                     style = TextStyle(
-                        fontSize = 20.sp,
+                        fontSize = 16.sp,
                         fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.SemiBold,
                         color = BlueDark
                     )
                 )

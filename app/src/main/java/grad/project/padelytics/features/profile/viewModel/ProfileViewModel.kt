@@ -24,6 +24,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val db = FirebaseFirestore.getInstance()
 
     private val _userProfile = MutableStateFlow<UserProfileModel?>(null)
     val userProfile: StateFlow<UserProfileModel?> get() = _userProfile
@@ -97,6 +98,38 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Failed to update user data", e)
                 onResult(false, e.message ?: "Failed to update profile")
+            }
+        }
+    }
+
+    fun updateRewardPointsBasedOnMatches() {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            try {
+                val db = FirebaseFirestore.getInstance()
+
+                val matchesSnapshot = db.collection("users")
+                    .document(currentUserId)
+                    .collection("uploadedMatches")
+                    .get()
+                    .await()
+
+                val matchCount = matchesSnapshot.size()
+                val newRewardPoints = matchCount * 100
+
+                db.collection("users")
+                    .document(currentUserId)
+                    .update("rewardPoints", newRewardPoints)
+                    .addOnSuccessListener {
+                        Log.d("Rewards", "Reward points updated to $newRewardPoints")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Rewards", "Failed to update reward points", e)
+                    }
+
+            } catch (e: Exception) {
+                Log.e("Rewards", "Error while updating rewards", e)
             }
         }
     }

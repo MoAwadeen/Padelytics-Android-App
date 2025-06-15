@@ -262,7 +262,7 @@ fun NoFavoritesAlert(){
             )
             Text(
                 text = "No Favorites",
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontFamily = lexendFontFamily,
                 color = BlueDark,
                 fontWeight = FontWeight.Bold,

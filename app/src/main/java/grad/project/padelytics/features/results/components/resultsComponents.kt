@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +39,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import grad.project.padelytics.R
 import grad.project.padelytics.appComponents.MidWhiteHeadline
 import grad.project.padelytics.features.results.data.MatchData
@@ -168,6 +174,13 @@ fun HorizontalLine(color: Color, thickness: Float) {
 
 @Composable
 fun NoMatchesAlert(){
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.Asset("nomatches.json")
+    )
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -178,15 +191,15 @@ fun NoMatchesAlert(){
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.no_near_courts),
-                contentDescription = "No Results",
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
                 modifier = Modifier
-                    .size(200.dp)
+                    .size(220.dp)
             )
             Text(
                 text = "No Uploaded Matches",
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontFamily = lexendFontFamily,
                 color = BlueDark,
                 fontWeight = FontWeight.Bold

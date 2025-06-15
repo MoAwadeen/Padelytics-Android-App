@@ -13,6 +13,6 @@ interface AmazonApiService {
         @Header("X-RapidAPI-Host") host: String = "real-time-amazon-data.p.rapidapi.com",
         @Query("query") query: String,
         @Query("page") page: Int = 1,
-        @Query("country") country: String = "EG"
+        @Query("country") country: String = "US"
     ): Response<ProductsList>
 }

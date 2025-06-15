@@ -70,6 +70,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavHostControlle
     var showConfirmationDialog by remember { mutableStateOf(false) }
 
 
+
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -105,6 +106,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavHostControlle
 
     LaunchedEffect(Unit) {
         profileViewModel.fetchUserProfile()
+        profileViewModel.updateRewardPointsBasedOnMatches()
     }
 
     Scaffold(
