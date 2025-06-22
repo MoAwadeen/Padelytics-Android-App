@@ -7,7 +7,8 @@ data class UserModel(
     val uid: String = "",
     val email: String,
     val password: String,
-    val photo: String
+    val photo: String,
+    val userName: String
 )
 
 data class UserProfileModel(

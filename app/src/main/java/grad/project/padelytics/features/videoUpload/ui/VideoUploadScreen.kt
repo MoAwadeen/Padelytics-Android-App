@@ -237,6 +237,16 @@ fun VideoUploadScreen(
                 item {
                     Box {
                         WideGreenButton(label = "Analyze") {
+                            val missingPlayers = selectedFriends.mapIndexedNotNull { index, friend ->
+                                if (friend == null) "Player ${index + 1}" else null
+                            }
+
+                            if (missingPlayers.isNotEmpty()) {
+                                val message = "Please select: ${missingPlayers.joinToString(", ")}"
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                return@WideGreenButton
+                            }
+
                             viewModel.uploadAndProcessVideo(
                                 context,
                                 onResult = { result ->
@@ -264,6 +274,8 @@ fun VideoUploadScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
                     }
+
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
         }

@@ -31,22 +31,22 @@ fun AboutAppScreen(modifier: Modifier = Modifier, navController: NavHostControll
 
     val pages = listOf(
         InfoPage(
-            image = R.drawable.video_upload,
-            description = "Padel has become one of the most significant contemporary sports, with rapid global growth. According to the International Padel Federation (FIP), around 30 million people now play the sport in more than 130 countries."
+            image = R.drawable.video_uploading2,
+            description = "Welcome to Padelytics – the ultimate AI-powered companion for padel players. Just place your phone and start playing, our AI captures every move, From match highlights to deep performance insights, Padelytics turns your game into data you can actually use."
         ),
         InfoPage(
-            image = R.drawable.analysis,
-            description = "Padel’s global infrastructure has expanded significantly, with over 63,000 courts & 20,000 facilities. In Egypt it has seen a remarkable surge, particularly in major cities, with the number of clubs and facilities exceed 200 by 2023 marking a 50% increase from previous years."
+            image = R.drawable.analysis2,
+            description = "The Game Broken Down Like Never Before! See your strengths, spot your weaknesses, and track your progress match by match. From shot accuracy to take advices, every detail is visualized, so you can play smarter next time."
         ),
         InfoPage(
-            image = R.drawable.booking,
-            description = "Padel is played in pairs on a smaller, enclosed court surrounded by glass walls, blending elements of tennis and squash. Its doubles format boosts teamwork, while the walls add a squash-like dynamic to the tennis-style gameplay."
+            image = R.drawable.booking2,
+            description = "Find. Book. Play! No more calls or wait times, discover nearby courts, check availability, and reserve your slot in seconds. Padelytics makes booking as smooth as your backhand."
         ),
-        InfoPage(image = R.drawable.about_app_shop,
-            description = "Padel uses the same scoring as tennis: 15, 30, 40, and game. Matches are typically best of three sets. The ball bounces once before hitting the glass walls, and players can use the walls during rallies. Serves are underhand and must land in the diagonal service box. Points are lost if the ball bounces twice, hits a player, or goes out without touching the walls."
+        InfoPage(image = R.drawable.shop2,
+            description = "Gear Up Like a Pro. Explore top-quality rackets, apparel, and accessories — handpicked for padel players, From beginner to beast mode, we’ve got what your game needs."
         ),
-        InfoPage(image = R.drawable.about_app_tournament,
-            description = "Padel uses the same scoring as tennis: 15, 30, 40, and game. Matches are typically best of three sets. The ball bounces once before hitting the glass walls, and players can use the walls during rallies. Serves are underhand and must land in the diagonal service box. Points are lost if the ball bounces twice, hits a player, or goes out without touching the walls."
+        InfoPage(image = R.drawable.tournament2,
+            description = "Step Into the Spotlight. Join local and national padel tournaments, track standings, and compete for glory, whether you're rising or reigning, your next big win starts here."
         )
     )
 
