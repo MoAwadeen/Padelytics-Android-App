@@ -41,7 +41,19 @@ class ShopViewModel : ViewModel() {
         "Tecnifibre" to listOf("Tecnifibre", "تكنيفايبر", "تكنيفيبر"),
         "Qshop" to listOf("Qshop", "كيو شوب"),
         "S SIUX" to listOf("S SIUX", "سيوكس"),
-        "Camewin" to listOf("Camewin", "كاموين")
+        "Camewin" to listOf("Camewin", "كاموين"),
+        "Dunlop Sports" to listOf("Dunlop Sports"),
+        "Stiga" to listOf("Stiga"),
+        "Tourna" to listOf("Tourna"),
+        "Harrow" to listOf("Harrow"),
+        "Gamma" to listOf("Gamma"),
+        "Cosmos" to listOf("Cosmos"),
+        "Franklin" to listOf("Franklin"),
+        "Ytonet" to listOf("Ytonet"),
+        "Incro" to listOf("Incro"),
+        "RYZE" to listOf("RYZE"),
+        "WLSRW" to listOf("WLSRW"),
+        "Generic" to listOf("Generic")
     )
 
     init {

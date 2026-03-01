@@ -46,7 +46,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 val userModel = UserModel(
                     firstName = firstName,
                     lastName = lastName,
-                    username = userName,
+                    userName = userName,
                     uid = userId,
                     email = email,
                     password = password,
@@ -119,7 +119,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                             uid = user.uid,
                             email = user.email ?: "",
                             password = "",
-                            photo = user.photoUrl?.toString() ?: ""
+                            photo = user.photoUrl?.toString() ?: "",
+                            userName = (user.displayName?.split(" ") ?: listOf("User", "")).toString()
                         )
                         firestore.collection("users").document(user.uid).set(userModel).await()
                         onResult(true, false, null)

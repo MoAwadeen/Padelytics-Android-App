@@ -85,7 +85,7 @@ fun ShopHeaders(
     var currentSheetType by remember { mutableStateOf(SheetType.CATEGORY) }
 
     val categories = listOf("All", "Rackets", "Shoes", "Bags", "Clothing", "Balls", "Accessories")
-    val brands = listOf("All", "Babolat", "Bullpadel", "Wilson", "Adidas", "NOX", "Qshop", "Asics", "Star vie", "Puma", "Head", "S SIUX", "Camewin", "Tecnifibre")
+    val brands = listOf("All", "Babolat", "Bullpadel", "Wilson", "Adidas", "NOX", "Qshop", "Asics", "Star vie", "Puma", "Head", "S SIUX", "Camewin", "Tecnifibre", "Dunlop Sports", "Stiga", "Tourna", "Harrow", "Gamma", "Cosmos", "Franklin", "Ytonet", "Incro", "RYZE", "WLSRW", "Generic")
     val sortOptions = listOf("Price: High to Low", "Price: Low to High", "Avg. Customer Review", "Featured", "Best Sellers")
 
     var tempSelection by remember { mutableStateOf("All") }
@@ -984,7 +984,7 @@ fun ProductDetails(
                     .padding(end = 5.dp),
                 painter = painterResource(R.drawable.location),
                 contentDescription = "Location",
-                tint = Blue
+                tint = BlueDark
             )
 
             Text(

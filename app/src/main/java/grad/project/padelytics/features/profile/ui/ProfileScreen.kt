@@ -215,6 +215,8 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                 LogoutButton{
                     showConfirmationDialog = true
                 }}
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }

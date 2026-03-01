@@ -3,11 +3,11 @@ package grad.project.padelytics.data
 data class UserModel(
     val firstName: String,
     val lastName: String,
-    val username: String = "",
     val uid: String = "",
     val email: String,
     val password: String,
-    val photo: String
+    val photo: String,
+    val userName: String
 )
 
 data class UserProfileModel(
