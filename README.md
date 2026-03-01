@@ -4,6 +4,36 @@
 
 Padelytics is an Android application built for padel players. It combines AI-powered match analysis with community features like court booking, tournament discovery, and a padel equipment shop — all in one place.
 
+---
+
+## What is Padel?
+
+![What is Padel](images/3.png)
+
+![Why Padel](images/4.png)
+
+---
+
+## The Problem
+
+![Challenges in Padel](images/5.png)
+
+---
+
+## What is Padelytics?
+
+![What is Padelytics](images/6.png)
+
+![Project Overview](images/7.png)
+
+---
+
+## Objectives
+
+![Objectives](images/8.png)
+
+---
+
 ## Features
 
 ### AI Match Analysis
@@ -38,6 +68,58 @@ Manage your profile including name, username, city, skill level, gender, and pro
 - **About the App** — Overview of app features
 - **About Us** — Meet the development team
 
+![App Features](images/20.png)
+
+---
+
+## App User Interface
+
+![App UI 1](images/21.png)
+
+![App UI 2](images/22.png)
+
+---
+
+## Web Platform
+
+![Web Features](images/22-2.png)
+
+![Web UI](images/22-3.png)
+
+---
+
+## AI Pipeline
+
+![Overall Stages](images/9.png)
+
+### Data Collection & Annotation
+
+![Data Collection](images/10.png)
+
+### AI Models
+
+![AI Models Used](images/11.png)
+
+### Tracking & Detection
+
+![AI Tracking & Detection](images/12.png)
+
+![AI Tracking Demo](images/13.png)
+
+### Key Visualizations
+
+![Key Visualizations](images/14.png)
+
+![Visualization Charts](images/15.png)
+
+---
+
+## System Architecture
+
+![System Architecture](images/19.png)
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -54,6 +136,22 @@ Manage your profile including name, username, city, skill level, gender, and pro
 | Image Loading | Coil |
 | Local Storage | DataStore Preferences |
 | HTML Parsing | Jsoup |
+
+### Backend Technologies
+
+![Technologies - Backend](images/16.png)
+
+### Frontend Technologies
+
+![Technologies - Frontend](images/17.png)
+
+---
+
+## Related Work
+
+![Related Work](images/8.png)
+
+---
 
 ## Project Structure
 
@@ -84,6 +182,8 @@ app/src/main/java/grad/project/padelytics/
 └── ui/theme/               # Colors, typography, and theme
 ```
 
+---
+
 ## Requirements
 
 - Android **API 26+** (Android 8.0 Oreo and above)
@@ -108,3 +208,15 @@ app/src/main/java/grad/project/padelytics/
 | `INTERNET` | Network requests (Firebase, APIs, video upload) |
 | `ACCESS_NETWORK_STATE` | Check connectivity before requests |
 | `POST_NOTIFICATIONS` | Match result push notifications |
+
+---
+
+## Future Work
+
+![Future Work](images/23.png)
+
+---
+
+## Business Model
+
+![BMC](images/25.png)
