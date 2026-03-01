@@ -1,5 +1,7 @@
 # Padelytics - Android App
 
+![Padelytics Cover](images/cover.png)
+
 Padelytics is an Android application built for padel players. It combines AI-powered match analysis with community features like court booking, tournament discovery, and a padel equipment shop — all in one place.
 
 ## Features
