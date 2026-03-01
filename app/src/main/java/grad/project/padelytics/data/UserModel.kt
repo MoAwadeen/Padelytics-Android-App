@@ -3,7 +3,6 @@ package grad.project.padelytics.data
 data class UserModel(
     val firstName: String,
     val lastName: String,
-    val username: String = "",
     val uid: String = "",
     val email: String,
     val password: String,

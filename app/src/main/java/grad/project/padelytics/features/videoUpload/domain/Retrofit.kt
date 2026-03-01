@@ -22,7 +22,7 @@ object RetrofitInstance {
 
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("http://34.44.128.145/") // ✅ Use HTTPS and trailing slash
+            .baseUrl("http://34.31.168.4/") // ✅ Use HTTPS and trailing slash
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
